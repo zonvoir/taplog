@@ -1,4 +1,4 @@
-@extends('layouts.app', ['page' => __('Edit Beat Plan'), 'pageSlug' => 'beatplan'])
+@extends('v3.app', ['page' => __('Edit Beat Plan'), 'pageSlug' => 'beatplan'])
 @section('content')
 <div class="row">
 	<div class="col-md-12">

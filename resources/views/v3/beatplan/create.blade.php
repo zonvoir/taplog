@@ -1,4 +1,4 @@
-@extends('metronic.layouts.app', ['page' => __('Create Beat Plan'), 'pageSlug' => 'beatplan'])
+@extends('v3.layouts.app', ['page' => __('Create Beat Plan'), 'pageSlug' => 'beatplan'])
 @section('content')
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
 	<!--begin::Subheader-->

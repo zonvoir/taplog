@@ -1,4 +1,4 @@
-@extends('metronic.layouts.app', ['page' => __('Beat Plans'), 'pageSlug' => 'beatplan'])
+@extends('v3.layouts.app', ['page' => __('Beat Plans'), 'pageSlug' => 'beatplan'])
 @section('content')
 <style type="text/css">
   .table-item-wrap .table td:nth-child(1),
@@ -147,13 +147,26 @@
               <table class="table table-bordered table-hover table-checkable" id="plan_datatable" style="margin-top: 13px !important">
                 <thead>
                   <tr>
-                    <th>Added Date</th>
-                    <th>Zone</th>
-                    <th>Plan Date</th>
-                    <th>Client</th>
-                    <th>Mode</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Trip Id</th>
+                    <th>Site id</th>
+                    <th>Site Name</th>
+                    <th>Site Category</th>
+                    <th>Technician Name</th>
+                    <th>Technician Contact</th>
+                    <th>Qty</th>
+                    <th>Current Status</th>
+                    <th>Loading Date</th>
+                    <th>Loading Start Time</th>
+                    <th>Loading Finish Time</th>
+                    <th>Filling Date</th>
+                    <th>Site In Time</th>
+                    <th>Site Out Time</th>
+                    <th>Vehicle No</th>
+                    <th>Driver Name</th>
+                    <th>Driver Contact</th>
+                    <th>Filler Name</th>
+                    <th>Filler Contact</th>
+                    <th>Remark</th>
                   </tr>
                 </thead>
               </table>

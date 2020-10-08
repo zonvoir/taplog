@@ -121,7 +121,7 @@ class BackLogController extends Controller
 	public function trip_data(Request $request){
 		// $beat_plan = Beatplan::findOrFail($request->beat_id);
 		// return view('backlog.not_delivered', compact('beat_plan'));
-		return view('backlog.not-delivered-datatable');
+		return view('v3.backlog.not-delivered-datatable');
 	}
 
 	public function save_divert(Request $request){
@@ -262,7 +262,7 @@ class BackLogController extends Controller
 			$i = 0;
 			foreach($returndata->beatplan_data as $key => $beatplan_data)
 				if($beatplan_data->trip_data()){
-					$alldata[$i]['trip_id'] = $beat_plan->uniqueTrip($beatplan_data->beatplan_id, $beatplan_data->site_id;
+					$alldata[$i]['trip_id'] = $beat_plan->uniqueTrip($beatplan_data->beatplan_id, $beatplan_data->site_id);
 				}
 				$alldata[$i]['site_id'] = $beatplan_data->site->site_id;
 				$alldata[$i]['site_name'] = $beatplan_data->site->site_name;
@@ -290,7 +290,6 @@ class BackLogController extends Controller
 				$alldata[$i]['action'] = null;
 				$i++;
 			}
-		}
 		$data = [];
     // internal use; filter selected columns only from raw data
 		foreach ( $alldata as $d ) {

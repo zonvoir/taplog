@@ -258,7 +258,7 @@ public function validateplan($site_id, $client_name)
     // new code
 public function index(Request $request)
 {
-    return view('metronic.beatplan.index');
+    return view('v3.beatplan.index');
 
     if (auth()->user()->type == 'admin') {
         return redirect()->route('user.index');
@@ -351,7 +351,7 @@ elseif (auth()->user()->type == 'filler' || auth()->user()->type == 'driver' || 
 }
 public function create()
 {
-    return view('metronic.beatplan.create');
+    return view('v3.beatplan.create');
 }
 public function store(Request $request)
 {
