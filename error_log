@@ -1,0 +1,5 @@
+[21-Aug-2020 06:14:43 UTC] PHP Warning:  Unterminated comment starting line 6 in /home/rottwbvs/public_html/v2admin/routes/api.php on line 6
+[25-Aug-2020 13:43:32 UTC] PHP Fatal error:  Cannot redeclare App\Beatplan::beatplan_data() in /home/rottwbvs/public_html/v2admin/app/Beatplan.php on line 50
+[28-Aug-2020 12:29:24 UTC] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /home/rottwbvs/public_html/v2admin/app/Http/Controllers/BeatPlanController.php on line 115
+[28-Aug-2020 12:29:53 UTC] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /home/rottwbvs/public_html/v2admin/app/Http/Controllers/BeatPlanController.php on line 115
+[28-Aug-2020 12:30:11 UTC] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /home/rottwbvs/public_html/v2admin/app/Http/Controllers/BeatPlanController.php on line 115

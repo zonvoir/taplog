@@ -1,0 +1,1 @@
+var datatable = $('#beatplan-datatable').KTDatatable(options);
