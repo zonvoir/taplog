@@ -139,9 +139,10 @@ Route::get('asset-name-list', 'AssetsController@assetNameForTrip')->name('asset-
 
 Route::group(['middleware'=> 'auth', 'prefix' => 'trip'], function(){
 	Route::get('/', 'TripController@index')->name('trips');
+	Route::get('/trip-data-table', 'TripController@datatable')->name('trips_datatable');
 	Route::get('/trip/{id}', 'TripController@edit')->name('trip.edit');
 	Route::post('/trip/{id}', 'TripController@update')->name('trip.update');
-	Route::get('/trip-remove/{id}', 'TripController@remove')->name('trip.remove');
+	Route::post('/trip-remove/{id}', 'TripController@remove')->name('trip.remove');
 	Route::get('allotment', 'TripController@tripAllotment')->name('allotment');
 	Route::get('site-details-trip/{zone?}/{date?}', 'BeatPlanController@siteDetailsForTrip')->name('site-details-trip');
 	Route::get('trip-modal-data', 'TripController@getTripModalData')->name('trip-modal-data');

@@ -20,38 +20,28 @@ use App\Misallottedzones;
 class TripController extends Controller
 {
 	public function index(Request $request){
+
+		return view('v3.trip.index');
+
+		if (auth()->user()->type == 'subadmin') {
+			
+		}elseif (auth()->user()->type == 'mis') {
+		
+		}
+	}
+	
+
+	public function datatable(Request $request){
 		if (auth()->user()->type == 'subadmin') {
 			$all = array();
 			$Ids = $this->getAllMisIdsBySubAdminId(auth()->user()->id);
 			foreach ($Ids as $key) {
-			array_push($all, $key->id);
+				array_push($all, $key->id);
 			}
 			array_push($all, auth()->user()->id);
-			$query = Trips::whereIn('added_by',$all);
-			if($request){
-				if($request->has('head_name') && $request->has('search_val')){
-					$value = $request->search_val;
-					if($request->head_name == 'driver'){
-						$query->whereHas('driver', function($q) use($value){
-							$q->where('name','=',$value);
-						});
-					}elseif($request->head_name == 'filler'){
-						$query->whereHas('filler', function($q) use($value){
-							$q->where('name','=',$value);
-						});
-					}elseif($request->head_name == 'vehicle_no'){
-						$query->whereHas('vechile', function($q) use($value){
-							$q->where('vehicle_no','=',$value);
-						});
-					}else{
-						$query->where($request->head_name,'=',$value);
-					}
-					$trips = $query->orderBy('id','DESC')->paginate(10);
-				}
-			}
-			$trips = $query->orderBy('id','DESC')->paginate(10);
-			return view('trip.index',compact('trips'));
+			$query = Trips::with(['vechile','driver','filler'])->select('trips.*')->whereIn('added_by',$all);
 		}elseif (auth()->user()->type == 'mis') {
+
 			$allotedData = Helper::allotedZonesAndClientId(auth()->user()->id);
 			if (isset($allotedData) && !empty($allotedData)) {
 				$query = Trips::whereHas('beat_plan', function($q) use($allotedData){
@@ -65,60 +55,35 @@ class TripController extends Controller
 						$i++;
 					}
 				});
-				if($request){
-					if($request->has('head_name') && $request->has('search_val')){
-						$value = $request->search_val;
-						if($request->head_name == 'driver'){
-							$query->whereHas('driver', function($q) use($value){
-								$q->where('name','=',$value);
-							});
-						}elseif($request->head_name == 'filler'){
-							$query->whereHas('filler', function($q) use($value){
-								$q->where('name','=',$value);
-							});
-						}elseif($request->head_name == 'vehicle_no'){
-							$query->whereHas('vechile', function($q) use($value){
-								$q->where('vehicle_no','=',$value);
-							});
-						}else{
-							$query->where($request->head_name,'=',$value);
-						}
-						$trips = $query->orderBy('id','DESC')->paginate(10);
-					}
-				}
+				
 				$trips = $query->orderBy('id','DESC')->paginate(10);
-				return view('trip.index',compact('trips'));
 			}else{
 				$query = Trips::whereHas('beat_plan', function($q){
 					$q->where(['added_by' => auth()->user()->id]);
 				});
-				if($request){
-					if($request->has('head_name') && $request->has('search_val')){
-						$value = $request->search_val;
-						if($request->head_name == 'driver'){
-							$query->whereHas('driver', function($q) use($value){
-								$q->where('name','=',$value);
-							});
-						}elseif($request->head_name == 'filler'){
-							$query->whereHas('filler', function($q) use($value){
-								$q->where('name','=',$value);
-							});
-						}elseif($request->head_name == 'vehicle_no'){
-							$query->whereHas('vechile', function($q) use($value){
-								$q->where('vehicle_no','=',$value);
-							});
-						}else{
-							$query->where($request->head_name,'=',$value);
-						}
-						$trips = $query->orderBy('id','DESC')->paginate(10);
-					}
-				}
-				$trips = $query->orderBy('id','DESC')->paginate(10);
-				return view('trip.index',compact('trips'));
 			}
+
 		}
-	}
-	
+
+        return \DataTables::of($query)
+        		->addColumn('action', function(Trips $data) {
+		            return '<div class="action-list"><a href="' . route('trip.edit',$data->id) . '" class="btn btn-sm btn-clean btn-icon"><i class="la la-edit"></i></a> <a href="javascript:;" data-href="'.route('trip.remove',$data->id).'" id="'. $data->id.'" class="delete btn btn-sm btn-clean btn-icon"><i class="la la-trash text-danger"></i></a></div>';
+		        })
+		        ->addColumn('vehicle', function(Trips $data) {
+		            return $data->vechile->vehicle_no ??'';
+		        })
+		        ->addColumn('driver_name', function(Trips $data) {
+		            return $data->driver->name ?? '';
+		        })
+		        ->addColumn('filler_name', function(Trips $data) {
+		            return $data->filler->name ?? '';
+		        })
+		        ->orderColumn('id', function ($query, $order) {
+                     $query->orderBy('id', $order);
+                 })
+		        ->rawColumns(['action'])->make(true);
+    }
+
 	public function edit(Request $request, $id){
 		if(auth()->user()->type == 'subadmin'){
 			$drivers = User::where(['type' => 'driver', 'created_by_id' => auth()->user()->id])->get();
@@ -1030,6 +995,7 @@ class TripController extends Controller
 			}
 		}
 		$trip->delete();
+		return response()->json(['status' => 'success', 'msg' => 'Trip deleted successfully!']);
 		return back()->with('success','Trip deleted successfully!');
 	}
 	public function sendSmsForDeleteTrip($id='')
