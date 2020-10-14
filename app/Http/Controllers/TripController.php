@@ -26,7 +26,7 @@ class TripController extends Controller
 		if (auth()->user()->type == 'subadmin') {
 			
 		}elseif (auth()->user()->type == 'mis') {
-		
+
 		}
 	}
 	
@@ -65,24 +65,30 @@ class TripController extends Controller
 
 		}
 
-        return \DataTables::of($query)
-        		->addColumn('action', function(Trips $data) {
-		            return '<div class="action-list"><a href="' . route('trip.edit',$data->id) . '" class="btn btn-sm btn-clean btn-icon"><i class="la la-edit"></i></a> <a href="javascript:;" data-href="'.route('trip.remove',$data->id).'" id="'. $data->id.'" class="delete btn btn-sm btn-clean btn-icon"><i class="la la-trash text-danger"></i></a></div>';
-		        })
-		        ->addColumn('vehicle', function(Trips $data) {
-		            return $data->vechile->vehicle_no ??'';
-		        })
-		        ->addColumn('driver_name', function(Trips $data) {
-		            return $data->driver->name ?? '';
-		        })
-		        ->addColumn('filler_name', function(Trips $data) {
-		            return $data->filler->name ?? '';
-		        })
-		        ->orderColumn('id', function ($query, $order) {
-                     $query->orderBy('id', $order);
-                 })
-		        ->rawColumns(['action'])->make(true);
-    }
+//		dd($request->all());
+
+		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
+			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
+		}
+
+		return \DataTables::of($query)
+		->addColumn('action', function(Trips $data) {
+			return '<div class="action-list"><a href="' . route('trip.edit',$data->id) . '" class="btn btn-sm btn-clean btn-icon"><i class="la la-edit"></i></a> <a href="javascript:;" data-href="'.route('trip.remove',$data->id).'" id="'. $data->id.'" class="delete btn btn-sm btn-clean btn-icon"><i class="la la-trash text-danger"></i></a></div>';
+		})
+		->addColumn('vehicle', function(Trips $data) {
+			return $data->vechile->vehicle_no ??'';
+		})
+		->addColumn('driver_name', function(Trips $data) {
+			return $data->driver->name ?? '';
+		})
+		->addColumn('filler_name', function(Trips $data) {
+			return $data->filler->name ?? '';
+		})
+		->orderColumn('id', function ($query, $order) {
+			$query->orderBy('id', $order);
+		})
+		->rawColumns(['action'])->make(true);
+	}
 
 	public function edit(Request $request, $id){
 		if(auth()->user()->type == 'subadmin'){
@@ -100,32 +106,40 @@ class TripController extends Controller
 			
 		}
 		$trip = Trips::findOrFail($id);
-		return view('trip.edit',['trip'=>$trip,'drivers'=>$drivers,'fillers'=>$fillers,'areaOfficers'=>$areaOfficers,'vendors'=>$vendors]);
+
+		return view('v3.trip.edit',['trip'=>$trip,'drivers'=>$drivers,'fillers'=>$fillers,'areaOfficers'=>$areaOfficers,'vendors'=>$vendors]);
 	}
 	
 	public function update(Request $request){
 		// $msgResp = $this->sendSmsForUpdateTrip($request->all());
-		// dd($msgResp);
 		$validatedData = $request->validate([
 			'vehicale_id' => 'required',
 			'route_id' => 'required',
 			'effective_date' => 'required',
 			'driver' => 'required',
-			'fiiler' => 'required',
+			'filler' => 'required',
 			'loading_point' => 'required',
 			'trip_id' => 'required',
-			'siteid' => 'required',
+			'siteArray' => 'required',
 			'zone' => 'required',
 		]);
-		$sitesArray = array_filter($request->siteid)??[];
+		
+		$sitesArray = array_filter($request->siteArray)??[];
 		$beatplanid = $request->beatplanid;
 		$beatplanid = $request->beatPlanIdForS;
 		$beatplandataid = $request->beatplandataid;
-		$tripdataid = array_filter($request->tripdataid)??[];
+
+		$beatplandataid = array_filter(array_column($request->siteArray, 'beatplandataid'), 'strlen');
+		$tripdataid = array_filter(array_column($request->siteArray, 'tripdataid'), 'strlen');
+		$asset_id = array_filter(array_column($request->assetArray, 'asset_name'), 'strlen');
+		$qty_allocate = array_filter(array_column($request->assetArray, 'qty_allocate'), 'strlen');
+		$client_name = array_filter(array_column($request->clientArray, 'client_name'), 'strlen');
+		$client_mobile = array_filter(array_column($request->clientArray, 'client_mobile'), 'strlen');
+		$client_email = array_filter(array_column($request->clientArray, 'client_email'), 'strlen');
+
 		$trip_data_ids = TripData::where('trip_id', $request->tripID)->pluck('id')->toArray();
 		$diff_ids = array_diff($trip_data_ids,$tripdataid);
 		$diff_ids = array_values($diff_ids); 
-		//dd($diff_ids, $trip_data_ids,$tripdataid);
 		
 		if($diff_ids){
 			//$tripData = TripData::whereIN('id', $diff_ids)->whereNotNull('divert_from_tripdata_id')->get();
@@ -166,40 +180,45 @@ class TripController extends Controller
 		$trips->vehicle_id = $request->vehicale_id;
 		$trips->route_id = $request->route_id;
 		$trips->driver_id = $request->driver;
-		$trips->filler_id = $request->fiiler;
+		$trips->filler_id = $request->filler;
 		$trips->field_officer_id = $request->area_officer;
 		$trips->loading_point_id = $request->loading_point; 
 		//$trips->trip_id = $request->trip_id;
 		//$trips->trip_data_id = $request->trip_data_id;
 		
-		if ($request->has('asset_id')) {
-			$trips->assets = json_encode($request->asset_id);	
+		if(!empty($asset_id)){
+			$trips->assets = json_encode($asset_id);	
 		}
-		if ($request->has('qty_allocate')) {
-			$trips->asset_qty = json_encode($request->qty_allocate);
+		if(!empty($qty_allocate) && !is_null($qty_allocate)){
+			$trips->asset_qty = json_encode($qty_allocate);
 		}
-		if ($request->has('client_name')) {
-			$trips->clients_name = json_encode($request->client_name);
+		if(!empty($client_name) && !is_null($client_name)){
+			$trips->clients_name = json_encode($client_name);
 		}
-		if ($request->has('client_mobile')) {
-			$trips->clients_mobile = json_encode($request->client_mobile);
+		if(!empty($client_mobile) && !is_null($client_mobile)) {
+			$trips->clients_mobile = json_encode($client_mobile);
 		}
-		//$trips->added_by = auth()->user()->id;
+		if(!empty($client_email) && !is_null($client_email)) {
+			$trips->client_email = json_encode($client_email);
+		}
+		
 		$trips->save();	
-		if ($sitesArray) {
-			$i = 0;
+		if($sitesArray){
 			foreach ($sitesArray as $value) {
-				$tripdata = TripData::firstOrNew(['trip_id'=>$trips->id,'data_id'=>$value,'beatplan_id'=>$beatplanid]);
+				$tripdata = TripData::firstOrNew(['trip_id'=>$trips->id,'data_id'=>$value['siteid'],'beatplan_id'=>$value['beatplanid']]);
 				$tripdata->trip_id = $trips->id;
-				$tripdata->data_id = $value; // Site id
-				$this->changeStatusOfBeatPlanData('allocated', $beatplandataid[$i]);
+				$tripdata->data_id = $value['siteid']; // Site id
+				$this->changeStatusOfBeatPlanData('allocated', $value['beatplandataid']);
 				$tripdata->beatplan_id = $beatplanid;
-				//$tripdata->trip_data_id = $trip_data_id[$i];
+				//return dd($tripdata);
 				$tripdata->save();
-				$i++;	
 			}
 		}
-		$msgResp = $this->sendSmsForUpdateTrip($request->all());		
+		
+		$request->request->add(['beatplandataid' => $beatplandataid]);
+
+		//dd($request->all());
+		$msgResp = $this->sendSmsForUpdateTrip($request->all());	
 		return redirect('/trip')->with('success', 'Trip Updated successfully!');
 	}
 	
@@ -210,13 +229,13 @@ class TripController extends Controller
 			$fillers = User::where(['type' => 'filler', 'created_by_id' => auth()->user()->id])->get();
 			$areaOfficers = User::where(['type' => 'field_officer', 'created_by_id' => auth()->user()->id])->get();
 			$vendors = Vendor::where(['type' => 'vendor', 'vendor_category' => 'PUMP', 'created_by_id' => auth()->user()->id])->get();
-			return view('trip.allotment',['drivers'=>$drivers,'fillers'=>$fillers,'areaOfficers'=>$areaOfficers,'vendors'=>$vendors]);
+			return view('v3.trip.allotment',['drivers'=>$drivers,'fillers'=>$fillers,'areaOfficers'=>$areaOfficers,'vendors'=>$vendors]);
 		}elseif (auth()->user()->type == 'mis') {
 			$drivers = User::where(['type' => 'driver', 'created_by_id' => auth()->user()->created_by_id])->get();
 			$fillers = User::where(['type' => 'filler', 'created_by_id' => auth()->user()->created_by_id])->get();
 			$areaOfficers = User::where(['type' => 'field_officer', 'created_by_id' => auth()->user()->created_by_id])->get();
 			$vendors = Vendor::where(['type' => 'vendor', 'vendor_category' => 'PUMP', 'created_by_id' => auth()->user()->created_by_id])->get();
-			return view('trip.allotment',['drivers'=>$drivers,'fillers'=>$fillers,'areaOfficers'=>$areaOfficers,'vendors'=>$vendors]);
+			return view('v3.trip.allotment',['drivers'=>$drivers,'fillers'=>$fillers,'areaOfficers'=>$areaOfficers,'vendors'=>$vendors]);
 		}
 	}
 	public function getTripModalData(Request $request)
@@ -264,25 +283,41 @@ class TripController extends Controller
 			$trip_id 	= '';
 		}
 
-		return view('trip.load', compact('beat_date','trip_id'));
+		return view('v3.trip.verification', compact('beat_date','trip_id'));
 	}
 	public function storeTrip(Request $request)
 	{
+
 		$validatedData = $request->validate([
 			'vehicale_id' => 'required',
 			'route_id' => 'required',
 			'effective_date' => 'required',
 			'driver' => 'required',
-			'fiiler' => 'required',
+			'filler' => 'required',
 			'loading_point' => 'required',
 			'trip_id' => 'required',
-			'siteid' => 'required',
+			'siteArray' => 'required',
 			'zone' => 'required'
 		]);
-		$sitesArray = $request->siteid;
+		$sitesArray = $request->siteArray;
 		$beatplanid = $request->beatplanid;
 		$beatplanid = $request->beatPlanIdForS;
 		$beatplandataid = $request->beatplandataid;
+
+		$asset_id = array_filter(array_column($request->assetArray, 'asset_name'), 'strlen');
+		$qty_allocate = array_filter(array_column($request->assetArray, 'qty_allocate'), 'strlen');
+		$client_name = array_filter(array_column($request->clientArray, 'client_name'), 'strlen');
+		$client_mobile = array_filter(array_column($request->clientArray, 'client_mobile'), 'strlen');
+		$client_email = array_filter(array_column($request->clientArray, 'client_email'), 'strlen');
+
+		if(!empty($client_email) && !is_null($client_email)) {
+			
+		}
+
+		//$sdsd = array_filter($asset_id, 'strlen');
+
+		// return dd($asset_id, $qty_allocate, $client_name);
+		
 		if (isset($sitesArray) && !empty($sitesArray) && !in_array(null, $sitesArray) ) {
 			$i = 0;
 			$trips = new Trips();
@@ -292,38 +327,43 @@ class TripController extends Controller
 			$trips->vehicle_id = $request->vehicale_id;
 			$trips->route_id = $request->route_id;
 			$trips->driver_id = $request->driver;
-			$trips->filler_id = $request->fiiler;
+			$trips->filler_id = $request->filler;
 			$trips->field_officer_id = $request->area_officer;
 			$trips->loading_point_id = $request->loading_point; 
 			$trips->trip_id = $request->trip_id;
 			//$trips->trip_data_id = $request->trip_data_id;
 			
-			if ($request->has('asset_id')) {
-				$trips->assets = json_encode($request->asset_id);	
+			if(!empty($asset_id)){
+				$trips->assets = json_encode($asset_id);	
 			}
-			if ($request->has('qty_allocate')) {
-				$trips->asset_qty = json_encode($request->qty_allocate);
+			if(!empty($qty_allocate) && !is_null($qty_allocate)){
+				$trips->asset_qty = json_encode($qty_allocate);
 			}
-			if ($request->has('client_name')) {
-				$trips->clients_name = json_encode($request->client_name);
+			if(!empty($client_name) && !is_null($client_name)){
+				$trips->clients_name = json_encode($client_name);
 			}
-			if ($request->has('client_mobile')) {
-				$trips->clients_mobile = json_encode($request->client_mobile);
+			if(!empty($client_mobile) && !is_null($client_mobile)) {
+				$trips->clients_mobile = json_encode($client_mobile);
 			}
-			if ($request->has('client_email')) {
-				$trips->client_email = json_encode($request->client_email);
+			if(!empty($client_email) && !is_null($client_email)) {
+				$trips->client_email = json_encode($client_email);
 			}
 			$trips->added_by = auth()->user()->id;
 
-			$trips->save();	
-			foreach ($sitesArray as $value) {
-				$tripdata = new TripData;
-				$tripdata->trip_id = $trips->id;
-				$tripdata->data_id = $value; // Site id
-				$this->changeStatusOfBeatPlanData('allocated', $beatplandataid[$i]);
-				$tripdata->beatplan_id = $beatplanid;
-				$tripdata->save();
-				$i++;	
+			//return dd($trips);
+
+			$trips->save();
+			if($sitesArray){
+				foreach ($sitesArray as $value) {
+					$tripdata = new TripData;
+					$tripdata->trip_id = $trips->id;
+					$tripdata->data_id = $value['siteid']; // Site id
+					$this->changeStatusOfBeatPlanData('allocated', $value['beatplandataid']);
+					$tripdata->beatplan_id = $beatplanid;
+					//return dd($tripdata);
+					$tripdata->save();
+					$i++;	
+				}
 			}
 			// send sms notification
 			$response = $this->sendSmsForNewTrip($request->all());
@@ -339,7 +379,7 @@ class TripController extends Controller
 		if ($request->has('name')) {
 			$search = $request->name;
 			if(auth()->user()->type == 'subadmin'){
-				$data = $trip->where('effective_date', 'LIKE', "%{$search}%")->where(['added_by' => auth()->user()->id])->limit($numrecords)->get();
+				$data = $trip->where('effective_date', 'LIKE', "%{$search}%")->where(['added_by' => auth()->user()->id])->limit($numrecords)->groupBy('effective_date')->get();
 			}elseif (auth()->user()->type == 'mis') {
 				$data = $trip->where('effective_date', 'LIKE', "%{$search}%")->where(['added_by' => auth()->user()->created_by_id])->limit($numrecords)->get();
 			}elseif(auth()->user()->type == 'field_officer'){
@@ -451,7 +491,7 @@ class TripController extends Controller
 			$vendors = [];
 		}
 		
-		return view('trip.load-sites',['trips'=>$tripDetails,'trips1'=>$tripDetails1,'mp_zone'=>$mp_zone,'client'=>$client,'action'=>$action, 'sites'=>$sites, 'drivers'=>$drivers, 'fillers'=> $fillers, 'areaOfficers'=> $areaOfficers, 'vendors'=>$vendors]);
+		return view('v3.trip.load-sites',['trips'=>$tripDetails,'trips1'=>$tripDetails1,'mp_zone'=>$mp_zone,'client'=>$client,'action'=>$action, 'sites'=>$sites, 'drivers'=>$drivers, 'fillers'=> $fillers, 'areaOfficers'=> $areaOfficers, 'vendors'=>$vendors]);
 		if($tripDetails) {
 		}
 
@@ -809,9 +849,9 @@ class TripController extends Controller
 	{
 		if(isset($data) && !empty($data)){
 			$response = '';
-			$qty = BeatPlanData::whereIn('id',$data['beatplandataid'])->sum('quantity');
+			$qty = Helper::getQtyByBeatplanIdAndDataid($data['beatPlanIdForS']);
 			$msg = "Hi, Vehicle No - ".$data['vehicale_number']." for Zone - ".$data['zone']." for Route - ".$data['route']." dated - ".$data['effective_date']." allocated for Qty - ".$qty;
-			$fillerMobile = Helper::getMoblieByid($data['fiiler']);
+			$fillerMobile = Helper::getMoblieByid($data['filler']);
 			$areaOfficerMobile = Helper::getMoblieByid($data['area_officer']);
 			$vendorMobile = Helper::getMoblieByVendorId($data['loading_point']);
 			if(!empty($fillerMobile)){
@@ -948,8 +988,8 @@ class TripController extends Controller
 		$driver = User::find($data['driver'])->name;
 		$driverContact = User::find($data['driver'])->contact;
 
-		$fillerContact = User::find($data['fiiler'])->contact;
-		$filler = User::find($data['fiiler'])->name;
+		$fillerContact = User::find($data['filler'])->contact;
+		$filler = User::find($data['filler'])->name;
 
 		$mailData['driver'] = $driver.'('.$driverContact.')';
 		$mailData['filler'] = $filler.'('.$fillerContact.')';
@@ -961,7 +1001,7 @@ class TripController extends Controller
 		$mailData['ro'] = Vendor::find($data['loading_point'])->name;
 		$mailData['trip_id'] = $data['trip_id'];
 
-		$mailData['sitesLength'] = count($data['siteid']);
+		$mailData['sitesLength'] = count($data['siteArray']);
 		$mailData['totalQty'] = 0;
 		if (isset($data['beatplandataid']) && !empty($data['beatplandataid'])) {
 			foreach ($data['beatplandataid'] as $id) {
@@ -1011,13 +1051,15 @@ class TripController extends Controller
 			}
 			$msg = "Hi, Vehicle No - ".$trip['vechile']['vehicle_no']." for Zone - ".$trip['beat_plan']['mp_zone']." for Route - ".$trip['route']['route_name']." dated - ".$trip['effective_date']." allocated for Qty - ".$qty." has been Cancelled";
 			$fillerMobile = $trip['filler']['contact'];
-			$areaOfficerMobile = $trip['officer']['contact'];
+			if(isset($trip['officer']['contact'])){
+				$areaOfficerMobile = $trip['officer']['contact'];
+				if(!empty($areaOfficerMobile)){
+					$response .= Cbis::sendSms($areaOfficerMobile,$msg);
+				}
+			}
 			$vendorMobile = Helper::getMoblieByVendorId($trip['loading_point_id']);
 			if(!empty($fillerMobile)){
 				$response .= Cbis::sendSms($fillerMobile,$msg);
-			}
-			if(!empty($areaOfficerMobile)){
-				$response .= Cbis::sendSms($areaOfficerMobile,$msg);
 			}
 			if(!empty($vendorMobile)){
 				$response .= Cbis::sendSms($vendorMobile,$msg);
@@ -1046,7 +1088,7 @@ class TripController extends Controller
 			$time = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 			$qty = BeatPlanData::whereIn('id',$data['beatplandataid'])->sum('quantity');
 			$msg = "Hi, Vehicle No - ".$data['vehicale_number']." for Zone - ".$data['zone']." for Route - ".$data['route']." dated - ".$data['effective_date']." allocated for Qty - ".$qty." updated at Time - ".$time." with total number of sites is ".$totalSites;
-			$fillerMobile = Helper::getMoblieByid($data['fiiler']);
+			$fillerMobile = Helper::getMoblieByid($data['filler']);
 			$areaOfficerMobile = Helper::getMoblieByid($data['area_officer']);
 			$vendorMobile = Helper::getMoblieByVendorId($data['loading_point']);
 			if(!empty($fillerMobile)){

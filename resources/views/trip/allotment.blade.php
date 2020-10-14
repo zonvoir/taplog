@@ -653,7 +653,7 @@
 		modal += '</table>';
 		$(".modal-body").html(modal);
 		$(".whatsapp").attr("data-text","https://web.whatsapp.com/send?text="+encodeURIComponent(data));
-		$(".email").click(dataObj,function(){
+		$(".email").click(dataObj, function(){
 			$("#input-mail").toggle();
 			$(".email-send").click(dataObj,function(event){
 				console.log(dataObj);

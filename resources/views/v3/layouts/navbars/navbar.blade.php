@@ -14,7 +14,7 @@
 					<ul class="header-tabs nav align-self-end font-size-lg" role="tablist">
 						<!--begin::Item-->
 						<li class="nav-item">
-							<a href="{{route('home')}}" class="nav-link py-4 px-6 active">Beat's</a>
+							<a href="{{route('home')}}" class="nav-link py-4 px-6">Beat's</a>
 						</li>
 						<!--end::Item-->
 						<!--begin::Item-->
@@ -33,8 +33,9 @@
 						</li>
 						<!--end::Item-->
 						<!--begin::Item-->
+						
 						<li class="nav-item mr-3">
-							<a href="#" class="nav-link py-4 px-6" data-toggle="tab" data-target="#kt_header_tab_trip" role="tab">Trip/Load</a>
+							<a href="#" class="nav-link py-4 px-6 {{ $pageSlug =='load-verification' || $pageSlug =='trip-allotment' || $pageSlug =='trips' || $pageSlug =='all-load' || $pageSlug =='load-sites' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_trip" role="tab">Trip/Load</a>
 						</li>
 						<!--end::Item-->
 						<!--begin::Item-->
@@ -274,7 +275,7 @@
 					<ul class="header-tabs p-5 p-lg-0 d-flex d-lg-none nav nav-bold nav-tabs" role="tablist">
 						<!--begin::Item-->
 						<li class="nav-item mr-2">
-							<a href="#" class="nav-link btn btn-clean active" data-toggle="tab" data-target="#kt_header_tab_1" role="tab">Beat's</a>
+							<a href="#" class="nav-link btn btn-clean" data-toggle="tab" data-target="#kt_header_tab_1" role="tab">Beat's</a>
 						</li>
 						<!--end::Item-->
 						<!--begin::Item-->
@@ -284,7 +285,7 @@
 						<!--end::Item-->
 						<!--begin::Item-->
 						<li class="nav-item mr-2">
-							<a href="#" class="nav-link btn btn-clean" data-toggle="tab" data-target="#kt_header_tab_trip" role="tab">Trip/Load</a>
+							<a href="#" class="nav-link btn btn-clean {{ $pageSlug =='load-verification' || $pageSlug =='trip-allotment' || $pageSlug =='trips' || $pageSlug =='all-load' || $pageSlug =='load-sites' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_trip" role="tab">Trip/Load</a>
 						</li>
 						<!--end::Item-->
 					</ul>
@@ -336,28 +337,28 @@
 							
 						</div>
 
-						<div class="tab-pane py-5 p-lg-0" id="kt_header_tab_trip">
+						<div class="tab-pane py-5 p-lg-0 {{ $pageSlug =='load-verification' || $pageSlug =='trip-allotment' || $pageSlug =='trips' || $pageSlug =='all-load' || $pageSlug =='load-sites' ? 'active' :'' }}" id="kt_header_tab_trip">
 							<!--begin::Menu-->
 							<div id="kt_header_menu" class="header-menu header-menu-mobile header-menu-layout-default">
 								<!--begin::Nav-->
 								<ul class="menu-nav">
 									@if(auth()->user()->type == 'subadmin' || auth()->user()->type == 'mis')
-									<li class="menu-item" aria-haspopup="true">
+									<li class="menu-item {{ $pageSlug =='trips' ? 'menu-item-active' :'' }}" aria-haspopup="true">
 										<a href="{{ route('trips') }}" class="menu-link">
 											<span class="menu-text">{{ __('Trips') }}</span>
 										</a>
 									</li>
-									<li class="menu-item" aria-haspopup="true">
+									<li class="menu-item {{ $pageSlug =='trip-allotment' ? 'menu-item-active' :'' }}" aria-haspopup="true">
 										<a href="{{ route('allotment') }}" class="menu-link">
 											<span class="menu-text">{{ __('Allot Trip') }}</span>
 										</a>
 									</li>
-									<li class="menu-item" aria-haspopup="true">
+									<li class="menu-item {{ $pageSlug =='load-verification' || $pageSlug =='load-sites' ? 'menu-item-active' :'' }}" aria-haspopup="true">
 										<a href="{{ route('load-verification') }}" class="menu-link">
 											<span class="menu-text">{{ __('Load Verification') }}</span>
 										</a>
 									</li>
-									<li class="menu-item" aria-haspopup="true">
+									<li class="menu-item {{ $pageSlug =='all-load' ? 'menu-item-active' :'' }}" aria-haspopup="true">
 										<a href="{{ route('all-loads') }}" class="menu-link">
 											<span class="menu-text">{{ __('All Load') }}</span>
 										</a>

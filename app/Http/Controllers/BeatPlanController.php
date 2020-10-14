@@ -458,31 +458,37 @@ public function siteListForPlan(Request $request, Sitemaster $sites, $zone='', $
 }
 
 public function siteDetailsForTrip(Request $request, $zone = '', $date = ''){
-  $response = [];
-  $numrecords = 10;
-  if ($request->has('name')) {
-   $search = $request->name;
-   $sites = Beatplan::leftJoin('beatplan_data', function($join) {
-    $join->on('beatplan_data.beatplan_id', '=', 'beatplans.id');
-})->leftJoin('site_master', function($join) {
-    $join->on('site_master.id', '=', 'beatplan_data.site_id');
-});
-   // })->where('beatplans.id',$request->beatPlanIdForS);
-if(auth()->user()->type == 'subadmin'){
-    $data = $sites->where('site_master.site_id', 'LIKE', "%{$search}%")->where(['beatplans.mp_zone' => $request->zone, 'beatplans.effective_date' => $request->date, 'beatplan_data.status' => 'pending' ])->limit($numrecords)->select('site_master.id','site_master.site_name','site_master.site_id','site_master.technician_name','beatplan_data.quantity','beatplans.id as beatplanid','beatplan_data.site_id as site_id2','beatplan_data.id as beatplandataid')->get();
-                //$unique = $data->unique();
-}elseif (auth()->user()->type == 'mis') {
-    $data = $sites->where('site_master.site_id', 'LIKE', "%{$search}%")->where(['beatplans.added_by' => auth()->user()->created_by_id, 'beatplans.mp_zone' => $request->zone, 'beatplans.effective_date' => $request->date , 'beatplan_data.status' => 'pending'])->limit($numrecords)->select('site_master.id','site_master.site_name','site_master.site_id', 'site_master.technician_name','beatplan_data.quantity','beatplans.id as beatplanid','beatplan_data.site_id as site_id2','beatplan_data.id as beatplandataid')->get();
-                //$unique = $data->unique();
-}
-foreach ($data as $p) {
-    //  dd();
-    $response[] = array("trip_data" => $p->single_trip_data($p->beatplanid, $p->id),"site_id" => $p->site_id2,"id" => $p->id, "name" => $p->site_id, "sitename" => $p->site_name, "quantity" => $p->quantity, "beatplanid" => $p->beatplanid, "beatplandataid" => $p->beatplandataid, 'technician_name' => $p->technician_name); 
-}
-} else {
-   $data = $sites->limit($numrecords)->get();
-}
-return response()->json($response);
+    $response = [];
+    $numrecords = 10;
+    if($request->has('name')) {
+       $search =    $request->name;
+        $sites =    Beatplan::leftJoin('beatplan_data', function($join) {
+                        $join->on('beatplan_data.beatplan_id', '=', 'beatplans.id');
+                    })->leftJoin('site_master', function($join) {
+                        $join->on('site_master.id', '=', 'beatplan_data.site_id');
+                    });
+        $siteids  = array_filter($request->siteids)??[];
+       
+        if(count($siteids) && !empty($siteids)){
+            //dd(count($request->siteids));
+            $sites->whereNotIn('site_master.id', $siteids);
+        }
+       // })->where('beatplans.id',$request->beatPlanIdForS);
+    if(auth()->user()->type == 'subadmin'){
+        $data = $sites->where('site_master.site_id', 'LIKE', "%{$search}%")->where(['beatplans.mp_zone' => $request->zone, 'beatplans.effective_date' => $request->date, 'beatplan_data.status' => 'pending' ])->limit($numrecords)->select('site_master.id','site_master.site_name','site_master.site_id','site_master.technician_name','beatplan_data.quantity','beatplans.id as beatplanid','beatplan_data.site_id as site_id2','beatplan_data.id as beatplandataid')->get();
+                    //$unique = $data->unique();
+    }elseif (auth()->user()->type == 'mis') {
+        $data = $sites->where('site_master.site_id', 'LIKE', "%{$search}%")->where(['beatplans.added_by' => auth()->user()->created_by_id, 'beatplans.mp_zone' => $request->zone, 'beatplans.effective_date' => $request->date , 'beatplan_data.status' => 'pending'])->limit($numrecords)->select('site_master.id','site_master.site_name','site_master.site_id', 'site_master.technician_name','beatplan_data.quantity','beatplans.id as beatplanid','beatplan_data.site_id as site_id2','beatplan_data.id as beatplandataid')->get();
+                    //$unique = $data->unique();
+    }
+    foreach ($data as $p) {
+        //  dd();
+        $response[] = array("trip_data" => $p->single_trip_data($p->beatplanid, $p->id),"site_id" => $p->site_id2,"id" => $p->id, "name" => $p->site_id, "sitename" => $p->site_name, "quantity" => $p->quantity, "beatplanid" => $p->beatplanid, "beatplandataid" => $p->beatplandataid, 'technician_name' => $p->technician_name); 
+    }
+    } else {
+       $data = $sites->limit($numrecords)->get();
+    }
+    return response()->json($response);
 }
 public function edit($id='')
 {

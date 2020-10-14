@@ -41,10 +41,13 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 				ajax: {
 					url: HOST_URL+'trip/trip-data-table',
 					type: 'GET',
-					data: {
-						_token : $('meta[name="csrf-token"]').attr('content'),
-						start_date: $("#start_date").val(),
-						end_date: $("#end_date").val()
+					data: function(data){
+						var start_date = $('#start_date').val();
+						var end_date = $('#end_date').val();
+
+						// Append to data
+						data.start_date = start_date;
+						data.end_date = end_date;
 					},
 			},
 			columns: [
@@ -54,22 +57,10 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 				{data: 'vehicle', name: 'vechile.vehicle_no'},
 				{data: 'driver_name', name: 'driver.name' },
 				{data: 'filler_name', name: 'filler.name'},
-				{data: 'action'},
+				{data: 'action', orderable: false, searchable: false,},
 			],
-			columnDefs: [ {
-		        'targets': [5], /* column index */
-		        'orderable': false, /* true or false */
-		    }]
 		});
-		var filter = function() {
-			var val = $.fn.dataTable.util.escapeRegex($(this).val());
-			table.column($(this).data('col-index')).search(val ? val : '', false, false).draw();
-		};
-
-		var asdasd = function(value, index) {
-			var val = $.fn.dataTable.util.escapeRegex(value);
-			table.column(index).search(val ? val : '', false, true);
-		};
+		
 		$('#kt_search').on('click', function(e) {
 			e.preventDefault();
 			table.draw();
@@ -99,6 +90,44 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 		$("#exportBeattoExcel").on("click", function() {
 			table.button( '.buttons-excel' ).trigger();
 		});
+		$(document).on('click', '.delete', function(e) {
+			var url = $(this).data('href')
+			// console.log($(this).data('href'));
+		    Swal.fire({
+		        title: "Are you sure?",
+		        text: "You won't be able to revert this!",
+		        icon: "warning",
+		        showCancelButton: true,
+		        confirmButtonText: "Yes, delete it!"
+		    }).then(function(result) {
+		        if (result.value) {
+		        	$.ajax({
+			            url: url,
+			            type: "POST",
+			            data: {
+			                _token: csrf_token
+			            },
+			            success: function () {
+			                Swal.fire(
+				                "Deleted!",
+				                "Your file has been deleted.",
+				                "success"
+				            );
+			                table.draw();
+			            },
+			            error: function (xhr, ajaxOptions, thrownError) {
+			            	Swal.fire(
+				                "Error deleting!",
+				                "Please try again.",
+				                "error"
+				            )
+			            }
+			        });
+		            
+		        }
+		        
+		    });
+		});
 	};
 
 	return {
@@ -114,42 +143,5 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 
 jQuery(document).ready(function() {
 	PLANDatatablesDataSourceAjaxServer.init();
-	$(document).on('click', '.delete', function(e) {
-		var url = $(this).data('href')
-		// console.log($(this).data('href'));
-	    Swal.fire({
-	        title: "Are you sure?",
-	        text: "You won't be able to revert this!",
-	        icon: "warning",
-	        showCancelButton: true,
-	        confirmButtonText: "Yes, delete it!"
-	    }).then(function(result) {
-	        if (result.value) {
-	        	$.ajax({
-		            url: url,
-		            type: "POST",
-		            data: {
-		                _token: csrf_token
-		            },
-		            success: function () {
-		                Swal.fire(
-			                "Deleted!",
-			                "Your file has been deleted.",
-			                "success"
-			            );
-		                table.ajax.reload();
-		            },
-		            error: function (xhr, ajaxOptions, thrownError) {
-		            	Swal.fire(
-			                "Error deleting!",
-			                "Please try again.",
-			                "error"
-			            )
-		            }
-		        });
-	            
-	        }
-	        
-	    });
-	});
+	
 });
