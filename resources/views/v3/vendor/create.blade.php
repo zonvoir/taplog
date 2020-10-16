@@ -67,6 +67,7 @@
                                 </div>
                                 <span class="form-text text-muted"></span>
                             </div>
+                            
                              <div class="col-lg-4">
                                 <label>Contact: <span class="text-danger">*</span></label>
                                 <div class="input-group">
