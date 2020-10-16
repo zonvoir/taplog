@@ -1,16 +1,5 @@
-@extends('v3.layouts.app', ['page' => __('Trips'), 'pageSlug' => 'trips'])
+@extends('v3.layouts.app', ['page' => __('Trips'), 'pageSlug' => 'all-load'])
 @section('content')
-<style type="text/css">
-  .table-item-wrap .table td:nth-child(1),
-  .table-item-wrap .table th:nth-child(1),
-  .table-item-wrap .table th:nth-child(3),
-  .table-item-wrap .table td:nth-child(3),
-  .table-item-wrap .table td:nth-child(7)  
-  {
-    border-left-width: 0;
-    white-space: nowrap;
-  }
-</style>
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
   <!--begin::Subheader-->
   <div class="subheader py-2 py-lg-6 subheader-transparent" id="kt_subheader">
@@ -20,7 +9,7 @@
         <!--begin::Page Heading-->
         <div class="d-flex align-items-baseline flex-wrap mr-5">
           <!--begin::Page Title-->
-          <h5 class="text-dark font-weight-bold my-1 mr-5">Trips</h5>
+          <h5 class="text-dark font-weight-bold my-1 mr-5">Loads</h5>
           <!--end::Page Title-->
           <!--begin::Breadcrumb-->
           <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
@@ -52,7 +41,7 @@
             <span class="card-icon">
               <i class="flaticon2-supermarket text-primary"></i>
             </span>
-            <h3 class="card-label">Trips</h3>
+            <h3 class="card-label">Loads</h3>
           </div>
           <div class="card-toolbar">
             <!--begin::Dropdown-->
@@ -149,13 +138,11 @@
               <table class="table table-bordered table-hover table-checkable" id="trip_datatable" style="margin-top: 13px !important">
                 <thead>
                   <tr>
-                    <th>ID</th>
                     <th>Trip ID</th>
                     <th>Effective Date</th>
                     <th>VEHICLE</th>
                     <th>DRIVER NAME	</th>
                     <th>FILLER NAME	</th>
-                    <th>Action</th>
                   </tr>
                 </thead>
               </table>
@@ -167,10 +154,155 @@
         <!--end::Container-->
       </div>
       <!--end::Entry-->
-    </div>
-    @endsection
-    @push('js')
-    <script src="{{ asset('public') }}/assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js"></script>
-    <script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
-    <script src="{{ asset('public') }}/assets/js/pages/crud/datatables/data-sources/trip-ajax.js"></script>
-    @endpush
+</div>
+@endsection
+@push('js')
+<script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
+<script type="text/javascript">
+	'use strict';
+	var PLANDatatablesDataSourceAjaxServer = function() {
+
+	var initTable1 = function() {
+		var table = $('#trip_datatable').DataTable({
+			responsive: true,
+			searchDelay: 500,
+			processing: true,
+			serverSide: true,
+			buttons: [
+			{ 
+				extend: 'excel',
+				exportOptions: {
+					columns: 'th:not(:last-child)'
+				}
+			},
+			{ 
+				extend: 'pdf',
+				exportOptions: {
+					columns: 'th:not(:last-child)'
+				}
+			}
+			],
+			order: [ [0, 'desc'] ],
+			/*dom: 'Bfrtip',*/
+			/*buttons: [*/
+			/*'copy', 'csv', 'excel', 'pdf', 'print',*/
+				/*{
+					extend: 'excelHtml5',
+					exportOptions: {
+						columns: 'th:not(:last-child)'
+					},
+				},
+				{
+					extend: 'pdf',
+					exportOptions: {
+						columns: 'th:not(:last-child)'
+					},
+				}*/
+				/*],*/
+				ajax: {
+					url: '{{ route('loads_datatable') }}',
+					type: 'GET',
+					data: function(data){
+						var start_date = $('#start_date').val();
+						var end_date = $('#end_date').val();
+
+						// Append to data
+						data.start_date = start_date;
+						data.end_date = end_date;
+					},
+			},
+			columns: [
+				{data: 'trip_id'},
+				{data: 'effective_date'},
+				{data: 'vehicle', name: 'vechile.vehicle_no'},
+				{data: 'driver_name', name: 'driver.name' },
+				{data: 'filler_name', name: 'filler.name'},
+			],
+		});
+		
+		$('#kt_search').on('click', function(e) {
+			e.preventDefault();
+			table.draw();
+		});
+
+		$('#kt_reset').on('click', function(e) {
+			e.preventDefault();
+			$('.datatable-input').each(function() {
+				$(this).val('');
+				table.column($(this).data('col-index')).search('', false, false);
+			});
+			table.table().draw();
+		});
+
+		$('#kt_datepicker').datepicker({
+			format: 'dd-mm-yyyy',
+			todayHighlight: true,
+			templates: {
+				leftArrow: '<i class="la la-angle-left"></i>',
+				rightArrow: '<i class="la la-angle-right"></i>',
+			},
+			autoclose: true
+		});
+		$("#exportBeattoPdf").on("click", function() {
+			table.button( '.buttons-pdf' ).trigger();
+		});
+		$("#exportBeattoExcel").on("click", function() {
+			table.button( '.buttons-excel' ).trigger();
+		});
+		$(document).on('click', '.delete', function(e) {
+			var url = $(this).data('href')
+			// console.log($(this).data('href'));
+		    Swal.fire({
+		        title: "Are you sure?",
+		        text: "You won't be able to revert this!",
+		        icon: "warning",
+		        showCancelButton: true,
+		        confirmButtonText: "Yes, delete it!"
+		    }).then(function(result) {
+		        if (result.value) {
+		        	$.ajax({
+			            url: url,
+			            type: "POST",
+			            data: {
+			                _token: csrf_token
+			            },
+			            success: function () {
+			                Swal.fire(
+				                "Deleted!",
+				                "Your file has been deleted.",
+				                "success"
+				            );
+			                table.draw();
+			            },
+			            error: function (xhr, ajaxOptions, thrownError) {
+			            	Swal.fire(
+				                "Error deleting!",
+				                "Please try again.",
+				                "error"
+				            )
+			            }
+			        });
+		            
+		        }
+		        
+		    });
+		});
+	};
+
+	return {
+
+		//main function to initiate the module
+		init: function() {
+			initTable1();
+		},
+
+	};
+
+	}();
+
+	jQuery(document).ready(function() {
+	PLANDatatablesDataSourceAjaxServer.init();
+
+	});
+</script>
+@endpush

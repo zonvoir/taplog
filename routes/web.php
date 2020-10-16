@@ -140,6 +140,8 @@ Route::get('asset-name-list', 'AssetsController@assetNameForTrip')->name('asset-
 Route::group(['middleware'=> 'auth', 'prefix' => 'trip'], function(){
 	Route::get('/', 'TripController@index')->name('trips');
 	Route::get('/trip-data-table', 'TripController@datatable')->name('trips_datatable');
+	Route::get('/load-data-table', 'TripController@load_datatable')->name('loads_datatable');
+	Route::get('/load-data-data-table', 'TripController@load_datatable_by_trip_id')->name('loads_data_datatable');
 	Route::get('/trip/{id}', 'TripController@edit')->name('trip.edit');
 	Route::post('/trip/{id}', 'TripController@update')->name('trip.update');
 	Route::post('/trip-remove/{id}', 'TripController@remove')->name('trip.remove');

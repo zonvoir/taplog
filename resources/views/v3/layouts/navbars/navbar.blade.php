@@ -343,22 +343,22 @@
 								<!--begin::Nav-->
 								<ul class="menu-nav">
 									@if(auth()->user()->type == 'subadmin' || auth()->user()->type == 'mis')
-									<li class="menu-item {{ $pageSlug =='trips' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+									<li class="menu-item {{ $pageSlug == 'trips' ? 'menu-item-active' :'' }}" aria-haspopup="true">
 										<a href="{{ route('trips') }}" class="menu-link">
 											<span class="menu-text">{{ __('Trips') }}</span>
 										</a>
 									</li>
-									<li class="menu-item {{ $pageSlug =='trip-allotment' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+									<li class="menu-item {{ $pageSlug == 'trip-allotment' ? 'menu-item-active' :'' }}" aria-haspopup="true">
 										<a href="{{ route('allotment') }}" class="menu-link">
 											<span class="menu-text">{{ __('Allot Trip') }}</span>
 										</a>
 									</li>
-									<li class="menu-item {{ $pageSlug =='load-verification' || $pageSlug =='load-sites' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+									<li class="menu-item {{ $pageSlug == 'load-verification' || $pageSlug =='load-sites' ? 'menu-item-active' :'' }}" aria-haspopup="true">
 										<a href="{{ route('load-verification') }}" class="menu-link">
 											<span class="menu-text">{{ __('Load Verification') }}</span>
 										</a>
 									</li>
-									<li class="menu-item {{ $pageSlug =='all-load' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+									<li class="menu-item {{ $pageSlug == 'all-load' ? 'menu-item-active' :'' }}" aria-haspopup="true">
 										<a href="{{ route('all-loads') }}" class="menu-link">
 											<span class="menu-text">{{ __('All Load') }}</span>
 										</a>

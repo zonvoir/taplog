@@ -41,7 +41,7 @@
 			</div>
 		</div>
 		<div class="card-body">
-			<form class="form" id="trip-allot-form" action="{{route('allot-trip')}}" method="POST" autocomplete="off">
+			<form class="form" id="trip-allot-form" action="{{route('allot-trip')}}" method="POST">
 				<div style="overflow: hidden; height: 0px;background: transparent;" data-description="dummyPanel for Chrome auto-fill issue">
 			        <input type="text" style="height:0;background: transparent; color: transparent;border: none;" data-description="dummyUsername"></input>
 			        <input type="password" style="height:0;background: transparent; color: transparent;border: none;" data-description="dummyPassword"></input>
@@ -462,6 +462,7 @@
 </div>
 @endsection
 @push('js')
+<script src="{{ asset('public') }}/assets/js/bootstrap3-typeahead.min.js"></script>
 <script type="text/javascript">
 	$(document).ready(function() {
 		//$('input').attr('autocomplete','none');

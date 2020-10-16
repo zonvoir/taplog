@@ -9,7 +9,7 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 			serverSide: true,
 			buttons: [
 			{ 
-				extend: 'excel',
+				extend: 'csv',
 				exportOptions: {
 					columns: 'th:not(:last-child)'
 				}
@@ -18,7 +18,9 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 				extend: 'pdf',
 				exportOptions: {
 					columns: 'th:not(:last-child)'
-				}
+				},
+				orientation: 'landscape',
+        		pageSize: 'A2'
 			}
 			],
 			order: [ [0, 'desc'] ],
@@ -88,7 +90,7 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 			table.button( '.buttons-pdf' ).trigger();
 		});
 		$("#exportBeattoExcel").on("click", function() {
-			table.button( '.buttons-excel' ).trigger();
+			table.button( '.buttons-csv' ).trigger();
 		});
 		$(document).on('click', '.delete', function(e) {
 			var url = $(this).data('href')

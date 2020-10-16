@@ -107,9 +107,18 @@ class BackLogController extends Controller
 		$load_transfer->vehicle_id 	 = $request->vehicle_id;
 		//return dd($load_transfer);
 		$load_transfer->save();
-		$verified->status = 'transferred';
+		//$verified->status = 'transferred';
 		$verified->transfer_id = $load_transfer->id;
 		$verified->save();
+
+		if($verified){
+			$trip 				 = Trips::find($verified->auto_trip_id);
+			$trip->transferred 	 = '1';
+			$trip->driver_id 	 = $request->driver_id;
+			$trip->filler_id 	 = $request->filler_id;
+			$trip->vehicle_id 	 = $request->vehicle_id;
+			$trip->save();
+		}
 		return response()->json('transferred');
 	}
 

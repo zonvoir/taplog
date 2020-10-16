@@ -75,6 +75,7 @@
 
 @endsection
 @push('js')
+<script src="{{ asset('public') }}/assets/js/bootstrap3-typeahead.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var effectiveDateLoadPath = "{{ route('effective-date-load') }}";

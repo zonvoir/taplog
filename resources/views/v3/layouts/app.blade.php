@@ -24,6 +24,7 @@
 		<!--begin::Layout Themes(used by all pages)-->
 		<!--end::Layout Themes-->
 		<link rel="shortcut icon" href="{{ asset('public') }}/assets/media/logos/favicon.ico" />
+		@stack('css')
 	</head>
 	<!--end::Head-->
 	<!--begin::Body-->
@@ -1049,22 +1050,15 @@
 		<!--end::Global Config-->
 		<!--begin::Global Theme Bundle(used by all pages)-->
 		<script src="{{ asset('public') }}/assets/plugins/global/plugins.bundle.js"></script>
-		<script src="{{ asset('public') }}/assets/plugins/custom/prismjs/prismjs.bundle.js"></script>
 		<script src="{{ asset('public') }}/assets/js/scripts.bundle.js"></script>
-		<!--end::Global Theme Bundle-->
-		<!--begin::Page Vendors(used by this page)-->
-		<script src="{{ asset('public') }}/assets/plugins/custom/fullcalendar/fullcalendar.bundle.js"></script>
-		<!--end::Page Vendors-->
-		<!--begin::Page Scripts(used by this page)-->
-		<script src="{{ asset('public') }}/assets/js/pages/widgets.js"></script>
-		<!--end::Page Scripts-->
-		<!--begin::Page Vendors(used by this page)-->
-		<script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
-		<!--end::Page Vendors-->
-		<script src="{{ asset('public') }}/assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js"></script>
-		<!--type head script -->
-		<script src="{{ asset('public') }}/assets/js/bootstrap3-typeahead.min.js"></script>
 		@stack('js')
+		<script type="text/javascript">
+			$(document).ready(function(){
+			    $( document ).on( 'focus', ':input', function(){
+			        $( this ).attr( 'autocomplete', 'off' );
+			    });
+			});
+		</script>
 	</body>
 	<!--end::Body-->
 </html>

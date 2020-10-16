@@ -191,7 +191,7 @@
 									<div data-repeater-list="siteArray" class="col-lg-12">
 										@if($trip->trip_data)
 										@foreach($trip->trip_data as $key=>$trip_data)
-										@if($trip_data->quantity())
+										@if(1)
 										<div data-repeater-item class="form-group row align-items-center site_row">
 											<div class="col">
 												<label>Site Id:</label>
@@ -529,6 +529,7 @@
 </div>
 @endsection
 @push('js')
+<script src="{{ asset('public') }}/assets/js/bootstrap3-typeahead.min.js"></script>
 <script type="text/javascript">
 	$(document).ready(function() {
 		// $('input').attr('autocomplete','nope');

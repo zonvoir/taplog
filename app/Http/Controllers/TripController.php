@@ -83,7 +83,7 @@ class TripController extends Controller
 		})
 		->addColumn('filler_name', function(Trips $data) {
 			return $data->filler->name ?? '';
-		})
+		})    
 		->orderColumn('id', function ($query, $order) {
 			$query->orderBy('id', $order);
 		})
@@ -219,7 +219,7 @@ class TripController extends Controller
 
 		//dd($request->all());
 		$msgResp = $this->sendSmsForUpdateTrip($request->all());	
-		return redirect('/trip')->with('success', 'Trip Updated successfully!');
+		return redirect()->back()->with('success', 'Trip Updated successfully!');
 	}
 	
 	public function tripAllotment()
@@ -451,7 +451,8 @@ class TripController extends Controller
 			$action = $request->action;
 			$list = true;
 		}else{
-			$action = false;
+			$action = true;
+			$list = true;
 		}
 		if($list)
 			$tripDetails = $query->get();
@@ -575,72 +576,145 @@ class TripController extends Controller
 			$fillers 		= User::where(['type' => 'filler'])->get();
 			$areaOfficers 	= User::where(['type' => 'field_officer'])->get();
 			$vendors 		= Vendor::where(['type' => 'vendor', 'vendor_category' => 'PUMP'])->get();
-			
-			if(auth()->user()->type == 'subadmin'){
-				$data = Verifiedloads::select('verified_loads.*')->with(['trip' => function ($query) {
-					$query->where('added_by', auth()->user()->id);
-				}])->where('auto_trip_id',$request->trip_id)
-				->join('trips', function($q){
-					$q->on('trips.id','=','verified_loads.auto_trip_id');
-				})
-				->join('trip_data', function($q){
-					$q->on('trip_data.id','=','verified_loads.trip_data_id');
-				})
-				->paginate(10);
-
-				$site_ids = Verifiedloads::where('auto_trip_id',$request->trip_id)->pluck('sites')->toArray();
-				$sites 	   = Sitemaster::whereNotIn('id',$site_ids)->orderBy('site_name','ASC')->get();
-				
-				//return dd($sites_ids);
-
-				return view('trip.verified-loads-data',['details' => $data, 'drivers' => $drivers, 'fillers' => $fillers, 'areaOfficers' => $areaOfficers, 'vendors' => $vendors, 'sites' => $sites]);
-			}elseif (auth()->user()->type == 'driver') {
-				$data = Verifiedloads::with(['trip' => function ($query) {
-					$query->where('driver_id', auth()->user()->id);
-				}])
-				->where('auto_trip_id',$request->trip_id)
-				->join('trips', function($q){
-					$q->on('trips.id','=','verified_loads.auto_trip_id');
-				})
-				->join('trip_data', function($q){
-					$q->on('trip_data.id','=','verified_loads.trip_data_id');
-				})
-				->paginate(10);
-				$site_ids = Verifiedloads::where('auto_trip_id',$request->trip_id)->pluck('sites')->toArray();
-				$sites 	   = Sitemaster::whereNotIn('id',$site_ids)->orderBy('site_name','ASC')->get();
-
-				return view('trip.verified-loads-data',['details' => $data, 'drivers' => $drivers, 'fillers' => $fillers, 'areaOfficers' => $areaOfficers, 'vendors' => $vendors]);
-			}elseif(auth()->user()->type == 'filler'){
-
-				$data = Verifiedloads::with(['trip' => function ($query) {
-					$query->where('filler_id', auth()->user()->id);
-				}])
-				->where('auto_trip_id',$request->trip_id)
-				->join('trips', function($q){
-					$q->on('trips.id','=','verified_loads.auto_trip_id');
-				})
-				->join('trip_data', function($q){
-					$q->on('trip_data.id','=','verified_loads.trip_data_id');
-				})
-				->paginate(10);
-				$site_ids = Verifiedloads::where('auto_trip_id',$request->trip_id)->pluck('sites')->toArray();
-				$sites 	   = Sitemaster::whereNotIn('id',$site_ids)->orderBy('site_name','ASC')->get();
-
-				return view('trip.verified-loads-data',['details' => $data, 'drivers' => $drivers, 'fillers' => $fillers, 'areaOfficers' => $areaOfficers, 'vendors' => $vendors]);
-			}
+			$site_ids 		= Verifiedloads::where('auto_trip_id',$request->trip_id)->pluck('sites')->toArray();
+			$sites 	   		= Sitemaster::whereNotIn('id',$site_ids)->orderBy('site_name','ASC')->get();
+			return view('v3.trip.loads-data', compact('drivers', 'fillers', 'areaOfficers', 'vendors', 'sites'));
 		}else{
-			$trips 	= 	Trips::select('trips.*')
-			->join('verified_loads',function($join){
-				$join->on('trips.id',"=",'verified_loads.auto_trip_id');
-			})
-			->groupBy('trips.id')->paginate(10);
-			return view('trip.verified-loads',['trips' => $trips]);
+			
+			return view('v3.trip.all-loads',['trips' => []]);
 		}
 
 	}
+
+	public function load_datatable(Request $request){
+		$query 	= 	Trips::select('trips.*')
+			->join('verified_loads',function($join){
+				$join->on('trips.id',"=",'verified_loads.auto_trip_id');
+			})
+			->orderBy('id', 'DESC')
+			->groupBy('verified_loads.auto_trip_id');
+
+		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
+			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
+		}
+
+		return \DataTables::of($query)
+		->addColumn('trip_id', function(Trips $data) {
+			return '<a href="'.route('all-loads').'?trip_id='. $data->id .'&action=load_data">'.$data->trip_id??''.'</a>';
+		})
+		->addColumn('vehicle', function(Trips $data) {
+			return $data->vechile->vehicle_no ??'';
+		})
+		->addColumn('driver_name', function(Trips $data) {
+			return $data->driver->name ?? '';
+		})
+		->addColumn('filler_name', function(Trips $data) {
+			return $data->filler->name ?? '';
+		})
+		->orderColumn('id', function ($query, $order) {
+			$query->orderBy('id', $order);
+		})
+		->rawColumns(['trip_id'])->make(true);
+
+	}
+
+	public function load_datatable_by_trip_id(Request $request){
+
+		// return dd($request->search['value']);
+		if(auth()->user()->type == 'subadmin'){
+			$data = Verifiedloads::select('verified_loads.*')->with(['site','trip' => function ($query) {
+				$query->where('added_by', auth()->user()->id);
+			}, 'trip.driver','trip.filler'])->where('auto_trip_id',$request->trip_id)
+			->join('trips', function($q){
+				$q->on('trips.id','=','verified_loads.auto_trip_id');
+			})
+			->join('trip_data', function($q){
+				$q->on('trip_data.id','=','verified_loads.trip_data_id');
+			});
+
+			$site_ids = Verifiedloads::where('auto_trip_id',$request->trip_id)->pluck('sites')->toArray();
+			$sites 	   = Sitemaster::whereNotIn('id',$site_ids)->orderBy('site_name','ASC')->get();
+			
+
+		}elseif (auth()->user()->type == 'driver') {
+			$data = Verifiedloads::with(['trip' => function ($query) {
+				$query->where('driver_id', auth()->user()->id);
+			}])
+			->where('auto_trip_id',$request->trip_id)
+			->join('trips', function($q){
+				$q->on('trips.id','=','verified_loads.auto_trip_id');
+			})
+			->join('trip_data', function($q){
+				$q->on('trip_data.id','=','verified_loads.trip_data_id');
+			});
+
+			$site_ids = Verifiedloads::where('auto_trip_id',$request->trip_id)->pluck('sites')->toArray();
+			$sites 	   = Sitemaster::whereNotIn('id',$site_ids)->orderBy('site_name','ASC')->get();
+
+			
+		}elseif(auth()->user()->type == 'filler'){
+
+			$data = Verifiedloads::with(['site','trip' => function ($query) {
+				$query->where('filler_id', auth()->user()->id);
+			}])
+			->where('auto_trip_id',$request->trip_id)
+			->join('trips', function($q){
+				$q->on('trips.id','=','verified_loads.auto_trip_id');
+			})
+			->join('trip_data', function($q){
+				$q->on('trip_data.id','=','verified_loads.trip_data_id');
+			});
+
+			$site_ids = Verifiedloads::where('auto_trip_id',$request->trip_id)->pluck('sites')->toArray();
+			$sites 	   = Sitemaster::whereNotIn('id',$site_ids)->orderBy('site_name','ASC')->get();
+
+			
+		}
+
+		return \DataTables::of($data)
+		->addColumn('trip_id', function(Verifiedloads $site) {
+			return $site->trip->trip_id??'';
+		})
+		->addColumn('site_id', function(Verifiedloads $site) {
+			return $site->site->site_id ??'';
+		})
+		->addColumn('site_name', function(Verifiedloads $site) {
+			return $site->site->site_name ??'';
+		})
+		->addColumn('site_cat', function(Verifiedloads $site) {
+			return $site->site->site_category ??'';
+		})
+		->addColumn('tech_name', function(Verifiedloads $site) {
+			return $site->site->technician_name ??'';
+		})
+		->addColumn('tech_no', function(Verifiedloads $site) {
+			return $site->site->technician_contact1 ??'' . ' '.$site->site->technician_contact2 ??'';
+		})
+		->addColumn('qty', function(Verifiedloads $site) {
+			return $site->trip_data->beat_plan_data()->quantity??'';
+		})
+		->addColumn('driver_name', function(Verifiedloads $site) {
+			return $site->trip->driver->name ?? '';
+		})
+		->addColumn('filler_name', function(Verifiedloads $site) {
+			return $site->trip->filler->name ?? '';
+		})
+		->addColumn('status', function(Verifiedloads $site) {
+			return $site->status;
+		})
+		->addColumn('action', function(Verifiedloads $site) {
+			$html = '';
+			$html .= '<a href="javascript: void(0);" class="btn btn-primary lModal" data-toggle="modal" data-target="#transferLoadModel" verified_id = "'.$site->id.'">Load Transfer</a>';
+			if($site->status != 'filled' && $site->status != 'unloaded'){
+			$html .= ' <a href="javascript: void(0);" class="btn btn-primary dModal" data-toggle="modal" data-target="#divertLoadModel" site_id="'.$site->site->site_id.'" site_name="'.$site->site->site_name.'" site_qty = "'.$site->trip_data->beat_plan_data()->quantity.'" site_id_primary = "'.$site->site->id.'" verified_id = "'.$site->id.'">Divert</a>';
+			}
+
+			return $html;
+		})
+		->rawColumns(['action'])->make(true);
+
+	}
 	public function allLoadData(){
-		
-		
 		
 	}
 	public function changeStatusUnloadedToLoaded($trip_id, $site_id, $beatplan_id, $status)
