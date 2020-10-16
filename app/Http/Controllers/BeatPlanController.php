@@ -28,9 +28,11 @@ class BeatPlanController extends Controller
             Excel::import($import, request()->file('file'));
                //dd($import->getRowCount());
             if($import->getRowCount()){
-                return back()->with('success','Total '.$import->getRowCount().' rows imported successfully!');
+                // return back()->with('success','Total '.$import->getRowCount().' rows imported successfully!');
+                return response()->json(['status' => 'ok!', 'message' => 'file imported!']);
             }else{
-                return back()->with('error','Either site_id, mpzone_name or client_name does not existed in master database.!');       
+                // return back()->with('error','Either site_id, mpzone_name or client_name does not existed in master database.!');       
+                return response()->json(['status' => 'ok!', 'message' => 'Either site_id, mpzone_name or client_name does not existed in master database.!']);
             }
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
@@ -43,8 +45,10 @@ class BeatPlanController extends Controller
              $failure->values(); // The values of the row that has failed.
              $error .= ' '.$failure->errors()[0];
          }
-         return back()->with('error',$error);
+         // return back()->with('error',$error);
+         return response()->json(['status' => 'ok!', 'message' => $error]);
      }
+
         // if(Excel::import(new BeatPlanImport,request()->file('file'))){
         //     return back()->with('success','CSV imported successfully!');
         // }else{
@@ -56,10 +60,10 @@ class BeatPlanController extends Controller
     $plan = Beatplans::find($id);
     return view('pages.edit-beat-plan',compact('plan'));
 }
-public function deleteBeatPlan($id='')
+public function deleteBeatPlan(Request $request)
 {
-    if($id){
-        $beatPlanId = $id;
+    if($request->has('id')){
+        $beatPlanId = $request->id;
         if (BeatPlanData::where(['beatplan_id' => $beatPlanId])->exists()) {
             if (TripData::where(['beatplan_id' => $beatPlanId])->exists()) {
                 $tripData = TripData::where(['beatplan_id' => $beatPlanId])->get();
@@ -83,7 +87,7 @@ public function deleteBeatPlan($id='')
         }else{
             Beatplan::find($beatPlanId)->delete();
         }
-        return back()->with('success','Data deleted successfully!');
+        return true;
     }
 }
 public function editBeatPlanAction(Request $request)
@@ -362,30 +366,6 @@ public function store(Request $request)
         'mode' => 'required',
         'effective_date' => 'required',
     ]);
-    // if($request->has('siteid')){
-    //     $siteIds = $request->siteid;
-    //     $quantity = $request->quantity;
-    //     $countArr = count($siteIds);
-    //     $plan = new Beatplan();         
-    //     $plan->mp_zone = $request->zone;
-    //     $plan->added_date = $request->current_date;
-    //     $plan->client_id = $request->client_id;
-    //     $plan->mode = $request->mode;
-    //     $plan->effective_date = $request->effective_date;
-    //     $plan->added_by = auth()->user()->id;
-    //     $plan->save();
-    //     $plan_id = $plan->id;
-    //     for ($i=0; $i < $countArr ; $i++) { 
-    //         $beatplandata = new BeatPlanData;
-    //         $beatplandata->beatplan_id = $plan_id;
-    //         $beatplandata->site_id = $siteIds[$i];
-    //         $beatplandata->quantity = $quantity[$i];
-    //         $beatplandata->save();
-    //     }
-    //     return redirect('/beat-plan')->with('success', 'Plan created successfully!');
-    // }else{
-    //     return back()->with('error','You did not add any site!');  
-    // }  
     $siteArray = $request->siteArray;
     $plan = new Beatplan(); 
     $plan->mp_zone = $request->zone;
@@ -494,44 +474,41 @@ public function edit($id='')
 {
     if(isset($id) && !empty($id)){
         $plan = Beatplan::find($id);
-        return view('beatplan.edit',['plan'=> $plan]);
+        return view('v3.beatplan.edit',['plan'=> $plan]);
     }
 }
 public function update(Request $request)
 {
-    if($request->has('siteid')){
-        $beatPlanId = $request->beatplan_id;
-        $siteIds = $request->siteid;
-        $quantity = $request->quantity;
-        $planDataIds = $request->plandata_id;
-        $countArr = count($siteIds);
-        $plan = Beatplan::find($request->beatplan_id);         
-        $plan->mp_zone = $request->zone;
-        $plan->added_date = $request->current_date;
-        $plan->client_id = $request->client_id;
-        $plan->mode = $request->mode;
-        $plan->effective_date = $request->effective_date;
-        $plan->added_by = auth()->user()->id;
-        $plan->save();
-        for ($i=0; $i < $countArr ; $i++) { 
-            if($planDataIds[$i]){
-                $beatplandata = BeatPlanData::find($planDataIds[$i]);
-                $beatplandata->beatplan_id = $beatPlanId;
-                $beatplandata->site_id = $siteIds[$i];
-                $beatplandata->quantity = $quantity[$i];
-                $beatplandata->save();
-            }else{
-                $beatplandata = new BeatPlanData;
-                $beatplandata->beatplan_id = $beatPlanId;
-                $beatplandata->site_id = $siteIds[$i];
-                $beatplandata->quantity = $quantity[$i];
-                $beatplandata->save();
+    //dd($request->all());
+    $siteArray = $request->siteArray;
+    $plan_id = $request->beatplan_id;
+    $plan = Beatplan::find($plan_id);  
+    $plan->mp_zone = $request->zone;
+    $plan->added_date = $request->current_date;
+    $plan->client_id = $request->client_id;
+    $plan->mode = $request->mode;
+    $plan->effective_date = $request->effective_date;
+    $plan->added_by = auth()->user()->id;
+    if($plan->save()){
+        if(isset($siteArray) && !empty($siteArray)){
+            foreach ($siteArray as $site) {
+                if(isset($site['plandata_id'])){
+                    $beatplandata = BeatPlanData::find($site['plandata_id']);
+                    $beatplandata->beatplan_id = $plan_id;
+                    $beatplandata->site_id = $site['siteid'];
+                    $beatplandata->quantity = $site['quantity'];
+                    $beatplandata->save();       
+                }else{
+                    $beatplandata = new BeatPlanData;
+                    $beatplandata->beatplan_id = $plan_id;
+                    $beatplandata->site_id = $site['siteid'];
+                    $beatplandata->quantity = $site['quantity'];
+                    $beatplandata->save();       
+                }
             }
         }
-        return redirect('/beat-plan')->with('success', 'Plan updated successfully!');  
-    }else{
-        return back()->with('error','You did not update any site!');  
-    }  
+        return redirect('/beat-plan')->with('success', 'Plan updated successfully!');
+    } 
 }
 public function removeSitesFromEdit(Request $request)
 {
@@ -607,9 +584,6 @@ public function dataTablePlan(Request $request)
             $columnsDefault[ $field ] = true;
         }
     }
-
-    // get all raw data
-    //$returndata = Beatplan::whereIn('added_by',$addedBy)->get();
     $alldata = array();
     if(isset($returndata) && !empty($returndata)){
         $i = 0;

@@ -6,7 +6,7 @@
 				<!--begin::Left-->
 				<div class="d-none d-lg-flex align-items-center mr-3">
 					<!--begin::Logo-->
-					<a href="index.html" class="mr-20">
+					<a href="{{route('home')}}" class="mr-20">
 						<img alt="Logo" src="{{ asset('public') }}/assets/media/logos/Logo.png" class="max-h-60px" />
 					</a>
 					<!--end::Logo-->
@@ -14,12 +14,12 @@
 					<ul class="header-tabs nav align-self-end font-size-lg" role="tablist">
 						<!--begin::Item-->
 						<li class="nav-item">
-							<a href="{{route('home')}}" class="nav-link py-4 px-6">Beat's</a>
+							<a href="{{route('home')}}" class="nav-link py-4 px-6 {{$pageSlug == 'beatplan' ? 'active' : ''}}">Beat's</a>
 						</li>
 						<!--end::Item-->
 						<!--begin::Item-->
 						<li class="nav-item mr-3">
-							<a href="#" class="nav-link py-4 px-6" data-toggle="tab" data-target="#kt_header_tab_user" role="tab">User's</a>
+							<a href="#" class="nav-link py-4 px-6 {{$pageSlug == 'users' ? 'active' : ''}}" data-toggle="tab" data-target="#kt_header_tab_user" role="tab">User's</a>
 						</li>
 						<!--end::Item-->
 						<!--begin::Item-->
@@ -315,20 +315,20 @@
 								<!--begin::Nav-->
 								<ul class="menu-nav">
 									<li class="menu-item" aria-haspopup="true">
-										<a href="index.html" class="menu-link">
+										<a href="{{route('user.index')}}" class="menu-link">
 											<span class="menu-text">User Management</span>
 										</a>
 									</li>
 									<li class="menu-item" aria-haspopup="true">
-										<a href="index.html" class="menu-link">
+										<a href="{{route('vendors.index')}}" class="menu-link">
 											<span class="menu-text">Vendor/Client Management</span>
 										</a>
 									</li>
-									<li class="menu-item" aria-haspopup="true">
+									<!-- <li class="menu-item" aria-haspopup="true">
 										<a href="index.html" class="menu-link">
 											<span class="menu-text">Employee Management</span>
 										</a>
-									</li>
+									</li> -->
 									
 								</ul>
 								<!--end::Nav-->

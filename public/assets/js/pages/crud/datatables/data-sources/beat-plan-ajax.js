@@ -1,6 +1,8 @@
 'use strict';
 var PLANDatatablesDataSourceAjaxServer = function() {
-
+	$.fn.dataTable.Api.register('column().title()', function() {
+		return $(this.header()).text().trim();
+	});
 	var initTable1 = function() {
 		var table = $('#plan_datatable').DataTable({
 			responsive: true,
@@ -21,27 +23,11 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 				}
 			}
 			],
-			/*dom: 'Bfrtip',*/
-			/*buttons: [*/
-			/*'copy', 'csv', 'excel', 'pdf', 'print',*/
-				/*{
-					extend: 'excelHtml5',
-					exportOptions: {
-						columns: 'th:not(:last-child)'
-					},
-				},
-				{
-					extend: 'pdf',
-					exportOptions: {
-						columns: 'th:not(:last-child)'
-					},
-				}*/
-				/*],*/
-				ajax: {
-					url: HOST_URL+'beat-plan-data-table',
-					type: 'POST',
-					data: {
-						'_token' : $('meta[name="csrf-token"]').attr('content'),
+			ajax: {
+				url: HOST_URL+'beat-plan-data-table',
+				type: 'POST',
+				data: {
+					'_token' : $('meta[name="csrf-token"]').attr('content'),
 					// parameters for custom backend script demo
 					columnsDef: [
 					'id','added_date', 'mp_zone',
@@ -59,6 +45,18 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 			{data: 'cstatus'},
 			{data: 'action', responsivePriority: -1},
 			],
+			initComplete: function() {
+				this.api().columns().every(function() {
+					var column = this;
+					switch (column.title()) {
+						case 'Zone':
+						column.data().unique().sort().each(function(d, j) {
+							$('.datatable-input[data-col-index="1"]').append('<option value="' + d + '">' + d + '</option>');
+						});
+						break;
+					}
+				});
+			},
 			columnDefs: [
 			{
 				targets: -1,
@@ -72,7 +70,7 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 					<a href="'+HOST_URL+'edit-beat-plan/'+full.id+'" class="btn btn-sm btn-clean btn-icon" title="Edit details">\
 					<i class="la la-edit"></i>\
 					</a>\
-					<a href="'+HOST_URL+'delete-beat-plan/'+full.id+'" class="btn btn-sm btn-clean btn-icon" title="Delete">\
+					<a href="javascript:;" plan-id="'+full.id+'" class="btn btn-sm btn-clean btn-icon del-plan" title="Delete">\
 					<i class="la la-trash"></i>\
 					</a>\
 					';
@@ -93,7 +91,7 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 			e.preventDefault();
 			var params = {};
 			$('.datatable-input').each(function() {
-				var i = 2;
+				var i = $(this).data('col-index');
 				if (params[i]) {
 					params[i] += '|' + $(this).val();
 				}
@@ -131,6 +129,29 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 		});
 		$("#exportBeattoExcel").on("click", function() {
 			table.button( '.buttons-excel' ).trigger();
+		});
+		$('#plan_datatable').on('click', '.del-plan', function(){
+			var id = $(this).attr('plan-id');
+			Swal.fire({
+				title: "Are you sure?",
+				text: "You would not be able to revert this!",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonText: "Yes, delete it!"
+			}).then(function(result) {
+				if (result.value) {
+					$.post( HOST_URL+"delete-beat-plan",{'_token' : $('meta[name="csrf-token"]').attr('content'), id: id }, function( resp ) {
+						if(resp){
+							Swal.fire(
+								"Deleted!",
+								"Plan has been deleted.",
+								"success"
+								)
+							table.row( $(this).parents('tr') ).remove().draw();
+						}
+					});
+				}
+			});
 		});
 	};
 
