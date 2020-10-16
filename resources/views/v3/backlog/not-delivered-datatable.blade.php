@@ -178,5 +178,6 @@
       });
     }
   </script>
+  <script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
   <script src="{{ asset('public') }}/assets/js/pages/crud/datatables/data-sources/beat-plan-data-ajax.js"></script>
   @endpush

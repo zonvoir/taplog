@@ -45,31 +45,31 @@ class VendorController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    { 
       $validatedData =  $request->validate([
         'name'      => 'required',
         'email'     => 'required|unique:users|max:255',
+        'contact'     => 'required|unique:users',
         'password'  => 'required',
         'type'      => 'required'
       ]);
       $user                =  new User;
       $user->name          = $request->name;
-      $user->email         = $request->email;
+      $user->email         = strtolower($request->email);
       $user->type          = $request->type;
+      $user->contact       = $request->contact;
       $user->password      = Hash::make($request->password);
       $user->created_by_id = auth()->user()->id;
       $user->save();
-
       if($user){
         $vendor = new Vendor();
         $vendor->user_id = $user->id;
-        $vendor->vendor_code = $request->vendor_code;
+        $vendor->vendor_code = strtoupper($request->vendor_code);
         $vendor->type = $request->type;
         $vendor->name = $request->name;
         $vendor->billing_address = $request->billing_address;
         $vendor->state = $request->state;
-        $vendor->gst_no = $request->gst_no;
-        $vendor->gst_no = $request->gst_no;
+        $vendor->gst_no = strtoupper($request->gst_no);
         if($request->type == 'vendor'){
           if($request->has('latitute'))
             $vendor->latitute = $request->latitute;
@@ -81,7 +81,8 @@ class VendorController extends Controller
         $vendor->created_by_id = auth()->user()->id;
         $vendor->save();
         if($request->vehicleAdded == 'yes'){
-          return view('vehicle.create',['vendorId' => $vendor->id]);
+          $vendor = Vendor::find($vendor->id);
+          return view('v3.vehicle.create',compact('vendor'));
         }else{
           if($vendor->type == 'client')
             return redirect('vendor/vendors')->with('success', 'Client created successfully!');
@@ -124,9 +125,8 @@ class VendorController extends Controller
      */
     public function edit($id)
     {
-      $vendor = Vendor::find($id);
-      $kyc    = VendorKyc::where('vendor_id','=',$id)->first();
-      return view('vendor.edit',['vendor' => $vendor,'vendorkyc' => $kyc]);
+      $user = Vendor::find($id);
+      return view('v3.vendor.personal-info',compact('user'));
     }
 
     public function profile()
@@ -284,6 +284,7 @@ class VendorController extends Controller
       if(auth()->user()->type == 'subadmin'){
         $returndata = Vendor::where('created_by_id','=',auth()->user()->id)->get();
       }
+
       $columnsDefault = [
         'id'     => true,
         'vendor_code'     => true,
@@ -306,6 +307,7 @@ class VendorController extends Controller
         }
       }
       $alldata = array();
+      
       if(isset($returndata) && !empty($returndata)){
         $i = 0;
         foreach ($returndata as $vendor) {
@@ -314,20 +316,22 @@ class VendorController extends Controller
           $alldata[$i]['name'] = $vendor->name;
           $alldata[$i]['type'] = $vendor->type == 'client' ? 'Client' : ($vendor->type == 'vendor' ? 'Vendor' : '');
           $alldata[$i]['billing_address'] = $vendor->billing_address;
-          $alldata[$i]['state'] = $vendor->state;
+          $alldata[$i]['state'] = $vendor->states->state;
           $alldata[$i]['gst_no'] = $vendor->gst_no;
           $alldata[$i]['latitute'] = $vendor->latitute;
           $alldata[$i]['longitude'] = $vendor->longitude;
           $alldata[$i]['vendor_category'] = $vendor->vendor_category;
           $alldata[$i]['created_at'] = \Carbon\Carbon::parse($vendor->created_at)->format('d-m-Y');
-          $alldata[$i]['action'] = '<div class="dropdown dropdown-inline"><a href="javascript:;" class="btn btn-sm btn-clean btn-icon" data-toggle="dropdown"><i class="la la-cog text-info"></i></a><div class="dropdown-menu dropdown-menu-sm dropdown-menu-right"><ul class="nav nav-hoverable flex-column"><li class="nav-item"><a class="nav-link" href="'.route('user.edit',$vendor->id).'"><i class="nav-icon la la-edit"></i><span class="nav-text">Update Profile</span></a></li><li class="nav-item"></li></ul></div></div><a href="javascript:;" class="btn btn-sm btn-clean btn-icon del-vendor" vendor-id="'.$vendor->id.'" title="Delete '.$vendor->type.'"><i class="la la-trash text-danger"></i></a>';
+          $alldata[$i]['action'] = '<div class="dropdown dropdown-inline"><a href="javascript:;" class="btn btn-sm btn-clean btn-icon" data-toggle="dropdown"><i class="la la-cog text-info"></i></a><div class="dropdown-menu dropdown-menu-sm dropdown-menu-right"><ul class="nav nav-hoverable flex-column"><li class="nav-item"><a class="nav-link" href="'.route('vendors.edit',$vendor->id).'"><i class="nav-icon la la-edit"></i><span class="nav-text">Update Profile</span></a></li><li class="nav-item"></li></ul></div></div><a href="javascript:;" class="btn btn-sm btn-clean btn-icon del-vendor" vendor-id="'.$vendor->id.'" title="Delete '.$vendor->type.'"><i class="la la-trash text-danger"></i></a>';
           $i++;
         }
       }
       $data = [];
+      
       foreach ( $alldata as $d ) {
         $data[] = Helper::filterArray( $d, $columnsDefault );
       }
+
       $totalRecords = $totalDisplay = count( $data );
       if ( isset( $_REQUEST['search'] ) ) {
         $data         = Helper::filterKeyword( $data, $_REQUEST['search'] );
@@ -341,7 +345,10 @@ class VendorController extends Controller
           }
         }
       }
-      if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
+
+      
+
+     /* if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
         $column = $_REQUEST['order'][0]['column'];
         $dir    = $_REQUEST['order'][0]['dir'];
         usort( $data, function ( $a, $b ) use ( $column, $dir ) {
@@ -356,7 +363,8 @@ class VendorController extends Controller
 
           return $a < $b ? true : false;
         } );
-      }
+      }*/
+
       if ( isset( $_REQUEST['length'] ) ) {
         $data = array_splice( $data, $_REQUEST['start'], $_REQUEST['length'] );
       }

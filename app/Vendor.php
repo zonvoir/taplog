@@ -26,4 +26,8 @@ class Vendor extends Model
 	{
 		return $this->belongsTo('App\User','user_id');
 	}
+	public function states()
+	{
+		return $this->hasOne('App\States', 'id', 'state');
+	}
 }
