@@ -14,6 +14,7 @@ use App\Verifiedloads;
 use App\LoadTransfer;
 use App\Divert;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\Helper;
 
 class BackLogController extends Controller
 {
@@ -128,9 +129,9 @@ class BackLogController extends Controller
 	}
 
 	public function trip_data(Request $request){
-		// $beat_plan = Beatplan::findOrFail($request->beat_id);
+		$beat_plan = Beatplan::findOrFail($request->beat_id);
 		// return view('backlog.not_delivered', compact('beat_plan'));
-		return view('v3.backlog.not-delivered-datatable');
+		return view('v3.backlog.not-delivered-datatable',compact('beat_plan'));
 	}
 
 	public function save_divert(Request $request){
@@ -246,6 +247,7 @@ class BackLogController extends Controller
 			'technician_contact'  => true,
 			'quantity'  => true,
 			'status'  => true,
+			'loading_date'  => true,
 			'loading_start'  => true,
 			'loading_finish'  => true,
 			'filling_finish'  => true,
@@ -256,7 +258,7 @@ class BackLogController extends Controller
 			'driver_contact'  => true,
 			'filler_name'  => true,
 			'filler_contact'  => true,
-			'remark'  => true,
+			'remark'  => true
 		];
 		if ( isset( $_REQUEST['columnsDef'] ) && is_array( $_REQUEST['columnsDef'] ) ) {
 			$columnsDefault = [];
@@ -269,51 +271,86 @@ class BackLogController extends Controller
 		$alldata = array();
 		if(isset($returndata) && !empty($returndata) && isset($returndata->beatplan_data)){
 			$i = 0;
-			foreach($returndata->beatplan_data as $key => $beatplan_data)
-				if($beatplan_data->trip_data()){
-					$alldata[$i]['trip_id'] = $beat_plan->uniqueTrip($beatplan_data->beatplan_id, $beatplan_data->site_id);
-				}
+			foreach($returndata->beatplan_data as $key => $beatplan_data){
 				$alldata[$i]['site_id'] = $beatplan_data->site->site_id;
 				$alldata[$i]['site_name'] = $beatplan_data->site->site_name;
 				$alldata[$i]['site_category'] = $beatplan_data->site->site_category;
 				$alldata[$i]['technician_name'] = $beatplan_data->site->technician_name;
 				$alldata[$i]['technician_contact'] = $beatplan_data->site->technician_contact1;
 				$alldata[$i]['quantity'] = $beatplan_data->quantity;
+				$alldata[$i]['trip_id'] = 'NA';
+				$alldata[$i]['loading_date'] = 'NA';
+				$alldata[$i]['loading_start'] = 'NA';
+				$alldata[$i]['loading_finish'] = 'NA';
+				$alldata[$i]['filling_finish'] = 'NA';
+				$alldata[$i]['site_in'] = 'NA';
+				$alldata[$i]['site_out'] = 'NA';
+				$alldata[$i]['vehicle_no'] = 'NA';
+				$alldata[$i]['driver_name'] = 'NA';
+				$alldata[$i]['driver_contact'] = 'NA';
+				$alldata[$i]['filler_name'] = 'NA';
+				$alldata[$i]['filler_contact'] = 'NA';
+				$alldata[$i]['remark'] = '';
 				if($beatplan_data->trip_data()){
+					$alldata[$i]['trip_id'] = $returndata->uniqueTrip($beatplan_data->beatplan_id, $beatplan_data->site_id) ?? 'NA';
+					$alldata[$i]['status'] = $beatplan_data->trip_data()->status;
+					if($beatplan_data->trip_data()->loading_start){
+						$alldata[$i]['loading_date'] = \Carbon\Carbon::parse($beatplan_data->trip_data()->loading_start)->format('d-m-y');
+						$alldata[$i]['loading_start'] =\Carbon\Carbon::parse($beatplan_data->trip_data()->loading_start)->format('H:i:s');
+					}
+					if($beatplan_data->trip_data()->loading_finish){
+						$alldata[$i]['loading_finish'] =\Carbon\Carbon::parse($beatplan_data->trip_data()->loading_finish)->format('H:i:s');
+					}
+					if($beatplan_data->trip_data()->filling_finish){
+						$alldata[$i]['filling_finish'] =\Carbon\Carbon::parse($beatplan_data->trip_data()->filling_finish)->format('d-m-y');
+					}
+					if($beatplan_data->trip_data()->site_in){
+						$alldata[$i]['site_in'] = \Carbon\Carbon::parse($beatplan_data->trip_data()->site_in)->format('H:i:s');
+					}
+					if($beatplan_data->trip_data()->site_out){
+						$alldata[$i]['site_out'] = \Carbon\Carbon::parse($beatplan_data->trip_data()->site_out)->format('H:i:s');
+					}
+					$alldata[$i]['vehicle_no'] = $beatplan_data->trip_data()->trip->vechile->vehicle_no;
+					$alldata[$i]['driver_name'] = $beatplan_data->trip_data()->trip->driver->name;
+					$alldata[$i]['driver_contact'] = $beatplan_data->trip_data()->trip->driver->contact;
+					$alldata[$i]['filler_name'] = $beatplan_data->trip_data()->trip->filler->name;
+					$alldata[$i]['filler_contact'] = $beatplan_data->trip_data()->trip->filler->contact;
+					if($beatplan_data->trip_data()->divert_from_tripdata_id){
+						if($beatplan_data->check_divert($beatplan_data->trip_data()->divert_from_tripdata_id)){
+							$alldata[$i]['remark'] .= 'Diverted From: '.$beatplan_data->site_data('from')->site_name;
+						}
+					}if($beatplan_data->trip_data()->divert_to_tripdata_id){
+						if($beatplan_data->check_divert($beatplan_data->trip_data()->divert_to_tripdata_id)){
+							$alldata[$i]['remark'] .= 'Diverted To: '.$beatplan_data->site_data('to')->site_name;
+						}
+					}if($beatplan_data->trip_data()->divert_qty){
+						if($beatplan_data->check_divert($beatplan_data->trip_data()->divert_to_tripdata_id) || $beatplan_data->check_divert($beatplan_data->trip_data()->divert_from_tripdata_id)){
+							$alldata[$i]['remark'] .= 'Qty: '.$beatplan_data->trip_data()->divert_qty;
+						}
+					}
+					$alldata[$i]['remark'] .= $beatplan_data->remarks.'<br><button data-id="'.$beatplan_data->id.'" type="button" class="btn btn-primary" onclick="addRemarkModal('.$beatplan_data->id.')">
+					Remark
+					</button>';
+				}else{
 					$alldata[$i]['status'] = $beatplan_data->status;
 				}
-				$alldata[$i]['quantity'] = $beatplan_data->quantity;
-				$alldata[$i]['quantity'] = $beatplan_data->quantity;
-				$alldata[$i]['quantity'] = $beatplan_data->quantity;
-				$alldata[$i]['quantity'] = $beatplan_data->quantity;
-				$alldata[$i]['quantity'] = $beatplan_data->quantity;
-				$status = $plan->beatplan_data->count('site_id')??0;
-				$status .= ' Sites';
-				if($plan->loaded_count()){
-					$status .= '/Loading Done('.$plan->loaded_count().')';
-				}
-				if($plan->filled_count()) {
-					$status .= '/Filling Done('.$plan->filled_count().')'; 
-				}
-				$alldata[$i]['cstatus'] = $status;
-				$alldata[$i]['action'] = null;
 				$i++;
 			}
+		}
 		$data = [];
-    // internal use; filter selected columns only from raw data
+    	// internal use; filter selected columns only from raw data
 		foreach ( $alldata as $d ) {
 			$data[] = Helper::filterArray( $d, $columnsDefault );
 		}
 
-    // count data
+    	// count data
 		$totalRecords = $totalDisplay = count( $data );
 
-    // filter by general search keyword
+    	// filter by general search keyword
 		if ( isset( $_REQUEST['search'] ) ) {
 			$data         = Helper::filterKeyword( $data, $_REQUEST['search'] );
 			$totalDisplay = count( $data );
 		}
-
 		if ( isset( $_REQUEST['columns'] ) && is_array( $_REQUEST['columns'] ) ) {
 			foreach ( $_REQUEST['columns'] as $column ) {
 				if ( isset( $column['search'] ) ) {
@@ -322,8 +359,7 @@ class BackLogController extends Controller
 				}
 			}
 		}
-
-    // sort
+    	// sort
 		if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
 			$column = $_REQUEST['order'][0]['column'];
 			$dir    = $_REQUEST['order'][0]['dir'];

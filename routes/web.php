@@ -33,7 +33,7 @@ Route::get('beat-plan-serverside', 'HomeController@serversideBeatplan')->name('b
 Route::post('create-collection-action', 'CollectionController@createCollectionAction')->name('create-collection-action')->middleware('auth');
 Route::get('edit-beat-plan/{id}', 'BeatPlanController@editBeatPlan')->name('edit-beat-plan')->middleware('auth');
 Route::post('edit-beat-plan-action', 'BeatPlanController@editBeatPlanAction')->name('edit-beat-plan-action')->middleware('auth');
-Route::get('delete-beat-plan/{id}', 'BeatPlanController@deleteBeatPlan')->name('delete-beat-plan')->middleware('auth');
+Route::post('delete-beat-plan', 'BeatPlanController@deleteBeatPlan')->middleware('auth');
 Route::get('edit-collection/{id}', 'CollectionController@editCollection')->name('edit-collection')->middleware('auth');
 Route::post('edit-collection-action', 'CollectionController@editCollectionAction')->name('edit-collection-action')->middleware('auth');
 Route::get('handbook-beat', 'BeatPlanController@Handbook')->name('handbook-beat')->middleware('auth');
@@ -44,7 +44,10 @@ Route::post('get-previous-reading', 'CollectionController@validatePreviousReadin
 Route::post('delete-plan-row', 'BeatPlanController@deleteRow')->name('delete-plan-row')->middleware('auth');
 Route::get('client-name-list', 'VendorController@show')->name('client-name-list')->middleware('auth');
 Route::get('site-name-list/{id?}', 'SiteMasterController@show')->name('site-name-list')->middleware('auth');
-Route::post('beat-plan-data-table', 'BeatPlanController@dataTablePlan')->name('beat-plan-data-table')->middleware('auth');
+// datatables 
+Route::post('beat-plan-data-table', 'BeatPlanController@dataTablePlan')->middleware('auth');
+Route::post('beat-view-table', 'BackLogController@trip_data_datatable')->middleware('auth');
+
 
 Route::group(['middleware' => 'auth'], function () {
 	Route::resource('user', 'UserController', ['except' => ['show']]);
@@ -74,6 +77,17 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('user/{id}', ['as' => 'user.profile','uses' => 'UserController@profile']);
 	Route::put('update-profile', ['as' => 'user.update-profile','uses' => 'UserController@updateProfile']);
 	Route::get('update-api-token', ['as' => 'update-api-token','uses' => 'UserController@apiToken']);
+	//new code v3
+	Route::post('index-table', 'UserController@indexDataTable');
+	Route::post('user-details-ajax', 'UserController@getUserDetailById');
+	Route::post('user-remove', 'UserController@removeUser');
+	Route::get('user-marital/{id}', ['as' => 'user.marital','uses' => 'UserController@marital']);
+	Route::post('child-remove', 'UserController@removeChild');
+	Route::get('user-contact/{id}', ['as' => 'user.contact','uses' => 'UserController@contact']);
+	Route::get('user-password/{id}', ['as' => 'user.password','uses' => 'UserController@password']);
+	Route::get('user-kyc/{id}', ['as' => 'user.kyc','uses' => 'UserController@kyc']);
+	Route::get('all-states', 'UserController@getAllStates');
+
 });
 
 Route::group(['middleware'=> ['auth','is_vendor'], 'prefix'=> 'vendor'], function(){
@@ -86,6 +100,8 @@ Route::group(['middleware'=> ['auth','is_vendor'], 'prefix'=> 'vendor'], functio
 	Route::get('vehicle-trip-data', 'VehicleMasterController@vehicle_trip_data')->name('vehicle-trip-data');
 	Route::get('vehicle-agreement', 'VehicleMasterController@get_agreement')->name('vehicle-agreement');
 	Route::post('vehicle-update-agreement', 'VehicleMasterController@vehicle_update_agreement')->name('vehicle-update-agreement');
+	// new code v3
+	Route::post('vendor-table', 'VendorController@indexDataTable');
 });
 
 Route::group(['middleware'=> 'auth', 'prefix'=> 'master'], function(){

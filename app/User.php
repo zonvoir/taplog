@@ -53,4 +53,8 @@ class User extends Authenticatable
     {
         return $this->hasOne('App\Vendor','user_id');
     }
+    public function child()
+    {
+        return $this->hasMany('App\Children');
+    }
 }

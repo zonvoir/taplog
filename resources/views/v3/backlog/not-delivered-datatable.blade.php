@@ -1,16 +1,14 @@
 @extends('v3.layouts.app', ['page' => __('Beat Plans'), 'pageSlug' => 'beatplan'])
 @section('content')
+
 <style type="text/css">
-  .table-item-wrap .table td:nth-child(1),
-  .table-item-wrap .table th:nth-child(1),
-  .table-item-wrap .table th:nth-child(3),
-  .table-item-wrap .table td:nth-child(3),
-  .table-item-wrap .table td:nth-child(7)  
+  .table-item-wrap .table thead tr th;
   {
     border-left-width: 0;
     white-space: nowrap;
   }
 </style>
+
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
   <!--begin::Subheader-->
   <div class="subheader py-2 py-lg-6 subheader-transparent" id="kt_subheader">
@@ -50,8 +48,9 @@
             <span class="card-icon">
               <i class="flaticon2-supermarket text-primary"></i>
             </span>
-            <h3 class="card-label">Beat Plan Table</h3>
+            <h3 class="card-label">Plan Data Table</h3>
           </div>
+          <div style="padding: 20px;"><span class="label label-primary label-inline font-weight-lighter mr-2">Effective Date:</span> {{$beat_plan->effective_date}} </div><div style="padding: 20px;"><span class="label label-primary label-inline font-weight-lighter mr-2">Client:</span> {{$beat_plan->client->name}}</div>
           <div class="card-toolbar">
             <!--begin::Dropdown-->
             <div class="dropdown dropdown-inline mr-2">
@@ -95,92 +94,89 @@
               </div>
               <!--end::Dropdown-->
               <!--begin::Button-->
-              <a href="{{route('create-beat-plan')}}" class="btn btn-primary font-weight-bolder">
-                <span class="svg-icon svg-icon-md">
-                  <!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
-                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                      <rect x="0" y="0" width="24" height="24" />
-                      <circle fill="#000000" cx="9" cy="15" r="6" />
-                      <path d="M8.8012943,7.00241953 C9.83837775,5.20768121 11.7781543,4 14,4 C17.3137085,4 20,6.6862915 20,10 C20,12.2218457 18.7923188,14.1616223 16.9975805,15.1987057 C16.9991904,15.1326658 17,15.0664274 17,15 C17,10.581722 13.418278,7 9,7 C8.93357256,7 8.86733422,7.00080962 8.8012943,7.00241953 Z" fill="#000000" opacity="0.3" />
-                    </g>
-                  </svg>
-                  <!--end::Svg Icon-->
-                </span>New Record</a>
-                <!--end::Button-->
-              </div>
-            </div>
-            <div class="card-body table-item-wrap">
-              <form class="mb-15">
-                <div class="row mb-8">
-                  <div class="col-lg-8 mb-lg-0 mb-6">
-                    <label>Plan Date:</label>
-                    <div class="input-daterange input-group" id="kt_datepicker">
-                      <input type="text" class="form-control datatable-input" name="start" placeholder="From" data-col-index="5" />
-                      <div class="input-group-append">
-                        <span class="input-group-text">
-                          <i class="la la-ellipsis-h"></i>
-                        </span>
-                      </div>
-                      <input type="text" class="form-control datatable-input" name="end" placeholder="To" data-col-index="5" />
-                    </div>
-                  </div>
-                  <div class="col-lg-4" style="margin-top: 25px;">
-                    <button class="btn btn-primary btn-primary--icon" id="kt_search">
-                      <span>
-                        <i class="la la-search"></i>
-                        <span>Search</span>
-                      </span>
-                    </button>&#160;&#160;
-                    <button class="btn btn-secondary btn-secondary--icon" id="kt_reset">
-                      <span>
-                        <i class="la la-close"></i>
-                        <span>Reset</span>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-                <div class="row mt-8">
-                </div>
-              </form>
-              <!--begin: Datatable-->
-              <table class="table table-bordered table-hover table-checkable" id="plan_datatable" style="margin-top: 13px !important">
-                <thead>
-                  <tr>
-                    <th>Trip Id</th>
-                    <th>Site id</th>
-                    <th>Site Name</th>
-                    <th>Site Category</th>
-                    <th>Technician Name</th>
-                    <th>Technician Contact</th>
-                    <th>Qty</th>
-                    <th>Current Status</th>
-                    <th>Loading Date</th>
-                    <th>Loading Start Time</th>
-                    <th>Loading Finish Time</th>
-                    <th>Filling Date</th>
-                    <th>Site In Time</th>
-                    <th>Site Out Time</th>
-                    <th>Vehicle No</th>
-                    <th>Driver Name</th>
-                    <th>Driver Contact</th>
-                    <th>Filler Name</th>
-                    <th>Filler Contact</th>
-                    <th>Remark</th>
-                  </tr>
-                </thead>
-              </table>
-              <!--end: Datatable-->
+
+              <!--end::Button-->
             </div>
           </div>
-          <!--end::Card-->
+          <div class="card-body table-item-wrap">
+            <input type="hidden" name="beat_id" value="{{request('beat_id')}}">
+            <!--start reange filter section -->
+            <!--end reange filter section -->
+            <!--begin: Datatable-->
+            <!-- <table class="table table-bordered table-hover table-checkable" id="plan_data_table" style="margin-top: 13px !important"> -->
+              <table class="table table-separate table-head-custom table-checkable" id="plan_data_table">
+              <thead>
+                <tr>
+                  <th>Trip Id</th>
+                  <th>Site id</th>
+                  <th>Site Name</th>
+                  <th>Site Category</th>
+                  <th>Technician Name</th>
+                  <th>Technician Contact</th>
+                  <th>Qty</th>
+                  <th>Current Status</th>
+                  <th>Loading Date</th>
+                  <th>Loading Start Time</th>
+                  <th>Loading Finish Time</th>
+                  <th>Filling Date</th>
+                  <th>Site In Time</th>
+                  <th>Site Out Time</th>
+                  <th>Vehicle No</th>
+                  <th>Driver Name</th>
+                  <th>Driver Contact</th>
+                  <th>Filler Name</th>
+                  <th>Filler Contact</th>
+                  <th>Remark</th>
+                </tr>
+              </thead>
+            </table>
+            <!--end: Datatable-->
+          </div>
         </div>
-        <!--end::Container-->
+        <!--end::Card-->
       </div>
-      <!--end::Entry-->
+      <!--end::Container-->
     </div>
-    @endsection
-    @push('js')
-    <script src="{{ asset('public/metronic/') }}/assets/js/pages/crud/datatables/data-sources/beat-plan-ajax.js"></script>
-    <!-- <script src="{{ asset('public/metronic/') }}/assets/js/pages/crud/datatables/search-options/advanced-search.js"></script> -->
-    @endpush
+    <!--end::Entry-->
+  </div>
+  <!-- Modal-->
+  <div class="modal fade" id="remarkModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Remark</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <i aria-hidden="true" class="ki ki-close"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="beat_data_id">
+          <textarea class="form-control" id="content"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary font-weight-bold" onclick="submitRemark()">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  @endsection
+  @push('js')
+  <script type="text/javascript">
+    function addRemarkModal(id) {
+      $('input[name="beat_data_id"]').val(id);
+      $('#remarkModal').modal('show');
+    }
+    function submitRemark() {
+      $('.modal-content').find('input, textarea, button, select').attr('disabled','disabled');
+      $('.modal-content').css('cursor', 'wait');
+      let url = "{{route('backlog.update_remark')}}";
+      let data = {_token: $('meta[name="csrf-token"]').attr('content'), beatplandata_id:$('input[name="beat_data_id"]').val(), remarks: $('#content').val()}
+      $.post( url,data, function( resp ) {
+        $('.modal-content').css('cursor', 'auto');
+        location.reload(true);
+      });
+    }
+  </script>
+  <script src="{{ asset('public') }}/assets/js/pages/crud/datatables/data-sources/beat-plan-data-ajax.js"></script>
+  @endpush

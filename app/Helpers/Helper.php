@@ -146,7 +146,7 @@ class Helper
 		return $data;
 	}
 	public function filterByDateRange( $data, $filter, $field ) {
-    // filter by range
+    	// filter by range
 		if ( ! empty( $range = array_filter( explode( '|', $filter ) ) ) ) {
 			$filter = $range;
 		}
@@ -155,8 +155,7 @@ class Helper
             // hardcoded date format
 				$date = date_create_from_format( 'd-m-Y', stripcslashes( $date ) );
 			}
-			//dd($date);
-        // filter by date range
+        	// filter by date range
 			$data = array_filter( $data, function ( $a ) use ( $field, $filter ) {
             // hardcoded date format
 				$current = date_create_from_format( 'd-m-Y', $a[ $field ] );
@@ -169,7 +168,6 @@ class Helper
 				return false;
 			} );
 		}
-
 		return $data;
 	}
 

@@ -9,7 +9,7 @@
 				</div>
 			</div>
 			<div class="card-body">
-               <form class="form" method="post" action="{{ route('user.store') }}">
+               <form class="form" method="post" action="{{route('clients.store')}}">
                 @csrf
                 <div class="card-body">
                     <div class="input-group{{ $errors->has('name') ? ' has-danger' : '' }}">
@@ -18,38 +18,32 @@
                                 <i class="tim-icons icon-single-02"></i>
                             </div>
                         </div>
+                        <input type="hidden" name="client_id" value="{{auth()->user()->id}}">
                         <input type="text" name="name" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" placeholder="{{ __('Name') }}" required="">
                         @include('alerts.feedback', ['field' => 'name'])
                     </div>
-                    @if(auth()->user()->type == 'admin')       
-                    <div class="input-group{{ $errors->has('type') ? ' has-danger' : '' }}">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <i class="tim-icons icon-single-02"></i>
-                            </div>
-                        </div>
-                        <select name="type" class="form-control{{ $errors->has('type') ? ' is-invalid' : '' }}" onchange="showHideUserSelection(this);" required="">
-                            <option value="subadmin" selected="">Sub Admin</option>
-                        </select>
-                        @include('alerts.feedback', ['field' => 'type'])
-                    </div>
-                    @endif
-                    <div class="input-group{{ $errors->has('user_type') ? ' has-danger' : '' }}" style="{{auth()->user()->type == 'admin' ? 'display: none;' : ''}}" id="select_user_type">
+                    <div class="input-group{{ $errors->has('user_type') ? ' has-danger' : '' }}">
                         <div class="input-group-prepend">
                             <div class="input-group-text">
                                 <i class="tim-icons icon-single-02"></i>
                             </div>
                         </div>
                         <select name="user_type" class="form-control{{ $errors->has('user_type') ? ' is-invalid' : '' }}">
-                            <option value="">Select User Type</option>
-                            <option value="mis">MIs</option>
-                            <option value="field_officer">Field officer</option>
-                            <option value="client">Client</option>
+                            <option value="">Client Type</option>
+                            <option value="mis">MIS</option>
                             <option value="technician">Technician</option>
-                            <option value="driver">Driver</option>
-                            <option value="filler">Filler</option>
                         </select>
                         @include('alerts.feedback', ['field' => 'user_type'])
+                    </div>
+                    <div class="input-group{{ $errors->has('contact') ? ' has-danger' : '' }}">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <i class="tim-icons icon-contact-85"></i>
+                            </div>
+                        </div>
+                        <input type="contact" name="contact" onblur="checkContactExistOrNot(this);" class="form-control{{ $errors->has('contact') ? ' is-invalid' : '' }}" placeholder="{{ __('Mobile Number') }}" required="">
+                        <span id="errors-contact" style="color: red; display: none"></span>
+                        @include('alerts.feedback', ['field' => 'contact'])
                     </div>
                     <div class="input-group{{ $errors->has('email') ? ' has-danger' : '' }}">
                         <div class="input-group-prepend">
@@ -78,17 +72,9 @@
                         </div>
                         <input type="password" name="password_confirmation" class="form-control" placeholder="{{ __('Confirm Password') }}">
                     </div>
-                    <div class="form-check text-left">
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox">
-                            <span class="form-check-sign"></span>
-                            {{ __('I agree to the') }}
-                            <a href="#">{{ __('terms and conditions') }}</a>.
-                        </label>
-                    </div>
                 </div>
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-primary btn-round btn-lg">{{ __('Get Started') }}</button>
+                    <button type="submit" class="btn btn-primary btn-round btn-lg">{{ __('Create') }}</button>
                 </div>
             </form>
         </div>
@@ -97,13 +83,6 @@
 </div>
 @endsection
 <script type="text/javascript">
-    function showHideUserSelection(e) {
-        if($(e).val() == 'other'){
-            $("#select_user_type").show();   
-        }else{
-            $("#select_user_type").hide();   
-        }
-    }
     function checkEmailExistOrNot(e) {
         var emaiId = $(e).val();
         $.get( "{{ route('is-exits-email') }}", { email: emaiId }, function( data ) {

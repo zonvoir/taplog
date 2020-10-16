@@ -1,4 +1,4 @@
-@extends('v3.layouts.app', ['page' => __('Beat Plans'), 'pageSlug' => 'beatplan'])
+@extends('v3.layouts.app', ['page' => __('Users'), 'pageSlug' => 'users'])
 @section('content')
 <style type="text/css">
   .table-item-wrap .table td:nth-child(1),
@@ -20,7 +20,7 @@
         <!--begin::Page Heading-->
         <div class="d-flex align-items-baseline flex-wrap mr-5">
           <!--begin::Page Title-->
-          <h5 class="text-dark font-weight-bold my-1 mr-5">Beat Plans</h5>
+          <h5 class="text-dark font-weight-bold my-1 mr-5">Users</h5>
           <!--end::Page Title-->
           <!--begin::Breadcrumb-->
           <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
@@ -48,9 +48,9 @@
         <div class="card-header">
           <div class="card-title">
             <span class="card-icon">
-              <i class="flaticon2-supermarket text-primary"></i>
+              <i class="fas fa-users text-primary"></i>
             </span>
-            <h3 class="card-label">Beat Plan Table</h3>
+            <h3 class="card-label">User's Table</h3>
           </div>
           <div class="card-toolbar">
             <!--begin::Dropdown-->
@@ -95,7 +95,7 @@
               </div>
               <!--end::Dropdown-->
               <!--begin::Button-->
-              <a href="{{route('create-beat-plan')}}" class="btn btn-primary font-weight-bolder">
+              <a href="{{route('user.create')}}" class="btn btn-primary font-weight-bolder">
                 <span class="svg-icon svg-icon-md">
                   <!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
                   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
@@ -111,54 +111,17 @@
               </div>
             </div>
             <div class="card-body table-item-wrap">
-              <form class="mb-15">
-                <div class="row mb-8">
-                  <div class="col-lg-6 mb-lg-0 mb-6">
-                    <label>Plan Date:</label>
-                    <div class="input-daterange input-group" id="kt_datepicker">
-                      <input type="text" class="form-control datatable-input" name="start" placeholder="From" data-col-index="2" />
-                      <div class="input-group-append">
-                        <span class="input-group-text">
-                          <i class="la la-ellipsis-h"></i>
-                        </span>
-                      </div>
-                      <input type="text" class="form-control datatable-input" name="end" placeholder="To" data-col-index="2" />
-                    </div>
-                  </div>
-                  <div class="col-lg-3 mb-lg-0 mb-6">
-                    <label>Zone:</label>
-                    <select class="form-control datatable-input" data-col-index="1">
-                      <option value="">Select</option>
-                    </select>
-                  </div>
-                  <div class="col-lg-3" style="margin-top: 25px;">
-                    <button class="btn btn-primary btn-primary--icon" id="kt_search">
-                      <span>
-                        <i class="la la-search"></i>
-                        <span>Search</span>
-                      </span>
-                    </button>&#160;&#160;
-                    <button class="btn btn-secondary btn-secondary--icon" id="kt_reset">
-                      <span>
-                        <i class="la la-close"></i>
-                        <span>Reset</span>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-                <div class="row mt-8">
-                </div>
-              </form>
               <!--begin: Datatable-->
-              <table class="table table-bordered table-hover table-checkable" id="plan_datatable" style="margin-top: 13px !important">
+              <table class="table table-bordered table-hover table-checkable" id="user_datatable" style="margin-top: 13px !important">
                 <thead>
                   <tr>
-                    <th>Added Date</th>
-                    <th>Zone</th>
-                    <th>Plan Date</th>
-                    <th>Client</th>
-                    <th>Mode</th>
+                    <th>S.No.</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Contact</th>
+                    <th>Type</th>
                     <th>Status</th>
+                    <th>Created At</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -172,9 +135,36 @@
       </div>
       <!--end::Entry-->
     </div>
+
+    <!-- Modal-->
+    <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">User Profile</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <i aria-hidden="true" class="ki ki-close"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div data-scroll="true" data-height="300">
+              <div class="row">
+                <div class="col-xs-12 col-md-12">
+                  <table class="table table-hover" id="modalTableUser">
+                   
+                  </table>
+                </div>
+              </div>
+            </div>
+          <!--   <div class="modal-footer">
+              <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Close</button>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
     @endsection
     @push('js')
-    <script src="{{ asset('public') }}/assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js"></script>
     <script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
-    <script src="{{ asset('public') }}/assets/js/pages/crud/datatables/data-sources/beat-plan-ajax.js"></script>
+    <script src="{{ asset('public') }}/assets/js/pages/crud/datatables/data-sources/users-ajax.js"></script>
     @endpush
