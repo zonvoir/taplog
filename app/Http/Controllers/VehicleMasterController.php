@@ -51,21 +51,21 @@ class VehicleMasterController extends Controller
         if($request->vendor_id !== null){
             $vehicle->vendor_id = $request->input('vendor_id');
         }
-        $vehicle->vehicle_no = $request->vehicle_no;
+        $vehicle->vehicle_no = strtoupper($request->vehicle_no);
         if($request->hasFile('rc_doc')){
             $vehicle->rc_doc = $request->file('rc_doc')->store('certificate');
         }
-        $vehicle->insurance_no = $request->insurance_no;
+        $vehicle->insurance_no = strtoupper($request->insurance_no);
         if($request->hasFile('insurance_doc')){
             $vehicle->insurance_doc = $request->file('insurance_doc')->store('insurance');
         }
         $vehicle->insurance_upto = $request->insurance_upto;
-        $vehicle->fitness_cert_no = $request->fitness_cert_no;
+        $vehicle->fitness_cert_no = strtoupper($request->fitness_cert_no);
         if($request->hasFile('fitness_cert_doc')){
             $vehicle->fitness_cert_doc = $request->file('fitness_cert_doc')->store('certificate');
         }
         $vehicle->fitness_cert_upto = $request->fitness_cert_upto;
-        $vehicle->permit_no = $request->permit_no;
+        $vehicle->permit_no = strtoupper($request->permit_no);
         if($request->hasFile('permit_doc')){
             $vehicle->permit_doc = $request->file('permit_doc')->store('certificate');
         }
@@ -73,7 +73,7 @@ class VehicleMasterController extends Controller
         $vehicle->created_by_id = auth()->user()->id;
         $vehicle->save();
         if($request->vendor_id !== null){
-            return redirect('vendor/vendors');
+            return redirect('vendor/vendors')->with('success','Vendor created and Vehicle added done!');
         }else{
             return back()->with('success','Vehicle added successfully!');   
         }

@@ -1,4 +1,4 @@
-@extends('v3.layouts.app', ['page' => __('Create User'), 'pageSlug' => 'users'])
+@extends('v3.layouts.app', ['page' => __('Create User'), 'pageSlug' => 'users-create'])
 @section('content')
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
     <!--begin::Subheader-->

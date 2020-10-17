@@ -44,7 +44,7 @@ class UserController extends Controller
         ]);
         $user = new User();
         $user->password = Hash::make($request->password);
-        $user->email = $request->email;
+        $user->email = strtolower($request->email);
         $user->name = $request->name;
         $user->type = $request->type;
         $user->contact = $request->contact;
@@ -58,10 +58,14 @@ class UserController extends Controller
     public function edit($id='')
     {
        $user = User::find($id);
-       return view('v3.users.personal-info',compact('user'));   
-   }
-   public function update(Request $request)
-   {
+       if($user->type == 'vendor' || $user->type == 'client'){
+        abort('403');
+    }else{
+        return view('v3.users.personal-info',compact('user'));   
+    }
+}
+public function update(Request $request)
+{
     if($request->form == 'marital'){
         $details = Userdetails::firstOrNew(['user_id'=>$request->user_id]);
         $details->child_status = $request->child_status;
@@ -94,7 +98,7 @@ class UserController extends Controller
         $details->father_name = $request->father_name;
         $details->mother_name = $request->mother_name;
         $details->marital_status = $request->married;
-         if ($request->hasFile('profile_avatar')) {
+        if ($request->hasFile('profile_avatar')) {
             $details->profile_img = $request->file('profile_avatar')->store('user');
         }
         if($details->save()){
@@ -141,7 +145,7 @@ class UserController extends Controller
         $details->bank_name = $request->bank_name;
         $details->bank_account_no = $request->bank_account_no;
         $details->bank_ifsc = $request->bank_ifsc;
-          if ($request->hasFile('adhar_doc')) {
+        if ($request->hasFile('adhar_doc')) {
             $details->adhar_doc = $request->file('adhar_doc')->store('adhar');
         }
         $details->save();
@@ -378,10 +382,14 @@ public function removeUser(Request $request)
 public function marital($id='')
 {
    $user = User::find($id);
+   if($user->type == 'vendor' || $user->type == 'client'){
+    abort('403');
+}else{
    if($user->details->marital_status == 'yes'){
     return view('v3.users.marital-info',compact('user'));   
 }else{
     abort('404');
+}
 }
 }
 public function removeChild(Request $request)
@@ -393,17 +401,29 @@ public function removeChild(Request $request)
 public function contact($id='')
 {
    $user = User::find($id);
+   if($user->type == 'vendor' || $user->type == 'client'){
+    abort('403');
+}else{
    return view('v3.users.contact-info',compact('user')); 
+}
 }
 public function password($id='')
 {
    $user = User::find($id);
+   if($user->type == 'vendor' || $user->type == 'client'){
+    abort('403');
+}else{
    return view('v3.users.password-info',compact('user')); 
+}
 }
 public function kyc($id='')
 {
    $user = User::find($id);
+   if($user->type == 'vendor' || $user->type == 'client'){
+    abort('403');
+}else{
    return view('v3.users.kyc-info',compact('user')); 
+}
 }
 public function getAllStates(Request $request)
 {

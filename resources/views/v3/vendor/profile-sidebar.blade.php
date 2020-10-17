@@ -176,7 +176,7 @@
                                                                     </g>
                                                                 </svg><!--end::Svg Icon--></span>
                                                             </span>
-                                                            <span class="navi-text font-size-lg">Contact Information</span>
+                                                            <span class="navi-text font-size-lg">Vehicle Information</span>
                                                         </a>
                                                     </div>
                                                     <div class="navi-item mb-2">
