@@ -107,7 +107,7 @@
 										<div class="col">
 											<label>Site Id:</label>
 											<input type="hidden" name="siteid" class="siteid" value="{{$site->site_id}}">
-                  							<input type="hidden" name="plandata_id" class="plandata_id" value="{{$site->id}}">
+											<input type="hidden" name="plandata_id" class="plandata_id" value="{{$site->id}}">
 											<input type="text" class="sites form-control" placeholder="Enter site id" required="" value="{{$site->site->site_id}}"/>
 											<div class="invalid-feedback"></div>
 											<div class="d-md-none mb-2"></div>
@@ -129,13 +129,11 @@
 											<input type="number" name="quantity" class="form-control" min="0" placeholder="Enter Quantity" required="" value="{{$site->quantity}}"/>
 											<div class="d-md-none mb-2"></div>
 										</div>
-										<div class="col-md-2">
-											<div class="">
-												<p>Action</p>
-												<a  href="javascript:;" data-repeater-delete="" class="btn btn-sm font-weight-bolder btn-light-danger">
-													<i class="la la-trash-o"></i> Delete
-												</a>
-											</div>
+										<div class="col">
+											<p>Action</p>
+											<a  href="javascript:;" data-repeater-delete="" class="btn btn-sm font-weight-bolder btn-light-danger">
+												<i class="la la-trash-o"></i> Delete
+											</a>
 										</div>
 									</div>
 									@endforeach
@@ -247,6 +245,7 @@
     		},
 
     		show: function () {
+    			console.log('show triggered');
     			$(this).slideDown();
     			$(this).children('div.col').find('.plandata_id').remove();
     			$(this).children('div.col').find('.siteid').val('');
@@ -268,14 +267,16 @@
     				var current = $(this).typeahead("getActive");
     				if (current) {
     					if (current.name == $(this).val()) {
-    						//console.log(siteIdExist(current.id));
+    						// console.log(siteIdExist(current.id));
     						if(!siteIdExist(current.id)){
+    							console.log('siteid does not exist');
     							$(this).siblings('.siteid').val(current.id);
     							$(this).parent('div.col').siblings('div.col').find('input.site_name').val(current.site_name);
     							$(this).parent('div.col').siblings('div.col').find('input.tech_name').val(current.technician_name);
     							$(this).removeClass( "sites form-control is-invalid" ).addClass( "sites form-control" );
     							$(this).siblings('.invalid-feedback').html('')
     						}else{
+    							console.log('siteid exist');
     							$(this).siblings('.siteid').val('');
     							$(this).removeClass( "sites form-control" ).addClass( "sites form-control is-invalid" );
     							$(this).siblings('.invalid-feedback').html('This id already added.')
@@ -295,8 +296,31 @@
     		},
 
     		hide: function (deleteElement) {
-    			$(this).slideUp(deleteElement);
-    			console.log($(this).siblings());
+    			let planDataId = $(this).closest("div").find('input.plandata_id').val();
+    			if(planDataId != undefined){
+    				Swal.fire({
+    					title: "Are you sure?",
+    					text: "You would not be able to revert this!",
+    					icon: "warning",
+    					showCancelButton: true,
+    					confirmButtonText: "Yes, delete it!"
+    				}).then(function(result) {
+    					if (result.value) {
+    						$.post( HOST_URL+"remove-sites",{'_token' : $('meta[name="csrf-token"]').attr('content'), dataId : planDataId }, function( resp ) {
+    							if(resp){
+    								Swal.fire(
+    									"Deleted!",
+    									"Site has been deleted.",
+    									"success"
+    									)
+    								$(this).slideUp(deleteElement);
+    							}
+    						});
+    					}
+    				});
+    			}else{
+    				$(this).slideUp(deleteElement);
+    			}
     		}
     	});
     }
@@ -373,9 +397,18 @@ $(document).ready(function(){
 		var current = $(this).typeahead("getActive");
 		if (current) {
 			if (current.name == $(this).val()) {
-				$(this).siblings('.siteid').val(current.id);
-				$(this).parent('div.col').siblings('div.col').find('input.site_name').val(current.site_name);
-				$(this).parent('div.col').siblings('div.col').find('input.tech_name').val(current.technician_name);
+				if(!siteIdExist(current.id)){
+					console.log('siteid does not exist 2');
+					$(this).siblings('.siteid').val(current.id);
+					$(this).parent('div.col').siblings('div.col').find('input.site_name').val(current.site_name);
+					$(this).parent('div.col').siblings('div.col').find('input.tech_name').val(current.technician_name);
+				}else{
+					console.log('siteid exist 2');
+					$(this).siblings('.siteid').val('');
+					$(this).removeClass( "sites form-control" ).addClass( "sites form-control is-invalid" );
+					$(this).siblings('.invalid-feedback').html('This id already added.')
+					$(this).val('');
+				}
 			}else{
 				$(this).siblings('.siteid').val('');
 				$(this).parent('div.col').siblings('div.col').find('input.site_name').val('');

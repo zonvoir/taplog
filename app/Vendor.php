@@ -30,4 +30,8 @@ class Vendor extends Model
 	{
 		return $this->hasOne('App\States', 'id', 'state');
 	}
+	public function kyc()
+	{
+		return $this->hasOne('App\VendorKyc','vendor_id');
+	}
 }

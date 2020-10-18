@@ -98,11 +98,11 @@
                                                 <div class="py-9">
                                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                                         <span class="font-weight-bold mr-2">Email:</span>
-                                                        <a href="mailto:test@test.com" class="text-muted text-hover-primary">{{$user->email}}</a>
+                                                        <a href="mailto:test@test.com" class="text-muted text-hover-primary">{{$user->user->email}}</a>
                                                     </div>
                                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                                         <span class="font-weight-bold mr-2">Phone:</span>
-                                                        <span class="text-muted">{{ isset($user->contact) ? '+91-'.$user->contact : 'Not Updated'}}</span>
+                                                        <span class="text-muted">{{ isset($user->user->contact) ? '+91-'.$user->user->contact : 'Not Updated'}}</span>
                                                     </div>
                                                     <div class="d-flex align-items-center justify-content-between">
                                                         <span class="font-weight-bold mr-2">Address:</span>
@@ -129,7 +129,7 @@
                                                         </a>
                                                     </div> -->
                                                     <div class="navi-item mb-2">
-                                                        <a href="{{route('user.edit',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'users-profile' ? 'active' :''}}">
+                                                        <a href="{{route('vendors.edit',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'vendor-profile' ? 'active' :''}}">
                                                             <span class="navi-icon mr-2">
                                                                 <span class="svg-icon">
                                                                     <!--begin::Svg Icon | path:assets/media/svg/icons/General/User.svg-->
@@ -146,28 +146,9 @@
                                                             <span class="navi-text font-size-lg">Personal Information</span>
                                                         </a>
                                                     </div>
-                                                    @if($user->martial_status == 'yes')
+                                                    @if($user->vendor_category == 'VEHICLE')
                                                     <div class="navi-item mb-2">
-                                                        <a href="{{route('user.marital',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'users-marital' ? 'active' :''}}">
-                                                            <span class="navi-icon mr-2">
-                                                                <span class="svg-icon">
-                                                                    <!--begin::Svg Icon | path:assets/media/svg/icons/General/User.svg-->
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
-                                                                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                                            <polygon points="0 0 24 0 24 24 0 24"></polygon>
-                                                                            <path d="M12,11 C9.790861,11 8,9.209139 8,7 C8,4.790861 9.790861,3 12,3 C14.209139,3 16,4.790861 16,7 C16,9.209139 14.209139,11 12,11 Z" fill="#000000" fill-rule="nonzero" opacity="0.3"></path>
-                                                                            <path d="M3.00065168,20.1992055 C3.38825852,15.4265159 7.26191235,13 11.9833413,13 C16.7712164,13 20.7048837,15.2931929 20.9979143,20.2 C21.0095879,20.3954741 20.9979143,21 20.2466999,21 C16.541124,21 11.0347247,21 3.72750223,21 C3.47671215,21 2.97953825,20.45918 3.00065168,20.1992055 Z" fill="#000000" fill-rule="nonzero"></path>
-                                                                        </g>
-                                                                    </svg>
-                                                                    <!--end::Svg Icon-->
-                                                                </span>
-                                                            </span>
-                                                            <span class="navi-text font-size-lg">Marital Information</span>
-                                                        </a>
-                                                    </div>
-                                                    @endif
-                                                    <div class="navi-item mb-2">
-                                                        <a href="{{route('user.contact',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'users-contact' ? 'active' :''}}">
+                                                        <a href="{{route('vendors.editVehicle',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'vendos-personal' ? 'active' :''}}">
                                                             <span class="navi-icon mr-2">
                                                                 <span class="svg-icon svg-icon-primary svg-icon-2x"><!--begin::Svg Icon | path:C:\wamp64\www\keenthemes\themes\metronic\theme\html\demo7\dist/../src/media/svg/icons\Home\Home.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
                                                                     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -179,8 +160,9 @@
                                                             <span class="navi-text font-size-lg">Vehicle Information</span>
                                                         </a>
                                                     </div>
+                                                    @endif
                                                     <div class="navi-item mb-2">
-                                                        <a href="{{route('user.kyc',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'users-kyc' ? 'active' :''}}">
+                                                        <a href="{{route('vendors.kyc',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'users-kyc' ? 'active' :''}}">
                                                             <span class="navi-icon mr-2">
                                                                 <span class="svg-icon svg-icon-primary svg-icon-2x"><!--begin::Svg Icon | path:C:\wamp64\www\keenthemes\themes\metronic\theme\html\demo7\dist/../src/media/svg/icons\Files\File.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
                                                                     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">

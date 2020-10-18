@@ -19,7 +19,7 @@
 					<!--end::Item-->
 					<!--begin::Item-->
 					<li class="nav-item mr-3">
-						<a href="#" class="nav-link py-4 px-6 {{$pageSlug == 'users' || $pageSlug == 'users-create' || $pageSlug == 'users-profile' || $pageSlug =='users-contact' || $pageSlug =='users-kyc' || $pageSlug =='users-password' || $pageSlug =='users-marital' || $pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' ? 'active' : ''}}" data-toggle="tab" data-target="#kt_header_tab_user" role="tab">User's</a>
+						<a href="#" class="nav-link py-4 px-6 {{$pageSlug == 'users' || $pageSlug == 'users-create' || $pageSlug == 'users-profile' || $pageSlug =='users-contact' || $pageSlug =='users-kyc' || $pageSlug =='users-password' || $pageSlug =='users-marital' || $pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' || $pageSlug == 'vendors-personal' || $pageSlug == 'vendors-kyc' ? 'active' : ''}}" data-toggle="tab" data-target="#kt_header_tab_user" role="tab">User's</a>
 					</li>
 					<!--end::Item-->
 					<!--begin::Item-->
@@ -280,7 +280,7 @@
 					<!--end::Item-->
 					<!--begin::Item-->
 					<li class="nav-item mr-2">
-						<a href="#" class="nav-link btn btn-clean {{$pageSlug == 'users' || $pageSlug == 'users-create' || $pageSlug == 'users-profile' || $pageSlug =='users-contact' || $pageSlug =='users-kyc' || $pageSlug =='users-password' || $pageSlug =='users-marital' || $pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' ? 'active' : ''}}" data-toggle="tab" data-target="#kt_header_tab_2" role="tab">User's</a>
+						<a href="#" class="nav-link btn btn-clean {{$pageSlug == 'users' || $pageSlug == 'users-create' || $pageSlug == 'users-profile' || $pageSlug =='users-contact' || $pageSlug =='users-kyc' || $pageSlug =='users-password' || $pageSlug =='users-marital' || $pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' || $pageSlug == 'vendors-personal' || $pageSlug == 'vendors-kyc' ? 'active' : ''}}" data-toggle="tab" data-target="#kt_header_tab_2" role="tab">User's</a>
 					</li>
 					<!--end::Item-->
 					<!--begin::Item-->
@@ -309,7 +309,7 @@
 						</div>
 						<!--end::Menu-->
 					</div>
-					<div class="tab-pane py-5 p-lg-0 {{$pageSlug == 'users' || $pageSlug == 'users-create' || $pageSlug == 'users-profile' || $pageSlug =='users-contact' || $pageSlug =='users-kyc' || $pageSlug =='users-password' || $pageSlug =='users-marital' || $pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' ? 'active' : ''}}" id="kt_header_tab_user">
+					<div class="tab-pane py-5 p-lg-0 {{$pageSlug == 'users' || $pageSlug == 'users-create' || $pageSlug == 'users-profile' || $pageSlug =='users-contact' || $pageSlug =='users-kyc' || $pageSlug =='users-password' || $pageSlug =='users-marital' || $pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' || $pageSlug == 'vendors-personal' || $pageSlug == 'vendors-kyc' ? 'active' : ''}}" id="kt_header_tab_user">
 						<!--begin::Menu-->
 						<div id="kt_header_menu" class="header-menu header-menu-mobile header-menu-layout-default">
 							<!--begin::Nav-->
@@ -320,7 +320,7 @@
 										<span class="menu-text">User Management</span>
 									</a>
 								</li>
-								<li class="menu-item {{$pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' ? 'menu-item-active' : ''}}" aria-haspopup="true">
+								<li class="menu-item {{$pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' || $pageSlug == 'vendors-personal' || $pageSlug == 'vendors-kyc' ? 'menu-item-active' : ''}}" aria-haspopup="true">
 									<a href="{{route('vendors.index')}}" class="menu-link">
 										<span class="menu-text">Vendor/Client Management</span>
 									</a>

@@ -138,10 +138,6 @@
                                     <h3 class="card-label font-weight-bolder text-dark">Marital  Information</h3>
                                     <span class="text-muted font-weight-bold font-size-sm mt-1">Update your Marital informaiton</span>
                                 </div>
-                                <div class="card-toolbar">
-                                    <button type="button" onclick="$('#marital-form').submit();" class="btn btn-success mr-2">Save Changes</button>
-                                    <button type="reset" class="btn btn-secondary">Cancel</button>
-                                </div>
                             </div>
                             <!--end::Header-->
                             <!--begin::Form-->
@@ -161,7 +157,7 @@
                                     <div class="form-group row">
                                         <div class="col-lg-6">
                                             <label>Spouse Name:</label>
-                                            <input class="form-control form-control-lg form-control-solid" type="text" name="spouse_name" value="{{isset($user->details->spouse_name) ? $user->details->spouse_name : ''}}" />
+                                            <input class="form-control form-control-lg form-control-solid" type="text" name="spouse_name" value="{{isset($user->details->spouse_name) ? $user->details->spouse_name : ''}}" placeholder="Enter spous name " />
                                         </div>
                                         <div class="col-lg-6">
                                          <label>Is Child:</label>
@@ -263,15 +259,19 @@
                             </div>
                         </div>
                         <!--end::Body-->
-                    </form>
-                    <!--end::Form-->
-                </div>
-            </div>
-            <!--end::Content-->
-        </div>
-        <!--end::Profile Personal Information-->
-    </div>
-    <!--end::Container-->
+                        <div class="card-footer">
+                           <button type="submit" class="btn btn-success mr-2">Save Changes</button>
+                           <button type="reset" class="btn btn-secondary">Cancel</button>
+                       </div>
+                   </form>
+                   <!--end::Form-->
+               </div>
+           </div>
+           <!--end::Content-->
+       </div>
+       <!--end::Profile Personal Information-->
+   </div>
+   <!--end::Container-->
 </div>
 <!--end::Entry-->
 </div>
@@ -342,7 +342,22 @@
                     if($(this).val() == 'no'){
                         $(".children").css("display","none");
                     }else{
-                        $(".children").css("display","block");
+                        if($("input[name=spouse_name]").val() !== ''){
+                            $(".children").css("display","block");
+                        }else{
+                            $("input[name=spouse_name]").focus();
+                            $(".child_status option[value='no']").attr('selected', 'selected'); 
+                            Swal.fire({
+                                title: 'Plz enter spouse name first!',
+                                showClass: {
+                                    popup: 'animate__animated animate__fadeInDown'
+                                },
+                                hideClass: {
+                                    popup: 'animate__animated animate__fadeOutUp'
+                                },
+                                icon: "error",
+                            });
+                        }
                     }
                 });
             </script>
