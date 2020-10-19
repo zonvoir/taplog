@@ -11,7 +11,7 @@ use App\TripData;
 use App\Misallottedzones;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Storage;
 class Helper
 {
 	public static function getMoblieByid($id='')
@@ -170,5 +170,9 @@ class Helper
 		}
 		return $data;
 	}
-
+	public static function removePreviousAvatar($path){
+		if(Storage::delete($path)) {
+			return true;
+		}
+	}
 }

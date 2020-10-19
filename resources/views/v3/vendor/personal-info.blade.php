@@ -1,4 +1,4 @@
-@extends('v3.layouts.app', ['page' => __('Personal Info'), 'pageSlug' => 'vendor-profile'])
+@extends('v3.layouts.app', ['page' => __('Personal Info'), 'pageSlug' => 'vendors-personal'])
 @section('content')
 <!--begin::Content-->
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -145,11 +145,10 @@
                             </div>
                             <!--end::Header-->
                             <!--begin::Form-->
-                            <form class="form" id="personal-form" action="{{route('user.update')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
+                            <form class="form" id="personal-form" action="{{route('vendors.update',$user->id)}}" method="POST" enctype="multipart/form-data" autocomplete="off">
                                 @csrf
                                 @method('put')
                                 <!--begin::Body-->
-                                <input type="hidden" name="user_id" value="{{$user->id}}">
                                 <input type="hidden" name="form" value="personal">
                                 <div class="card-body">
                                     <div class="row">
@@ -375,6 +374,11 @@ plugins: {
 jQuery(document).ready(function() {
  KTSelect2.init();
 });
+let stateid = '{{$user->states->id}}';
+let state = '{{$user->states->state}}';
+var $newOption = $("<option selected='selected'></option>").val(stateid).text(state)
+$("#kt_select2_4").append($newOption).trigger('change');
+
 $('select[name="type"]').change(function(e) {
     if($(this).val() == 'client'){
         $(".vendor-row").css('display','none');
@@ -384,5 +388,6 @@ $('select[name="type"]').change(function(e) {
         fv.enableValidator('vendor_category','notEmpty');
     }
 });
+
 </script>
 @endpush

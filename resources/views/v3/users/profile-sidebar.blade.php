@@ -146,7 +146,7 @@
                                                             <span class="navi-text font-size-lg">Personal Information</span>
                                                         </a>
                                                     </div>
-                                                    @if($user->martial_status == 'yes')
+                                                    @if(isset($user->details->marital_status) && $user->details->marital_status == 'yes')
                                                     <div class="navi-item mb-2">
                                                         <a href="{{route('user.marital',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'users-marital' ? 'active' :''}}">
                                                             <span class="navi-icon mr-2">

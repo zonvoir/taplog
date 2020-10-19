@@ -218,7 +218,7 @@ class VendorController extends Controller
           $msg = 'Email already exists';
         }
       }
-      return redirect()->back()->with('success', $msg);
+      return redirect('vendor/vendors')->with('success', $msg);
     }
 
     /**
@@ -246,28 +246,36 @@ class VendorController extends Controller
       if($request->has('row_id') && !empty($request->row_id)){
         $kyc = VendorKyc::find($request->row_id);
         $kyc->adhar_no = $request->adhar_no;
-        $kyc->mobile_no = $request->mobile_no;
         $kyc->pan_no = $request->pan_no;
-        $kyc->email_id = $request->email_id;
         $kyc->beneficiary_name = $request->beneficiary_name;
         $kyc->bank_name = $request->bank_name;
         $kyc->bank_acc_no = $request->bank_acc_no;
         $kyc->ifsc_code = $request->ifsc_code;
+        if ($request->hasFile('adhar_doc')) {
+            $kyc->adhar_doc = $request->file('adhar_doc')->store('adhar');
+        }
+        if ($request->hasFile('pan_doc')) {
+            $kyc->pan_doc = $request->file('pan_doc')->store('pan');
+        }
         $kyc->save();
-        return back()->with('success', 'KYC updated successfully!');
+        return redirect('vendor/vendors')->with('success', 'KYC updated successfully!');
       }else{
         $kyc = new VendorKyc();
         $kyc->vendor_id = $request->vendor_id;
         $kyc->adhar_no = $request->adhar_no;
-        $kyc->mobile_no = $request->mobile_no;
         $kyc->pan_no = $request->pan_no;
-        $kyc->email_id = $request->email_id;
         $kyc->beneficiary_name = $request->beneficiary_name;
         $kyc->bank_name = $request->bank_name;
         $kyc->bank_acc_no = $request->bank_acc_no;
         $kyc->ifsc_code = $request->ifsc_code;
+        if ($request->hasFile('adhar_doc')) {
+            $kyc->adhar_doc = $request->file('adhar_doc')->store('adhar');
+        }
+        if ($request->hasFile('pan_doc')) {
+            $kyc->pan_doc = $request->file('pan_doc')->store('pan');
+        }
         $kyc->save();
-        return back()->with('success', 'KYC updated successfully!');
+        return redirect('vendor/vendors')->with('success', 'KYC updated successfully!');
       }
 
     }
@@ -346,9 +354,7 @@ class VendorController extends Controller
         }
       }
 
-      
-
-     /* if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
+      if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
         $column = $_REQUEST['order'][0]['column'];
         $dir    = $_REQUEST['order'][0]['dir'];
         usort( $data, function ( $a, $b ) use ( $column, $dir ) {
@@ -363,7 +369,7 @@ class VendorController extends Controller
 
           return $a < $b ? true : false;
         } );
-      }*/
+      }
 
       if ( isset( $_REQUEST['length'] ) ) {
         $data = array_splice( $data, $_REQUEST['start'], $_REQUEST['length'] );
@@ -391,5 +397,13 @@ class VendorController extends Controller
       header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
       header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
       return json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
+    public function kyc($id){
+      if(auth()->user()->type == 'subadmin'){
+        $user = Vendor::find($id);
+        return view('v3.vendor.kyc-info',compact('user'));
+      }else{
+        abort('403');
+      }
     }
   }

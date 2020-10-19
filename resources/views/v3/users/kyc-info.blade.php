@@ -177,44 +177,67 @@
                              </div>
                              <div class="form-group row">
                                 <div class="col-lg-6">
-                                    <label>Universal Account Number </label>
-                                    <input class="form-control form-control-lg form-control-solid" type="text" name="uan_no" value="{{isset($user->details->uan_no) ? $user->uan_no : ''}}" />
+                                    <label>Pan Number <span class="text-danger">*</span></label>
+                                    <input class="form-control form-control-lg form-control-solid" type="text" name="pan_no" value="{{isset($user->details->pan_no) ? $user->details->pan_no : ''}}" />
                                 </div>
                                 <div class="col-lg-6">
-                                   <label>ESIC Number </label>
-                                   <input class="form-control form-control-lg form-control-solid" type="text" name="esic_no" value="{{isset($user->details) ? $user->details->esic_no : ''}}" />
-                               </div>
-                           </div>
-                           <div class="form-group row">
+                                   <label>Pan proof</label>
+                                   @if(isset($user->details->pan_doc))
+                                   <div class="row">
+                                       <div class="custom-file">
+                                         <input type="file" class="custom-file-input" name="pan_doc" id="customFile"/>
+                                         <label class="custom-file-label" for="customFile">Choose file</label>
+                                     </div>
+                                     <a href="{{isset($user->details->pan_doc) ? asset('public/').'/'.$user->details->pan_doc : ''}}" /download><span><i></i></span>File</a>
+                                 </div>
+                                 @else
+                                 <div class="custom-file">
+                                     <input type="file" class="custom-file-input" name="pan_doc" id="customFile"/>
+                                     <label class="custom-file-label" for="customFile">Choose file</label>
+                                 </div>
+                                 @endif
+                             </div>
+                         </div>
+                         <div class="form-group row">
                             <div class="col-lg-6">
-                                <label>Bank Name</label>
-                                <input class="form-control form-control-lg form-control-solid" type="text" name="bank_name" value="{{isset($user->details->bank_name) ? $user->uan_no : ''}}" />
+                                <label>Universal Account Number </label>
+                                <input class="form-control form-control-lg form-control-solid" type="text" name="uan_no" value="{{isset($user->details->uan_no) ? $user->uan_no : ''}}" />
                             </div>
                             <div class="col-lg-6">
-                               <label>A/C Number </label>
-                               <input class="form-control form-control-lg form-control-solid" type="text" name="bank_account_no" value="{{isset($user->details) ? $user->details->bank_account_no : ''}}" />
+                               <label>ESIC Number </label>
+                               <input class="form-control form-control-lg form-control-solid" type="text" name="esic_no" value="{{isset($user->details) ? $user->details->esic_no : ''}}" />
                            </div>
                        </div>
                        <div class="form-group row">
                         <div class="col-lg-6">
-                            <label>Bank IFSC</label>
-                            <input class="form-control form-control-lg form-control-solid" type="text" name="bank_ifsc" value="{{isset($user->details->bank_ifsc) ? $user->bank_ifsc : ''}}" />
+                            <label>Bank Name</label>
+                            <input class="form-control form-control-lg form-control-solid" type="text" name="bank_name" value="{{isset($user->details->bank_name) ? $user->uan_no : ''}}" />
                         </div>
                         <div class="col-lg-6">
+                           <label>A/C Number </label>
+                           <input class="form-control form-control-lg form-control-solid" type="text" name="bank_account_no" value="{{isset($user->details) ? $user->details->bank_account_no : ''}}" />
+                       </div>
+                   </div>
+                   <div class="form-group row">
+                    <div class="col-lg-6">
+                        <label>Bank IFSC</label>
+                        <input class="form-control form-control-lg form-control-solid" type="text" name="bank_ifsc" value="{{isset($user->details->bank_ifsc) ? $user->bank_ifsc : ''}}" />
+                    </div>
+                    <div class="col-lg-6">
 
-                        </div>
                     </div>
                 </div>
-                <!--end::Body-->
-                <div class="card-footer">
-                   <button type="submit" class="btn btn-success mr-2">Save Changes</button>
-                   <button type="reset" class="btn btn-secondary">Cancel</button>
-               </div>
-           </form>
-           <!--end::Form-->
-       </div>
+            </div>
+            <!--end::Body-->
+            <div class="card-footer">
+               <button type="submit" class="btn btn-success mr-2">Save Changes</button>
+               <button type="reset" class="btn btn-secondary">Cancel</button>
+           </div>
+       </form>
+       <!--end::Form-->
    </div>
-   <!--end::Content-->
+</div>
+<!--end::Content-->
 </div>
 <!--end::Profile Personal Information-->
 </div>
@@ -236,7 +259,7 @@
                   message: 'Adhar number is required'
               },
               stringLength: {
-                max: 12,
+                min: 12,
                 message: 'The Adhar number must have 12 digits!'
             }
         }

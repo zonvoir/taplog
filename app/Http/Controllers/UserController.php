@@ -99,6 +99,9 @@ public function update(Request $request)
         $details->mother_name = $request->mother_name;
         $details->marital_status = $request->married;
         if ($request->hasFile('profile_avatar')) {
+            if (isset($details->profile_img) && !empty($details->profile_img)) {
+                Helper::removePreviousAvatar($details->profile_img);
+            }
             $details->profile_img = $request->file('profile_avatar')->store('user');
         }
         if($details->save()){
@@ -140,6 +143,7 @@ public function update(Request $request)
     }elseif ($request->form == 'kyc') {
         $details = Userdetails::firstOrNew(['user_id'=>$request->user_id]);
         $details->adhar_no = $request->adhar_no;
+        $details->pan_no = $request->pan_no;
         $details->uan_no = $request->uan_no;
         $details->esic_no = $request->esic_no;
         $details->bank_name = $request->bank_name;
