@@ -56,7 +56,7 @@ class TripController extends Controller
 					}
 				});
 				
-				$trips = $query->orderBy('id','DESC')->paginate(10);
+				//$trips = $query->orderBy('id','DESC')->paginate(10);
 			}else{
 				$query = Trips::whereHas('beat_plan', function($q){
 					$q->where(['added_by' => auth()->user()->id]);
@@ -588,11 +588,12 @@ class TripController extends Controller
 
 	public function load_datatable(Request $request){
 		$query 	= 	Trips::select('trips.*')
-			->join('verified_loads',function($join){
-				$join->on('trips.id',"=",'verified_loads.auto_trip_id');
-			})
-			->orderBy('id', 'DESC')
-			->groupBy('verified_loads.auto_trip_id');
+					->with(['vechile','filler','driver'])
+					->join('verified_loads',function($join){
+						$join->on('trips.id',"=",'verified_loads.auto_trip_id');
+					})
+					//->orderBy('effective_date', 'DESC')
+					->groupBy('verified_loads.auto_trip_id');
 
 		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
 			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
@@ -611,8 +612,8 @@ class TripController extends Controller
 		->addColumn('filler_name', function(Trips $data) {
 			return $data->filler->name ?? '';
 		})
-		->orderColumn('id', function ($query, $order) {
-			$query->orderBy('id', $order);
+		->orderColumn('effective_date', function ($query, $order) {
+			$query->orderBy('effective_date', $order);
 		})
 		->rawColumns(['trip_id'])->make(true);
 
@@ -620,11 +621,10 @@ class TripController extends Controller
 
 	public function load_datatable_by_trip_id(Request $request){
 
-		// return dd($request->search['value']);
 		if(auth()->user()->type == 'subadmin'){
-			$data = Verifiedloads::select('verified_loads.*')->with(['site','trip' => function ($query) {
+			$data = Verifiedloads::select('verified_loads.*')->with(['site','trip.driver','trip.filler','trip' => function ($query) {
 				$query->where('added_by', auth()->user()->id);
-			}, 'trip.driver','trip.filler'])->where('auto_trip_id',$request->trip_id)
+			}])->where('auto_trip_id',$request->trip_id)
 			->join('trips', function($q){
 				$q->on('trips.id','=','verified_loads.auto_trip_id');
 			})
@@ -637,7 +637,7 @@ class TripController extends Controller
 			
 
 		}elseif (auth()->user()->type == 'driver') {
-			$data = Verifiedloads::with(['trip' => function ($query) {
+			$data = Verifiedloads::with(['site','trip.driver','trip.filler','trip' => function ($query) {
 				$query->where('driver_id', auth()->user()->id);
 			}])
 			->where('auto_trip_id',$request->trip_id)
@@ -654,7 +654,7 @@ class TripController extends Controller
 			
 		}elseif(auth()->user()->type == 'filler'){
 
-			$data = Verifiedloads::with(['site','trip' => function ($query) {
+			$data = Verifiedloads::with(['site','trip.driver','trip.filler','trip' => function ($query) {
 				$query->where('filler_id', auth()->user()->id);
 			}])
 			->where('auto_trip_id',$request->trip_id)
@@ -669,6 +669,10 @@ class TripController extends Controller
 			$sites 	   = Sitemaster::whereNotIn('id',$site_ids)->orderBy('site_name','ASC')->get();
 
 			
+		}
+
+		if($request->status){
+			$data->where('verified_loads.status', $request->status);
 		}
 
 		return \DataTables::of($data)
@@ -700,6 +704,14 @@ class TripController extends Controller
 			return $site->trip->filler->name ?? '';
 		})
 		->addColumn('status', function(Verifiedloads $site) {
+			$class =  'info';
+			if($site->status == 'loaded'){
+				$class =  'warning';
+			}
+			if($site->status == 'filled'){
+				$class =  'success';
+			}
+			return '<span class="label label-lg font-weight-bold label-light-'.$class.' label-inline">'.ucfirst($site->status).'</span>';
 			return $site->status;
 		})
 		->addColumn('action', function(Verifiedloads $site) {
@@ -711,7 +723,10 @@ class TripController extends Controller
 
 			return $html;
 		})
-		->rawColumns(['action'])->make(true);
+		->orderColumn('status', function ($query, $order) {
+			$query->orderBy('status', $order);
+		})
+		->rawColumns(['action', 'status'])->make(true);
 
 	}
 	public function allLoadData(){

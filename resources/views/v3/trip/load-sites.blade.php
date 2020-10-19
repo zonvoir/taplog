@@ -399,7 +399,6 @@
 @push('js')
 <script src="{{ asset('public/assets/js/moment.min.js') }}"></script>
 <script src="{{ asset('public/assets/js/datetimepicker.min.js') }}"></script>
-<script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
 <script>
 	$(function() {
 		$('.datetimepicker').datetimepicker({

@@ -1,47 +1,37 @@
-@extends('v3.layouts.app', ['page' => __('Trips'), 'pageSlug' => 'trips'])
+@extends('v3.layouts.app', ['page' => __('Backlogs'), 'pageSlug' => 'unloaded'])
 @section('content')
-<style type="text/css">
-  .table-item-wrap .table td:nth-child(1),
-  .table-item-wrap .table th:nth-child(1),
-  .table-item-wrap .table th:nth-child(3),
-  .table-item-wrap .table td:nth-child(3),
-  .table-item-wrap .table td:nth-child(7)  
-  {
-    border-left-width: 0;
-    white-space: nowrap;
-  }
-</style>
+
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
   <!--begin::Subheader-->
-  <div class="subheader py-2 py-lg-6 subheader-transparent" id="kt_subheader">
-    <div class="container d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
-      <!--begin::Info-->
-      <div class="d-flex align-items-center flex-wrap mr-1">
-        <!--begin::Page Heading-->
-        <div class="d-flex align-items-baseline flex-wrap mr-5">
-          <!--begin::Page Title-->
-          <h5 class="text-dark font-weight-bold my-1 mr-5">Trips</h5>
-          <!--end::Page Title-->
-          <!--begin::Breadcrumb-->
-          <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
-            <li class="breadcrumb-item">
-              <a href="{{route('home')}}" class="text-muted">Home</a>
-            </li>
-          </ul>
-          <!--end::Breadcrumb-->
-        </div>
-        <!--end::Page Heading-->
-      </div>
-      <!--end::Info-->
-      <!--begin::Toolbar-->
-      
-      <!--end::Toolbar-->
-    </div>
-  </div>
+	<div class="subheader py-2 py-lg-6 subheader-transparent" id="kt_subheader">
+		<div class="container d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+		<!--begin::Info-->
+		<div class="d-flex align-items-center flex-wrap mr-1">
+		<!--begin::Page Heading-->
+		<div class="d-flex align-items-baseline flex-wrap mr-5">
+		  <!--begin::Page Title-->
+		  <h5 class="text-dark font-weight-bold my-1 mr-5">Trips</h5>
+		  <!--end::Page Title-->
+		  <!--begin::Breadcrumb-->
+		  <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
+		    <li class="breadcrumb-item">
+		      <a href="{{route('home')}}" class="text-muted">Home</a>
+		    </li>
+		  </ul>
+		  <!--end::Breadcrumb-->
+		</div>
+		<!--end::Page Heading-->
+		</div>
+		<!--end::Info-->
+		<!--begin::Toolbar-->
+
+		<!--end::Toolbar-->
+		</div>
+	</div>
   <!--end::Subheader-->
   <!--begin::Entry-->
 
-  <div class="d-flex flex-column-fluid">
+ 	<div class="d-flex flex-column-fluid">
     <!--begin::Container-->
     <div class="container">
     @include('v3.layouts.navbars.flash-message')
@@ -52,7 +42,7 @@
             <span class="card-icon">
               <i class="flaticon2-supermarket text-primary"></i>
             </span>
-            <h3 class="card-label">Trips</h3>
+            <h3 class="card-label">Backlog</h3>
           </div>
           <div class="card-toolbar">
             <!--begin::Dropdown-->
@@ -146,17 +136,26 @@
                 </div>
               </form>
               <!--begin: Datatable-->
-              <table class="table table-bordered table-hover table-checkable" id="trip_datatable" style="margin-top: 13px !important">
+              <table class="table table-bordered table-hover table-checkable" id="unloaded_datatable" style="margin-top: 13px !important">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Trip ID</th>
-                    <th>Effective Date</th>
-                    <th>VEHICLE</th>
-                    <th>DRIVER NAME	</th>
-                    <th>FILLER NAME	</th>
-                    <th>Action</th>
-                  </tr>
+					<th>
+					  Effective Date
+					</th>
+					<th>
+					 Mp/Zone
+					</th>
+					 <th>
+					  Client Name
+					</th>
+					<th>
+					  Mode
+					</th>
+					<th>
+					  Status
+					</th>
+					<th></th>
+				  </tr>
                 </thead>
               </table>
               <!--end: Datatable-->
@@ -167,10 +166,115 @@
         <!--end::Container-->
       </div>
       <!--end::Entry-->
-    </div>
+</div>
+
 @endsection
+
 @push('js')
-<script src="{{ asset('public') }}/assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js"></script>
+
 <script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
-<script src="{{ asset('public') }}/assets/js/pages/crud/datatables/data-sources/trip-ajax.js"></script>
+
+<script type="text/javascript">
+	'use strict';
+	var PLANDatatablesDataSourceAjaxServer = function() {
+	
+		var initTable1 = function() {
+			var table = $('#unloaded_datatable').DataTable({
+				responsive: true,
+				searchDelay: 500,
+				processing: true,
+				serverSide: true,
+				buttons: [
+				{ 
+					extend: 'csv',
+					exportOptions: {
+						columns: 'th:not(:last-child)'
+					}
+				},
+				{ 
+					extend: 'pdf',
+					exportOptions: {
+						columns: 'th:not(:last-child)'
+					},
+					orientation: 'landscape',
+	        		pageSize: 'A2'
+				}
+				],
+				order: [ [1, 'desc'] ],
+				
+				ajax: {
+					url: '{{ route('backlog.unloaded_datatable') }}',
+					type: 'POST',
+					data: function(data){
+						//var trip_id =  "{{ request('trip_id') }}";
+						//data.trip_id = trip_id;
+						data._token = csrf_token;
+					},
+				},
+				
+				columns: [
+					{data: 'effective_date'},
+					{data: 'mp_zone'},
+					{data: 'client_id'},
+					{data: 'mode'},
+					{data: 'status'},
+					{data: 'action', orderable: false, searchable: false},
+				],
+			});
+			
+			$('#kt_search').on('click', function(e) {
+				e.preventDefault();
+				table.draw();
+			});
+
+			$('#kt_reset').on('click', function(e) {
+				e.preventDefault();
+				$('.datatable-input').each(function() {
+					$(this).val('');
+					table.column($(this).data('col-index')).search('', false, false);
+				});
+				table.table().draw();
+			});
+
+			$('#kt_datepicker').datepicker({
+				format: 'dd-mm-yyyy',
+				todayHighlight: true,
+				templates: {
+					leftArrow: '<i class="la la-angle-left"></i>',
+					rightArrow: '<i class="la la-angle-right"></i>',
+				},
+				autoclose: true
+			});
+
+			$("#exportBeattoPdf").on("click", function() {
+				table.button( '.buttons-pdf' ).trigger();
+			});
+
+			$("#exportBeattoExcel").on("click", function() {
+				table.button( '.buttons-csv' ).trigger();
+			});
+
+			
+			
+		};
+
+		return {
+
+			//main function to initiate the module
+			init: function() {
+				initTable1();
+			},
+
+		};
+
+	}();
+
+
+	$(document).ready(function(){
+		PLANDatatablesDataSourceAjaxServer.init();
+	});
+
+	
+</script>
+
 @endpush

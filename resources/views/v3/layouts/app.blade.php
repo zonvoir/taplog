@@ -33,7 +33,7 @@
 		<!--begin::Header Mobile-->
 		<div id="kt_header_mobile" class="header-mobile bg-primary header-mobile-fixed">
 			<!--begin::Logo-->
-			<a href="index.html">
+			<a href="{{ route('home') }}">
 				<img alt="Logo" src="{{ asset('public') }}/assets/media/logos/Logo.png" class="max-h-60px" />
 			</a>
 			<!--end::Logo-->

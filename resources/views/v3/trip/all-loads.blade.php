@@ -182,7 +182,7 @@
 				}
 			}
 			],
-			order: [ [0, 'desc'] ],
+			order: [ [1, 'desc'] ],
 			/*dom: 'Bfrtip',*/
 			/*buttons: [*/
 			/*'copy', 'csv', 'excel', 'pdf', 'print',*/
