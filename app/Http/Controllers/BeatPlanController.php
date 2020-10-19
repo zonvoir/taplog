@@ -29,10 +29,10 @@ class BeatPlanController extends Controller
                //dd($import->getRowCount());
             if($import->getRowCount()){
                 // return back()->with('success','Total '.$import->getRowCount().' rows imported successfully!');
-                return response()->json(['status' => 'ok!', 'message' => 'file imported!']);
+                return response()->json(['status' => '1', 'message' => 'file imported!']);
             }else{
                 // return back()->with('error','Either site_id, mpzone_name or client_name does not existed in master database.!');       
-                return response()->json(['status' => 'ok!', 'message' => 'Either site_id, mpzone_name or client_name does not existed in master database.!']);
+                return response()->json(['status' => '0', 'message' => 'Either Zone or Client Name does not exist in master database !']);
             }
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();

@@ -92,9 +92,8 @@ Route::group(['middleware' => 'auth'], function () {
 
 Route::group(['middleware'=> ['auth','is_vendor'], 'prefix'=> 'vendor'], function(){
 	Route::resource('vendors', 'VendorController');
-	Route::get('vendor-profile', 'VendorController@profile')->name('vendor-profile');
 	Route::get('editVehicle/{id}', ['as' => 'vendors.editVehicle','uses' => 'VendorController@redirectToEditVehicle']);
-	Route::put('update-kyc', ['as' => 'update-kyc', 'uses' => 'VendorController@updateKyc']);
+	Route::put('update-kyc', ['as' => 'vendors.updateKyc', 'uses' => 'VendorController@updateKyc']);
 	Route::get('vehicle-status/{vehicle_id}', 'VehicleMasterController@vehicle_status')->name('vehicle-status');
 	Route::get('vehicle-run-data/{vehicle_id}', 'VehicleMasterController@vehicle_run_data')->name('vehicle-run-data');
 	Route::get('vehicle-trip-data', 'VehicleMasterController@vehicle_trip_data')->name('vehicle-trip-data');
@@ -102,6 +101,7 @@ Route::group(['middleware'=> ['auth','is_vendor'], 'prefix'=> 'vendor'], functio
 	Route::post('vehicle-update-agreement', 'VehicleMasterController@vehicle_update_agreement')->name('vehicle-update-agreement');
 	// new code v3
 	Route::post('vendor-table', 'VendorController@indexDataTable');
+	Route::get('kyc/{id}', ['as' => 'vendors.kyc', 'uses' => 'VendorController@kyc']);
 });
 
 Route::group(['middleware'=> 'auth', 'prefix'=> 'master'], function(){

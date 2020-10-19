@@ -214,8 +214,8 @@
 								<div class="dropzone dropzone-default dz-clickable" id="beat-csv-upload">
 									<div class="dropzone-msg dz-message needsclick">
 										<h3 class="dropzone-msg-title">Drop files here or click to upload.</h3>
-										<span class="dropzone-msg-desc">This is just a demo dropzone. Selected files are
-											<strong>not</strong>actually uploaded.</span>
+										<span class="dropzone-msg-desc">Import here csv file of
+											<strong><a href="{{asset('public/importFormats/beatplan-sample.csv')}}" /download>this</a></strong> format only.</span>
 										</div>
 									</div>
 								</div>

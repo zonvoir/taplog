@@ -1,4 +1,4 @@
-@extends('v3.layouts.app', ['page' => __('Personal Info'), 'pageSlug' => 'users'])
+@extends('v3.layouts.app', ['page' => __('Personal Info'), 'pageSlug' => 'users-profile'])
 @section('content')
 <!--begin::Content-->
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -124,7 +124,7 @@
                     <!--begin::Aside-->
                     <div class="flex-row-auto offcanvas-mobile w-250px w-xxl-350px" id="kt_profile_aside">
                         <!--begin::Profile Card-->
-                        @include('v3.users.profile-sidebar')
+                        @include('v3.users.profile-sidebar',['pageSlug' => 'users-profile'])
                         <!--end::Profile Card-->
                     </div>
                     <!--end::Aside-->
@@ -163,7 +163,7 @@
                                         <div class="col-lg-9 col-xl-6">
                                             <div class="image-input image-input-outline" id="kt_profile_avatar" style="background-image: url({{asset('public/assets/media/users/')}}/blank.png)">
                                                 @if(isset($user->details->profile_img))
-                                                <div class="image-input-wrapper" style="background-image: url({{asset('public')}}/{{$user->details->profile_img}})"></div>
+                                                <div class="image-input-wrapper" style="background-image: url({{storage_path('app/')}}/{{$user->details->profile_img}})"></div>
                                                 @else
                                                 <div class="image-input-wrapper" style="background-image: url({{asset('public/assets/media/users/')}}/blank.png)">
                                                 </div>

@@ -1,11 +1,11 @@
-@extends('v3.layouts.app', ['page' => __('Beat Plans'), 'pageSlug' => 'beatplan'])
+@extends('v3.layouts.app', ['page' => __('all Vendors/Clients'), 'pageSlug' => 'vendors'])
 @section('content')
 <style type="text/css">
-  .table-item-wrap .table td:nth-child(1),
-  .table-item-wrap .table th:nth-child(1),
-  .table-item-wrap .table th:nth-child(3),
-  .table-item-wrap .table td:nth-child(3),
-  .table-item-wrap .table td:nth-child(7)  
+  .table-item-wrap .table td:nth-child(2),
+  .table-item-wrap .table th:nth-child(2),
+  .table-item-wrap .table th:nth-child(4),
+  .table-item-wrap .table td:nth-child(4),
+  .table-item-wrap .table td:nth-child(10)  
   {
     border-left-width: 0;
     white-space: nowrap;
@@ -43,6 +43,7 @@
   <div class="d-flex flex-column-fluid">
     <!--begin::Container-->
     <div class="container">
+      @include('v3.layouts.navbars.flash-message')
       <!--begin::Card-->
       <div class="card card-custom">
         <div class="card-header">

@@ -1,4 +1,4 @@
-@extends('v3.layouts.app', ['page' => __('Edit User KYC'), 'pageSlug' => 'users-kyc'])
+@extends('v3.layouts.app', ['page' => __('Personal Info'), 'pageSlug' => 'vendors-personal'])
 @section('content')
 <!--begin::Content-->
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -15,7 +15,7 @@
                 <!--begin::Page Heading-->
                 <div class="d-flex align-items-baseline flex-wrap mr-5">
                     <!--begin::Page Title-->
-                    <h5 class="text-dark font-weight-bold my-1 mr-5">Profile 1</h5>
+                    <h5 class="text-dark font-weight-bold my-1 mr-5">Details</h5>
                     <!--end::Page Title-->
                     <!--begin::Breadcrumb-->
                     <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
@@ -124,7 +124,7 @@
                     <!--begin::Aside-->
                     <div class="flex-row-auto offcanvas-mobile w-250px w-xxl-350px" id="kt_profile_aside">
                         <!--begin::Profile Card-->
-                        @include('v3.users.profile-sidebar',['pageSlug' => 'users-kyc'])
+                        @include('v3.vendor.profile-sidebar',['pageSlug' => 'vendor-profile'])
                         <!--end::Profile Card-->
                     </div>
                     <!--end::Aside-->
@@ -135,8 +135,8 @@
                             <!--begin::Header-->
                             <div class="card-header py-3">
                                 <div class="card-title align-items-start flex-column">
-                                    <h3 class="card-label font-weight-bolder text-dark">KYC Information</h3>
-                                    <span class="text-muted font-weight-bold font-size-sm mt-1">Update your KYC informaiton</span>
+                                    <h3 class="card-label font-weight-bolder text-dark">Personal Information</h3>
+                                    <span class="text-muted font-weight-bold font-size-sm mt-1">Update your personal informaiton</span>
                                 </div>
                                 <!-- <div class="card-toolbar">
                                     <button type="button" class="btn btn-success mr-2">Save Changes</button>
@@ -145,99 +145,100 @@
                             </div>
                             <!--end::Header-->
                             <!--begin::Form-->
-                            <form class="form" id="kyc-form" action="{{route('user.update')}}" method="POST" autocomplete="off">
+                            <form class="form" id="personal-form" action="{{route('vendors.update',$user->id)}}" method="POST" enctype="multipart/form-data" autocomplete="off">
                                 @csrf
                                 @method('put')
                                 <!--begin::Body-->
-                                <input type="hidden" name="user_id" value="{{$user->id}}">
-                                <input type="hidden" name="form" value="kyc">
+                                <input type="hidden" name="form" value="personal">
                                 <div class="card-body">
-                                   <div class="form-group row">
+                                    <div class="row">
+                                        <label class="col-xl-3"></label>
+                                        <div class="col-lg-9 col-xl-6">
+                                            <h5 class="font-weight-bold mb-6">{{ucwords($user->type) }} Info</h5>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-lg-6">
+                                            <label>Name <span class="text-danger">*</span></label>
+                                            <input class="form-control form-control-lg form-control-solid" type="text" name="name" value="{{$user->name}}" />
+                                        </div>
+                                        <div class="col-lg-6">
+                                          <label>Type(Designation) <span class="text-danger">*</span></label>
+                                          <select class="form-control form-control-lg form-control-solid" name="type">
+                                            @if(isset($user->type))
+                                            <option value="vendor" {{$user->type == 'vendor' ? 'selected' : ''}}>Vendor</option>
+                                            <option value="client" {{$user->type == 'client' ? 'selected' : ''}}>Client</option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <div class="col-lg-6">
-                                        <label>Adhar Number <span class="text-danger">*</span></label>
-                                        <input class="form-control form-control-lg form-control-solid" type="text" name="adhar_no" value="{{isset($user->details->adhar_no) ? $user->details->adhar_no : ''}}" />
+                                        <label>{{ucwords($user->type) }} Code <span class="text-danger">*</span></label>
+                                        <input class="form-control form-control-lg form-control-solid" type="text" name="vendor_code" value="{{$user->vendor_code}}" />
                                     </div>
                                     <div class="col-lg-6">
-                                       <label>Adhar proof</label>
-                                       @if(isset($user->details->adhar_doc))
-                                       <div class="row">
-                                           <div class="custom-file">
-                                             <input type="file" class="custom-file-input" name="adhar_doc" id="customFile"/>
-                                             <label class="custom-file-label" for="customFile">Choose file</label>
-                                         </div>
-                                         <a href="{{isset($user->details->adhar_doc) ? asset('public/').'/'.$user->details->adhar_doc : ''}}" /download><span><i></i></span>File</a>
-                                     </div>
-                                     @else
-                                     <div class="custom-file">
-                                         <input type="file" class="custom-file-input" name="adhar_doc" id="customFile"/>
-                                         <label class="custom-file-label" for="customFile">Choose file</label>
-                                     </div>
-                                     @endif
-                                 </div>
-                             </div>
-                             <div class="form-group row">
+                                      <label>GST No. <span class="text-danger">*</span></label>
+                                      <input class="form-control form-control-lg form-control-solid" type="text" name="gst_no" value="{{$user->gst_no}}" />
+                                  </div>
+                              </div>
+                              <div class="form-group row">
                                 <div class="col-lg-6">
-                                    <label>Pan Number <span class="text-danger">*</span></label>
-                                    <input class="form-control form-control-lg form-control-solid" type="text" name="pan_no" value="{{isset($user->details->pan_no) ? $user->details->pan_no : ''}}" />
+                                    <label>Email <span class="text-danger">*</span></label>
+                                    <input class="form-control form-control-lg form-control-solid" type="text" name="email" value="{{$user->user->email}}" />
                                 </div>
                                 <div class="col-lg-6">
-                                   <label>Pan proof</label>
-                                   @if(isset($user->details->pan_doc))
-                                   <div class="row">
-                                       <div class="custom-file">
-                                         <input type="file" class="custom-file-input" name="pan_doc" id="customFile"/>
-                                         <label class="custom-file-label" for="customFile">Choose file</label>
-                                     </div>
-                                     <a href="{{isset($user->details->pan_doc) ? asset('public/').'/'.$user->details->pan_doc : ''}}" /download><span><i></i></span>File</a>
-                                 </div>
-                                 @else
-                                 <div class="custom-file">
-                                     <input type="file" class="custom-file-input" name="pan_doc" id="customFile"/>
-                                     <label class="custom-file-label" for="customFile">Choose file</label>
-                                 </div>
-                                 @endif
-                             </div>
-                         </div>
-                         <div class="form-group row">
+                                    <label>Contact <span class="text-danger">*</span></label>
+                                    <input class="form-control form-control-lg form-control-solid" type="text" name="contact" value="{{$user->user->contact}}" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                              <div class="col-lg-6">
+                                  <label>State <span class="text-danger">*</span></label>
+                                  <select class="form-control form-control-lg form-control-solid select2" id="kt_select2_4" name="state">
+                                  </select>
+                              </div>
+                              <div class="col-lg-6">
+                                <label>Billing Address <span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-lg form-control-solid" name="billing_address">{{$user->billing_address}}</textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row vendor-row" style="{{$user->type == 'client' ? 'display: none;' : ''}}">
                             <div class="col-lg-6">
-                                <label>Universal Account Number </label>
-                                <input class="form-control form-control-lg form-control-solid" type="text" name="uan_no" value="{{isset($user->details->uan_no) ? $user->uan_no : ''}}" />
+                                <label>Latitude</label>
+                                <input class="form-control form-control-lg form-control-solid" type="text" name="latitude" value="{{$user->latitude}}" placeholder="enter latitude"/>
                             </div>
                             <div class="col-lg-6">
-                               <label>ESIC Number </label>
-                               <input class="form-control form-control-lg form-control-solid" type="text" name="esic_no" value="{{isset($user->details) ? $user->details->esic_no : ''}}" />
-                           </div>
-                       </div>
-                       <div class="form-group row">
+                              <label>Longitude </label>
+                              <input class="form-control form-control-lg form-control-solid" type="text" name="longitude" value="{{$user->longitude}}" placeholder="enter longitude"/>
+                          </div>
+                      </div>
+                      <div class="form-group row vendor-row" style="{{$user->type == 'client' ? 'display: none;' : ''}}">
                         <div class="col-lg-6">
-                            <label>Bank Name</label>
-                            <input class="form-control form-control-lg form-control-solid" type="text" name="bank_name" value="{{isset($user->details->bank_name) ? $user->uan_no : ''}}" />
+                            <label>Vendor Category: <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <select class="form-control" name="vendor_category">
+                                    <option value="PUMP" {{$user->vendor_category == 'PUMP' ? 'selected' :''}}>PUMP</option>
+                                    <option value="VEHICLE" {{$user->vendor_category == 'VEHICLE' ? 'selected' :''}}>VEHICLE</option>
+                                </select>
+                            </div>
+                            <span class="form-text text-muted"></span>
                         </div>
                         <div class="col-lg-6">
-                           <label>A/C Number </label>
-                           <input class="form-control form-control-lg form-control-solid" type="text" name="bank_account_no" value="{{isset($user->details) ? $user->details->bank_account_no : ''}}" />
-                       </div>
-                   </div>
-                   <div class="form-group row">
-                    <div class="col-lg-6">
-                        <label>Bank IFSC</label>
-                        <input class="form-control form-control-lg form-control-solid" type="text" name="bank_ifsc" value="{{isset($user->details->bank_ifsc) ? $user->bank_ifsc : ''}}" />
-                    </div>
-                    <div class="col-lg-6">
 
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!--end::Body-->
-            <div class="card-footer">
-               <button type="submit" class="btn btn-success mr-2">Save Changes</button>
-               <button type="reset" class="btn btn-secondary">Cancel</button>
-           </div>
-       </form>
-       <!--end::Form-->
+                <!--end::Body-->
+                <div class="card-footer">
+                   <button type="submit" class="btn btn-success mr-2">Save Changes</button>
+                   <button type="reset" class="btn btn-secondary">Cancel</button>
+               </div>
+           </form>
+           <!--end::Form-->
+       </div>
    </div>
-</div>
-<!--end::Content-->
+   <!--end::Content-->
 </div>
 <!--end::Profile Personal Information-->
 </div>
@@ -248,22 +249,99 @@
 <!--end::Content-->
 @endsection
 @push('js')
+<script src="{{ asset('public') }}/assets/js/pages/custom/profile/profile.js"></script>
+<script src="{{ asset('public') }}/assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js"></script>
 <script type="text/javascript">
     const fv = FormValidation.formValidation(
-        document.getElementById('kyc-form'),
+        document.getElementById('personal-form'),
         {
           fields: {
-            adhar_no: {
-                validators: {
-                 notEmpty: {
-                  message: 'Adhar number is required'
-              },
-              stringLength: {
-                min: 12,
-                message: 'The Adhar number must have 12 digits!'
-            }
-        }
+           email: {
+            validators: {
+             notEmpty: {
+              message: 'Email is required'
+          },
+          emailAddress: {
+              message: 'The value is not a valid email address'
+          }
+      }
+  },
+  type: {
+    validators: {
+     notEmpty: {
+      message: 'Type is required'
+  }
+}
+},
+vendor_code: {
+    validators: {
+     notEmpty: {
+      message: 'Code is required'
+  }
+}
+},
+state: {
+    validators: {
+     notEmpty: {
+      message: 'State is required'
+  }
+}
+},
+gst_no: {
+    validators: {
+     notEmpty: {
+      message: 'GST number is required'
+  },
+  stringLength: {
+    min: 15,
+    message: 'GST number must be 15 characters!'
+}
+}
+},
+billing_address: {
+    validators: {
+     notEmpty: {
+      message: 'Billing address is required'
+  },
+  stringLength: {
+    min: 15,
+    message: 'Billing address must be 15 characters!'
+}
+}
+},
+vendor_category: {
+    validators: {
+     notEmpty: {
+      message: 'Category is required'
+  }
+}
+},
+name: {
+    validators: {
+     notEmpty: {
+      message: 'Name is required'
+  },
+  stringLength: {
+    min: 4,
+    message: 'The full name must be 4 characters!'
+}
+}
+},
+contact: {
+    validators: {
+     notEmpty: {
+        message: 'Indian phone number is required'
     },
+    phone: {
+      country: 'IN',
+      message: 'The value is not a valid Indian phone number!'
+  },
+  stringLength: {
+    max: 10,
+    message: 'The phone number must have 10 digits!'
+}
+}
+},
 },
 
 plugins: {
@@ -277,5 +355,39 @@ plugins: {
         }
     }
     );
+    var KTSelect2 = function() {
+     var demos = function() {
+        $.get( HOST_URL+'all-states', function( resp ) {
+            $('#kt_select2_4').select2({
+               placeholder: "Select a state",
+               data:resp,
+               allowClear: true
+           });
+        });
+    }
+    return {
+        init: function() {
+            demos();
+        }
+    };
+}();
+jQuery(document).ready(function() {
+ KTSelect2.init();
+});
+let stateid = '{{$user->states->id}}';
+let state = '{{$user->states->state}}';
+var $newOption = $("<option selected='selected'></option>").val(stateid).text(state)
+$("#kt_select2_4").append($newOption).trigger('change');
+
+$('select[name="type"]').change(function(e) {
+    if($(this).val() == 'client'){
+        $(".vendor-row").css('display','none');
+        fv.disableValidator('vendor_category','notEmpty');
+    }else if($(this).val() == 'vendor'){
+        $(".vendor-row").removeAttr('style');
+        fv.enableValidator('vendor_category','notEmpty');
+    }
+});
+
 </script>
 @endpush

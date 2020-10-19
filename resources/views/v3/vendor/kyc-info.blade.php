@@ -1,4 +1,4 @@
-@extends('v3.layouts.app', ['page' => __('Edit User KYC'), 'pageSlug' => 'users-kyc'])
+@extends('v3.layouts.app', ['page' => __('Edit User KYC'), 'pageSlug' => 'vendors-kyc'])
 @section('content')
 <!--begin::Content-->
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -124,7 +124,7 @@
                     <!--begin::Aside-->
                     <div class="flex-row-auto offcanvas-mobile w-250px w-xxl-350px" id="kt_profile_aside">
                         <!--begin::Profile Card-->
-                        @include('v3.users.profile-sidebar',['pageSlug' => 'users-kyc'])
+                        @include('v3.vendor.profile-sidebar',['pageSlug' => 'users-kyc'])
                         <!--end::Profile Card-->
                     </div>
                     <!--end::Aside-->
@@ -145,27 +145,29 @@
                             </div>
                             <!--end::Header-->
                             <!--begin::Form-->
-                            <form class="form" id="kyc-form" action="{{route('user.update')}}" method="POST" autocomplete="off">
+                            <form class="form" id="kyc-form" action="{{route('vendors.updateKyc')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
                                 @csrf
                                 @method('put')
                                 <!--begin::Body-->
-                                <input type="hidden" name="user_id" value="{{$user->id}}">
+                                <input type="hidden" name="vendor_id" value="{{$user->id}}">
+                                <input type="hidden" name="row_id" value="{{isset($user->kyc) ? $user->kyc->id : null}}">
                                 <input type="hidden" name="form" value="kyc">
+
                                 <div class="card-body">
                                    <div class="form-group row">
                                     <div class="col-lg-6">
                                         <label>Adhar Number <span class="text-danger">*</span></label>
-                                        <input class="form-control form-control-lg form-control-solid" type="text" name="adhar_no" value="{{isset($user->details->adhar_no) ? $user->details->adhar_no : ''}}" />
+                                        <input class="form-control form-control-lg form-control-solid" type="text" name="adhar_no" value="{{isset($user->kyc) ? $user->kyc->adhar_no : ''}}" />
                                     </div>
                                     <div class="col-lg-6">
                                        <label>Adhar proof</label>
-                                       @if(isset($user->details->adhar_doc))
+                                       @if(isset($user->kyc->adhar_doc))
                                        <div class="row">
                                            <div class="custom-file">
                                              <input type="file" class="custom-file-input" name="adhar_doc" id="customFile"/>
                                              <label class="custom-file-label" for="customFile">Choose file</label>
                                          </div>
-                                         <a href="{{isset($user->details->adhar_doc) ? asset('public/').'/'.$user->details->adhar_doc : ''}}" /download><span><i></i></span>File</a>
+                                         <a href="{{isset($user->kyc->adhar_doc) ? asset('public/').'/'.$user->kyc->adhar_doc : ''}}" /download><span><i></i></span>File</a>
                                      </div>
                                      @else
                                      <div class="custom-file">
@@ -178,66 +180,57 @@
                              <div class="form-group row">
                                 <div class="col-lg-6">
                                     <label>Pan Number <span class="text-danger">*</span></label>
-                                    <input class="form-control form-control-lg form-control-solid" type="text" name="pan_no" value="{{isset($user->details->pan_no) ? $user->details->pan_no : ''}}" />
+                                    <input class="form-control form-control-lg form-control-solid" type="text" name="pan_no" value="{{isset($user->kyc) ? $user->kyc->pan_no : ''}}" />
                                 </div>
                                 <div class="col-lg-6">
-                                   <label>Pan proof</label>
-                                   @if(isset($user->details->pan_doc))
-                                   <div class="row">
-                                       <div class="custom-file">
+                                   <label>Pan Doc </label>
+                                   @if(isset($user->kyc->pan_doc))
+                                       <div class="row">
+                                           <div class="custom-file">
+                                             <input type="file" class="custom-file-input" name="pan_doc" id="customFile"/>
+                                             <label class="custom-file-label" for="customFile">Choose file</label>
+                                         </div>
+                                         <a href="{{isset($user->kyc->pan_doc) ? asset('public/').'/'.$user->kyc->pan_doc : ''}}" /download><span><i></i></span>File</a>
+                                     </div>
+                                     @else
+                                     <div class="custom-file">
                                          <input type="file" class="custom-file-input" name="pan_doc" id="customFile"/>
                                          <label class="custom-file-label" for="customFile">Choose file</label>
                                      </div>
-                                     <a href="{{isset($user->details->pan_doc) ? asset('public/').'/'.$user->details->pan_doc : ''}}" /download><span><i></i></span>File</a>
-                                 </div>
-                                 @else
-                                 <div class="custom-file">
-                                     <input type="file" class="custom-file-input" name="pan_doc" id="customFile"/>
-                                     <label class="custom-file-label" for="customFile">Choose file</label>
-                                 </div>
-                                 @endif
-                             </div>
-                         </div>
-                         <div class="form-group row">
+                                     @endif
+                               </div>
+                           </div>
+                           <div class="form-group row">
                             <div class="col-lg-6">
-                                <label>Universal Account Number </label>
-                                <input class="form-control form-control-lg form-control-solid" type="text" name="uan_no" value="{{isset($user->details->uan_no) ? $user->uan_no : ''}}" />
+                                <label>Bank Name</label>
+                                <input class="form-control form-control-lg form-control-solid" type="text" name="bank_name" value="{{isset($user->kyc) ? $user->kyc->bank_name : ''}}" />
                             </div>
                             <div class="col-lg-6">
-                               <label>ESIC Number </label>
-                               <input class="form-control form-control-lg form-control-solid" type="text" name="esic_no" value="{{isset($user->details) ? $user->details->esic_no : ''}}" />
+                               <label>A/C Number </label>
+                               <input class="form-control form-control-lg form-control-solid" type="text" name="bank_account_no" value="{{isset($user->kyc) ? $user->kyc->bank_acc_no : ''}}" />
                            </div>
                        </div>
                        <div class="form-group row">
                         <div class="col-lg-6">
-                            <label>Bank Name</label>
-                            <input class="form-control form-control-lg form-control-solid" type="text" name="bank_name" value="{{isset($user->details->bank_name) ? $user->uan_no : ''}}" />
+                            <label>Bank IFSC</label>
+                            <input class="form-control form-control-lg form-control-solid" type="text" name="bank_ifsc" value="{{isset($user->kyc) ? $user->kyc->bank_ifsc : ''}}" />
                         </div>
                         <div class="col-lg-6">
-                           <label>A/C Number </label>
-                           <input class="form-control form-control-lg form-control-solid" type="text" name="bank_account_no" value="{{isset($user->details) ? $user->details->bank_account_no : ''}}" />
-                       </div>
-                   </div>
-                   <div class="form-group row">
-                    <div class="col-lg-6">
-                        <label>Bank IFSC</label>
-                        <input class="form-control form-control-lg form-control-solid" type="text" name="bank_ifsc" value="{{isset($user->details->bank_ifsc) ? $user->bank_ifsc : ''}}" />
-                    </div>
-                    <div class="col-lg-6">
-
+                            <label>Beneficiary Name</label>
+                            <input class="form-control form-control-lg form-control-solid" type="text" name="bank_ifsc" value="{{isset($user->kyc) ? $user->kyc->beneficiary_name : ''}}" />
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!--end::Body-->
-            <div class="card-footer">
-               <button type="submit" class="btn btn-success mr-2">Save Changes</button>
-               <button type="reset" class="btn btn-secondary">Cancel</button>
-           </div>
-       </form>
-       <!--end::Form-->
+                <!--end::Body-->
+                <div class="card-footer">
+                   <button type="submit" class="btn btn-success mr-2">Save Changes</button>
+                   <button type="reset" class="btn btn-secondary">Cancel</button>
+               </div>
+           </form>
+           <!--end::Form-->
+       </div>
    </div>
-</div>
-<!--end::Content-->
+   <!--end::Content-->
 </div>
 <!--end::Profile Personal Information-->
 </div>
@@ -260,6 +253,7 @@
               },
               stringLength: {
                 min: 12,
+                max: 12,
                 message: 'The Adhar number must have 12 digits!'
             }
         }

@@ -5,24 +5,27 @@ var KTDropzoneDemo = function () {
     // Private functions
     var demo1 = function () {
         // single file upload
-        $('#beat-csv-upload').dropzone({
+        var beatsUploadDz = new Dropzone("#beat-csv-upload",{
+            method: 'POST',
             url: HOST_URL+"import", // Set the url for your upload script location
             paramName: "file", // The name that will be used to transfer the file
-            maxFiles: 1,
+            maxFiles: 10,
             maxFilesize: 5, // MB
             addRemoveLinks: true,
+            acceptedFiles: 'text/csv',
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            accept: function(file, done) {
-                console.log(file);
-                if (file.status == "status") {
-                    done("File imported!");
-                } else {
-                    done('Something went wrong. check format!');
-                }
             }
         });
+        beatsUploadDz.on("success", function(file,resp) {
+            console.log(resp)
+            if(resp.status == 1){
+                this.defaultOptions.success(file, resp.message)
+            }else{
+                this.defaultOptions.error(file, resp.message);
+            }
+          });
+
 
         // multiple file upload
         $('#kt_dropzone_2').dropzone({
