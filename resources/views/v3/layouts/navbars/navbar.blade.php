@@ -40,7 +40,7 @@
 					<!--end::Item-->
 					<!--begin::Item-->
 					<li class="nav-item mr-3">
-						<a href="#" class="nav-link py-4 px-6" data-toggle="tab" data-target="#kt_header_tab_2" role="tab">Collection</a>
+						<a href="{{route('collections')}}" class="nav-link py-4 px-6 {{ $pageSlug =='collections' || $pageSlug == 'collection-edit' || $pageSlug == 'collection-create' || $pageSlug == 'handbook-beats' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_collections" role="tab">Collections</a>
 					</li>
 					<!--end::Item-->
 					<!--begin::Item-->
@@ -288,6 +288,11 @@
 						<a href="#" class="nav-link btn btn-clean {{ $pageSlug =='load-verification' || $pageSlug =='trip-allotment' || $pageSlug =='trips' || $pageSlug =='all-load' || $pageSlug =='load-sites' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_trip" role="tab">Trip/Load</a>
 					</li>
 					<!--end::Item-->
+					<!--begin::Item-->
+					<li class="nav-item mr-2">
+						<a href="#" class="nav-link btn btn-clean {{ $pageSlug =='collections' || $pageSlug == 'collection-edit' || $pageSlug == 'collection-create' || $pageSlug == 'handbook-beats' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_collections" role="tab">Collections</a>
+					</li>
+					<!--end::Item-->
 				</ul>
 				<!--begin::Tab Navs-->
 				<!--begin::Tab Content-->
@@ -336,6 +341,26 @@
 							</div>
 							<!--end::Menu-->
 							
+						</div>
+						<div class="tab-pane py-5 p-lg-0 {{ $pageSlug =='collections' || $pageSlug == 'collection-create' || $pageSlug == 'collection-edit' || $pageSlug == 'handbook-beats'  ? 'active' :'' }}" id="kt_header_tab_collections">
+							<!--begin::Menu-->
+							<div id="kt_header_menu" class="header-menu header-menu-mobile header-menu-layout-default">
+								<!--begin::Nav-->
+								<ul class="menu-nav">
+									<li class="menu-item {{ $pageSlug == 'collections' || $pageSlug == 'collection-create' || $pageSlug == 'collection-edit' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+										<a href="{{ route('collections') }}" class="menu-link">
+											<span class="menu-text">{{ __('View/Add/Edit') }}</span>
+										</a>
+									</li>
+									<li class="menu-item {{ $pageSlug == 'handbook' || $pageSlug =='handbook-beats' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+										<a href="{{ route('handbook-beats') }}" class="menu-link">
+											<span class="menu-text">{{ __('Update Handbook') }}</span>
+										</a>
+									</li>
+								</ul>
+								<!--end::Nav-->
+							</div>
+							<!--end::Menu-->
 						</div>
 
 						<div class="tab-pane py-5 p-lg-0 {{ $pageSlug =='load-verification' || $pageSlug =='trip-allotment' || $pageSlug =='trips' || $pageSlug =='all-load' || $pageSlug =='load-sites' ? 'active' :'' }}" id="kt_header_tab_trip">

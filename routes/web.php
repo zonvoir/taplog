@@ -28,7 +28,7 @@ Route::get('/home', 'BeatPlanController@index')->name('home');
 Route::post('import', 'BeatPlanController@import')->name('import')->middleware('auth');
 Route::get('collections', 'CollectionController@collections')->name('collections')->middleware('auth');
 Route::get('create-collection/{id}', 'CollectionController@createCollection')->name('create-collection')->middleware('auth');
-Route::get('collection-serverside', 'CollectionController@serversideCollection')->name('collection-serverside')->middleware('auth');
+Route::post('collection-serverside', 'CollectionController@allCollection')->name('collection-serverside')->middleware('auth');
 Route::get('beat-plan-serverside', 'HomeController@serversideBeatplan')->name('beat-plan-serverside')->middleware('auth');
 Route::post('create-collection-action', 'CollectionController@createCollectionAction')->name('create-collection-action')->middleware('auth');
 Route::get('edit-beat-plan/{id}', 'BeatPlanController@editBeatPlan')->name('edit-beat-plan')->middleware('auth');
@@ -47,7 +47,8 @@ Route::get('site-name-list/{id?}', 'SiteMasterController@show')->name('site-name
 // datatables 
 Route::post('beat-plan-data-table', 'BeatPlanController@dataTablePlan')->middleware('auth');
 Route::post('beat-view-table', 'BackLogController@trip_data_datatable')->middleware('auth');
-
+Route::get('handbook-beats', 'CollectionController@handbookBeats')->name('handbook-beats')->middleware('auth');
+Route::post('handbook-beats-table', 'CollectionController@handbookBeatsTable')->middleware('auth');
 
 Route::group(['middleware' => 'auth'], function () {
 	Route::resource('user', 'UserController', ['except' => ['show']]);

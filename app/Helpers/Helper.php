@@ -175,4 +175,9 @@ class Helper
 			return true;
 		}
 	}
+	public static function getAllMisIdsBySubAdminId($id){
+		$ids = User::where(['created_by_id' => $id, 'type' => 'mis'])->select('id')->get();
+		return $ids;
+	}
+	
 }
