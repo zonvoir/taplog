@@ -174,6 +174,7 @@ Route::group(['middleware'=> 'auth', 'prefix' => 'trip'], function(){
 	Route::get('all-loads', 'TripController@allLoad')->name('all-loads');
 	Route::post('update-loading-time', 'TripController@update_loading_time')->name('update-loading-time');
 	Route::get('backlog', 'BackLogController@index')->name('backlog.index');
+	Route::post('unloaded_data', 'BackLogController@unloaded_datatable')->name('backlog.unloaded_datatable');
 	Route::post('assign-trip', 'BackLogController@assign_trip')->name('backlog.assign_trip');
 	Route::post('load-transfer', 'BackLogController@load_transfer')->name('backlog.load_transfer');
 	Route::get('not-delivered', 'BackLogController@not_delivered')->name('backlog.not_delivered');

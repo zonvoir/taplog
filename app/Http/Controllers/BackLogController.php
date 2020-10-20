@@ -24,7 +24,7 @@ class BackLogController extends Controller
 			$plans 	= Beatplan::select('beatplans.*','beatplans.id as plan_id')->join('beatplan_data', function($join) {
 				$join->on('beatplan_data.beatplan_id', '=', 'beatplans.id');
 			})->where('beatplans.effective_date', '<', date('d-m-Y'))->where('beatplan_data.status', 'pending')->groupBy('beatplans.id')->paginate(10);
-			return view('backlog.unallocated',['plans' => $plans, 'type' => $request->type]);
+			return view('v3.backlog.unallocated',['plans' => $plans, 'type' => $request->type]);
 		}
 		if($request->type == "unallocated_data" && $request->beat_id){
 			$plan_id = $request->beat_id;
@@ -41,7 +41,7 @@ class BackLogController extends Controller
 				$join->on('trip_data.beatplan_id', '=', 'beatplans.id');
 			})->where('beatplans.effective_date', '<', date('d-m-Y'))->where('trip_data.status', 'unloaded')->groupBy('beatplans.id')->paginate(10);
 
-			return view('backlog.index',['plans' => $plans, 'type' => $request->type]);
+			return view('v3.backlog.index',['plans' => $plans, 'type' => $request->type]);
 		}
 		if($request->type == "unloaded_data" && $request->beat_id){
 			$backlogs	= Trips::where('beatplan_id', $request->beat_id)
@@ -56,7 +56,7 @@ class BackLogController extends Controller
 			$plans 	= Beatplan::select('beatplans.*','beatplans.id as plan_id')->join('trip_data', function($join) {
 				$join->on('trip_data.beatplan_id', '=', 'beatplans.id');
 			})->where('beatplans.effective_date', '<', date('d-m-Y'))->where('trip_data.status', 'loaded')->groupBy('beatplans.id')->paginate(10);
-			return view('backlog.not_filled',['plans' => $plans]);
+			return view('v3.backlog.not_filled',['plans' => $plans]);
 		}
 		
 		if($request->type == "not_filled_data" && $request->beat_id){
@@ -70,6 +70,42 @@ class BackLogController extends Controller
 		}
 
 		// return dd($trips);
+	}
+
+	public function unloaded_datatable(Request $request){
+		$query 	= Beatplan::with(['client'])
+					->select('beatplans.*')
+					->join('trip_data', function($join) {
+						$join->on('trip_data.beatplan_id', '=', 'beatplans.id');
+					});
+/*
+		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
+			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
+		}*/
+
+		return \DataTables::of($query)
+		->addColumn('effective_date', function(Beatplan $data) {
+			return '<a href="'.route('backlog.index').'?type=load_data&beat_id='. $data->id .'">'.$data->effective_date??''.'</a>';
+		})
+		->addColumn('mp_zone', function(Beatplan $data) {
+			return $data->mp_zone;
+		})
+		->addColumn('client_id', function(Beatplan $data) {
+			return $data->client->name ?? '';
+		})
+		->addColumn('mode', function(Beatplan $data) {
+			return $data->mode ?? '';
+		})
+		->addColumn('status', function(Beatplan $data) {
+			return $data->status ?? '';
+		})
+		->addColumn('action', function(Beatplan $data) {
+			return '<a href="' . route('backlog.trip_data',$data->id) . '" class="btn btn-sm btn-clean btn-icon"><i class="la la-eye"></i></a>';
+		})
+		->orderColumn('effective_date', function ($query, $order) {
+			$query->orderBy('effective_date', $order);
+		})
+		->rawColumns(['effective_date', 'action'])->make(true);
 	}
 
 	public function assign_trip(Request $request){

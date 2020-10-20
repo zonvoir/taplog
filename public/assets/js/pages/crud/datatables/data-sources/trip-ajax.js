@@ -23,7 +23,7 @@ var PLANDatatablesDataSourceAjaxServer = function() {
         		pageSize: 'A2'
 			}
 			],
-			order: [ [0, 'desc'] ],
+			order: [ [2, 'desc'] ],
 			/*dom: 'Bfrtip',*/
 			/*buttons: [*/
 			/*'copy', 'csv', 'excel', 'pdf', 'print',*/
@@ -59,7 +59,7 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 				{data: 'vehicle', name: 'vechile.vehicle_no'},
 				{data: 'driver_name', name: 'driver.name' },
 				{data: 'filler_name', name: 'filler.name'},
-				{data: 'action', orderable: false, searchable: false,},
+				{data: 'action', orderable: false, searchable: false},
 			],
 		});
 		

@@ -262,6 +262,7 @@
 
 @endsection
 @push('js')
+<script src="{{ asset('public') }}/assets/js/bootstrap3-typeahead.min.js"></script>
 <script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
 <script type="text/javascript">
 	'use strict';
@@ -323,8 +324,13 @@
 
 					switch (column.title()) {
 						case 'Status':
+						
+							var status = {
+								0: {'title': 'Loaded', 'value': 'loaded',},
+								1: {'title': 'Filled', 'value': 'filled',},
+							};
 							column.data().unique().sort().each(function(d, j) {
-								$('.datatable-input[data-col-index="9"]').append('<option value="' + d + '">' + d + '</option>');
+								$('.datatable-input[data-col-index="9"]').append('<option value="' + status[j].value + '">'+ status[j].title +'</option>');
 							});
 							break;
 					}
@@ -337,11 +343,11 @@
 				{data: 'site_cat', name: 'site.site_category'},
 				{data: 'tech_name', name: 'site.technician_name'},
 				{data: 'tech_no', name: 'site.technician_contact1'},
-				{data: 'qty'},
+				{data: 'qty', name: 'qty'},
 				{data: 'driver_name', name: 'trip.driver.name' },
 				{data: 'filler_name', name: 'trip.filler.name'},
-				{data: 'status'},
-				{data: 'action'},
+				{data: 'status', name: 'status'},
+				{data: 'action', orderable: false, searchable: false},
 			],
 		});
 		
