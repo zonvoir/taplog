@@ -26,4 +26,9 @@ class Verifiedloads extends Model
     {
         return $this->belongsTo('App\Beatplan','beatplan_id');
     }
+    public function collection()
+    {
+        return $this->hasOne('App\Collection','verified_load_id');
+    }
+
 }

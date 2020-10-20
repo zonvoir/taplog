@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Collection;
-use App\Beatplans;
+use App\Beatplan;
 use App\User;
 use App\TripData;
 use App\Verifiedloads;
@@ -17,19 +17,14 @@ class CollectionController extends Controller
 {
 	public function collections()
 	{
-		// $collections = Collection::rightjoin('verified_loads', function($join){
-		// 	$join->on('verified_loads.id','=','collection.verified_load_id');	
-		// })->paginate(10);
-		return view('collection.collections');
+		return view('v3.collection.index');
 	}
 	public function createCollection($verified_loads_id = '')
 	{
 		$loads = Verifiedloads::find($verified_loads_id);
-		//dd($loads->trip_data->loading_start);
-		return view('pages.create_collection',compact('verified_loads_id','loads'));
+		return view('v3.collection.create',compact('verified_loads_id','loads'));
 	}
 	public function serversideCollection(Request $request){
-		//dd($request->all());
 		DB::connection()->enableQueryLog();
 		$orderby = $request->input('order.0.column');
 		$sort['col'] = $request->input('columns.' . $orderby . '.data');    
@@ -184,7 +179,7 @@ class CollectionController extends Controller
 				'eb_meter_reading'=> $request->eb_meter_reading,
 				'eb_meter_reading_img'=> $eb_meter_reading_img ?? null,
 				'filling_qty' => $request->filling_qty,
-				'filling_date' => $request->filling_date,
+				'filling_date' => \Carbon\Carbon::parse($request->filling_date)->format('d-m-Y'),
 				'remark' => $request->remark ?? null
 			];
 			if(Collection::create($post_array)){
@@ -226,7 +221,7 @@ class CollectionController extends Controller
 	public function editCollection($id='')
 	{
 		$collection = Collection::where('verified_load_id','=', $id)->first();
-		return view('pages.edit-collection',compact('collection'));
+		return view('v3.collection.edit',compact('collection'));
 	}
 	public function editCollectionAction(Request $request)
 	{
@@ -272,7 +267,7 @@ class CollectionController extends Controller
 			$tripData->filling_finish = \Carbon\Carbon::parse($request->filling_finish)->format('Y-m-d H:i:s');
 			$tripData->save();
 		}
-		return back()->with('success','Date updated successfully!');
+		return redirect('collections')->with('success','Collection updated successfully!');
 	}
 	public function validatePreviousReading(Request $request)
 	{
@@ -334,6 +329,336 @@ class CollectionController extends Controller
 			}
 			return $response;
 		}
+	}
+	public function allCollection(Request $request)
+	{
+		$columnsDefault = [
+			'' => true,
+			'action' => true,     
+			'plan_date' => true,     
+			'site_id' => true,      
+			'site_name' => true,      
+			'site_category' => true,     
+			'technician' => true,  
+			'route' => true,  
+			'quantity' => true,  
+			'ro' => true,  
+			'lift_date' => true,  
+			'lift_start' => true,  
+			'lift_finish' => true,   
+			'filling_finish' => true,   
+			'site_in' => true,  
+			'site_out' => true,  
+			'kwh_reading' => true,  
+			'kwh_reading_img' => true,  
+			'hmr_reading' => true,  
+			'hmr_reading_img' => true,  
+			'gcu_bef_fill_img' => true,  
+			'fuel_stock_bef_fill' => true,  
+			'gcu_aft_fill_img' => true,  
+			'fuel_stock_aft_fill' => true,  
+			'fuel_guage_bef_fill_img' => true,  
+			'fuel_guage_aft_fill_img' => true,  
+			'dip_stick_bef_fill_img' => true,  
+			'dip_stick_aft_fill_img' => true,  
+			'eb_meter_reading' => true,
+			'eb_meter_reading_img' => true,
+			'filling_qty' => true,
+			'filling_date' => true,
+			'remark' => true,
+			'handbook_img' => true,
+			'status' => true,
+		];
+		if ( isset( $_REQUEST['columnsDef'] ) && is_array( $_REQUEST['columnsDef'] ) ) {
+			$columnsDefault = [];
+			foreach ( $_REQUEST['columnsDef'] as $field ) {
+				$columnsDefault[ $field ] = true;
+			}
+		}
+		$query = Collection::rightjoin('verified_loads', function($join){
+			$join->on('verified_loads.id','=','collection.verified_load_id');	
+		})
+		->leftjoin('trips', function($join){
+			$join->on('verified_loads.auto_trip_id','=','trips.id');	
+		})
+		->leftjoin('trip_data', function($join){
+			$join->on('trip_data.id','=','verified_loads.trip_data_id');	
+		})
+		->leftjoin('diverts', function($join){
+			$join->on('diverts.verified_id','=','verified_loads.id');	
+		})
+		->leftjoin('site_master as divertedToSiteId', function($join){
+			$join->on('divertedToSiteId.id','=','diverts.to_site_id');	
+		})
+		->leftjoin('site_master as divertedFromSiteId', function($join){
+			$join->on('divertedFromSiteId.id','=','diverts.from_site_id');	
+		})
+		->leftjoin('beatplans', function($join){
+			$join->on('verified_loads.beatplan_id','=','beatplans.id');	
+		})
+		->leftjoin('beatplan_data', function($join){
+			$join->on('beatplan_data.beatplan_id','=','beatplans.id')
+			->on('beatplan_data.site_id', '=', 'verified_loads.sites');
+		})
+		->leftjoin('site_master', function($join){
+			$join->on('site_master.id','=','verified_loads.sites');	
+		})
+		->leftjoin('routes', function($join){
+			$join->on('routes.id','=','trips.route_id');	
+		})
+		->leftjoin('users as filler', function($join){
+			$join->on('filler.id','=','trips.filler_id');	
+		})
+		->leftjoin('users as driver', function($join){
+			$join->on('driver.id','=','trips.driver_id');	
+		})
+		->leftjoin('users as fieldofficer', function($join){
+			$join->on('fieldofficer.id','=','trips.field_officer_id');	
+		})
+		->leftjoin('vehicle_master', function($join){
+			$join->on('vehicle_master.id','=','trips.vehicle_id');	
+		})
+		->leftjoin('vendors', function($join){
+			$join->on('vendors.id','=','trips.loading_point_id');	
+		});
+		$query->where('verified_loads.status','!=','unloaded');
+		if(auth()->user()->type == 'filler'){
+			$query->where('trips.filler_id','=',auth()->user()->id);
+		}
+		if(auth()->user()->type == 'driver'){
+			$query->where('trips.driver_id','=',auth()->user()->id);
+		}
+		if(auth()->user()->type == 'subadmin'){
+			$user['fillers'] = User::where(['created_by_id'=>auth()->user()->id, 'type' => 'filler'])->pluck('id');
+			$user['drivers'] = User::where(['created_by_id'=>auth()->user()->id, 'type' => 'driver'])->pluck('id');
+			$query->where(function($q) use($user){
+				$q->whereIn('trips.filler_id',$user['fillers'])->orWhereIn('trips.driver_id',$user['drivers']);
+			});
+		}elseif (auth()->user()->type == 'subadmin') {
+			$allotedData = Helper::allotedZonesAndClientId(auth()->user()->id);
+			if (isset($allotedData) && !empty($allotedData)) {
+				$query->where(function($q) use($allotedData){
+					$i = 1;
+					foreach ($allotedData as $key) {
+						if ($i == 1) {
+							$q->where(['beatplans.mp_zone' => $key->zone, 'beatplans.client_id' => $key->client]);		
+						}
+						else{
+							$q->orWhere(['beatplans.mp_zone' => $key->zone, 'beatplans.client_id' => $key->client]);		
+						}
+						$i++;
+					}
+				});
+			}
+		}
+		$returndata = $query->select('site_master.site_id','site_master.site_name','site_master.site_category','site_master.mp_zone','site_master.technician_name','site_master.technician_contact1','site_master.latitude','site_master.longitude','routes.route_name','driver.name as driver_name','driver.contact as driver_mobile','filler.name as filler_name','filler.contact as filler_mobile','vehicle_master.vehicle_no','beatplan_data.quantity','beatplans.effective_date','trip_data.handbook_img','collection.*','verified_loads.id as verifiedId','verified_loads.auto_trip_id','verified_loads.sites','vendors.name as loadingPointName','trip_data.loading_start','trip_data.loading_finish','trip_data.filling_finish','trip_data.site_in','trip_data.site_out','divertedFromSiteId.site_id as diverFromSiteid','divertedToSiteId.site_id as divertTositeid','diverts.qty as divert_qty','diverts.from_site_id','diverts.to_site_id')->get();
+		$alldata = array();
+		if(isset($returndata) && !empty($returndata)){
+			$i = 0;
+			foreach($returndata as $key){
+				$alldata[$i]['action'] = isset($key->id) ? '<a href="'.route("edit-collection",$key->verifiedId).'" class="btn btn-sm btn-clean btn-icon" collect-id="'.$key->id.'" title="Update Collection"><i class="la la-pencil-square-o text-primary"></i></a>' : '<a href="'.route("create-collection",$key->verifiedId).'" class="btn btn-sm btn-clean btn-icon" verified-id="'.$key->verifiedId.'" title="Add Collection"><i class="la la-plus-square text-success"></i></a>';
+				$alldata[$i]['plan_date'] = $key->effective_date;
+				$alldata[$i]['site_id'] = $key->site_id;
+				$alldata[$i]['site_name'] = $key->site_name;
+				$alldata[$i]['site_category'] = $key->site_category;
+				$alldata[$i]['technician'] = $key->technician_name;
+				$alldata[$i]['route'] = $key->route_name;
+				$alldata[$i]['quantity'] = $key->quantity;
+				$alldata[$i]['ro'] = $key->loadingPointName;
+				$alldata[$i]['lift_date'] = \Carbon\Carbon::parse($key->loading_start)->format('d-m-y');
+				$alldata[$i]['lift_start'] = \Carbon\Carbon::parse($key->loading_start)->format('H:i:s');
+				$alldata[$i]['lift_finish'] = \Carbon\Carbon::parse($key->loading_finish)->format('H:i:s');
+				$alldata[$i]['filling_finish'] = \Carbon\Carbon::parse($key->filling_finish)->format('d-m-y');
+				$alldata[$i]['site_in'] = \Carbon\Carbon::parse($key->site_in)->format('H:i:s');
+				$alldata[$i]['site_out'] = \Carbon\Carbon::parse($key->site_out)->format('H:i:s');
+				$alldata[$i]['kwh_reading'] = isset($key->kwh_reading) ? $key->kwh_reading : '';
+				$alldata[$i]['kwh_reading_img'] = isset($key->kwh_reading_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->kwh_reading_img.'">' : '';
+				$alldata[$i]['hmr_reading'] = isset($key->hmr_reading) ? $key->hmr_reading : '';
+				$alldata[$i]['hmr_reading_img'] = isset($key->hmr_reading_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->hmr_reading_img.'">' : '';
+				$alldata[$i]['gcu_bef_fill_img'] = isset($key->gcu_bef_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->gcu_bef_fill_img.'">' : '';
+				$alldata[$i]['fuel_stock_bef_fill'] = isset($key->fuel_stock_bef_fill) ? $key->fuel_stock_bef_fill : '';
+				$alldata[$i]['gcu_aft_fill_img'] = isset($key->gcu_aft_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->gcu_aft_fill_img.'">' : '';
+				$alldata[$i]['fuel_stock_aft_fill'] = isset($key->fuel_stock_aft_fill) ? $key->fuel_stock_aft_fill : '';
+				$alldata[$i]['fuel_guage_bef_fill_img'] = isset($key->fuel_guage_bef_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->fuel_guage_bef_fill_img.'">' : '';
+				$alldata[$i]['dip_stick_bef_fill_img'] = isset($key->dip_stick_bef_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->dip_stick_bef_fill_img.'">' : '';
+				$alldata[$i]['dip_stick_aft_fill_img'] = isset($key->dip_stick_aft_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->dip_stick_aft_fill_img.'">' : '';
+				$alldata[$i]['eb_meter_reading'] = isset($key->eb_meter_reading) ? $key->eb_meter_reading : '';
+				$alldata[$i]['eb_meter_reading_img'] = isset($key->eb_meter_reading_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->eb_meter_reading_img.'">' : '';
+				$alldata[$i]['filling_qty'] = isset($key->filling_qty) ? $key->filling_qty : '';
+				$alldata[$i]['filling_date'] = isset($key->filling_date) ? $key->filling_date : '';
+				$alldata[$i]['remark'] = isset($key->remark) ? $key->remark : '';
+				$alldata[$i]['handbook_img'] = isset($key->handbook_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->handbook_img.'">' : '';
+				$alldata[$i]['status'] = isset($key->diverFromSiteid) ? 'Diverted From: '.$key->diverFromSiteid.' Quantity: '.$key->divert_qty : (isset($key->divertTositeid) ? ' Diverted To: '.$key->divertTositeid.' Qantity: '.$key->divert_qty : ' Not Diverted' );
+				$i++;
+			}
+		}
+		$data = [];
+		foreach ( $alldata as $d ) {
+			$data[] = Helper::filterArray( $d, $columnsDefault );
+		}
+		$totalRecords = $totalDisplay = count( $data );
+		if ( isset( $_REQUEST['search'] ) ) {
+			$data         = Helper::filterKeyword( $data, $_REQUEST['search'] );
+			$totalDisplay = count( $data );
+		}
+		if ( isset( $_REQUEST['columns'] ) && is_array( $_REQUEST['columns'] ) ) {
+			foreach ( $_REQUEST['columns'] as $column ) {
+				if ( isset( $column['search'] ) ) {
+					$data         = Helper::filterKeyword( $data, $column['search'], $column['data'] );
+					$totalDisplay = count( $data );
+				}
+			}
+		}
+		if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
+			$column = $_REQUEST['order'][0]['column'];
+			$dir    = $_REQUEST['order'][0]['dir'];
+			usort( $data, function ( $a, $b ) use ( $column, $dir ) {
+				$a = array_slice( $a, $column, 1 );
+				$b = array_slice( $b, $column, 1 );
+				$a = array_pop( $a );
+				$b = array_pop( $b );
+
+				if ( $dir === 'desc' ) {
+					return $a > $b ? true : false;
+				}
+				return $a < $b ? true : false;
+			} );
+		}
+		if ( isset( $_REQUEST['length'] ) ) {
+			$data = array_splice( $data, $_REQUEST['start'], $_REQUEST['length'] );
+		}
+		if ( isset( $_REQUEST['array_values'] ) && $_REQUEST['array_values'] ) {
+			$tmp  = $data;
+			$data = [];
+			foreach ( $tmp as $d ) {
+				$data[] = array_values( $d );
+			}
+		}
+		$secho = 0;
+		if ( isset( $_REQUEST['sEcho'] ) ) {
+			$secho = intval( $_REQUEST['sEcho'] );
+		}
+		$result = [
+			'iTotalRecords'        => $totalRecords,
+			'iTotalDisplayRecords' => $totalDisplay,
+			'sEcho'                => $secho,
+			'aaData'               => $data,
+		];
+		header('Content-Type: application/json');
+		header('Access-Control-Allow-Origin: *');
+		header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
+		header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
+		return json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+	}
+	public function handbookBeats()
+	{
+		return view('v3.collection.handbook.beats');
+	}
+	public function handbookBeatsTable()
+	{
+		$returndata = [];
+		if(auth()->user()->type == 'subadmin'){
+			$addedBy = array();
+			$Ids = Helper::getAllMisIdsBySubAdminId(auth()->user()->id);
+			foreach ($Ids as $key) {
+				array_push($addedBy, $key->id);
+			}
+			array_push($addedBy, auth()->user()->id);
+			$returndata = Beatplan::leftjoin('vendors', function($join){
+				$join->on('vendors.id','=','beatplans.client_id');    
+			})->whereIn('beatplans.added_by',$addedBy)->select('beatplans.*','vendors.name as clientname')->get();
+		}elseif (auth()->user()->type == 'mis' && auth()->user()->client_id == null) {
+			$allotedData = Helper::allotedZonesAndClientId(auth()->user()->id);
+			if (isset($allotedData) && !empty($allotedData)) {
+				$returndata = Beatplan::leftjoin('vendors', function($join){
+					$join->on('vendors.id','=','beatplans.client_id');    
+				})->where(function($q) use ($allotedData){
+					$i = 1;
+					foreach ($allotedData as $key) {
+						if ($i == 1 ) {
+							$q->where(['beatplans.added_by' => auth()->user()->created_by_id, 'beatplans.mp_zone' => $key->zone, 'beatplans.client_id' => $key->client]);
+						}else{
+							$q->orWhere(['beatplans.added_by' => auth()->user()->created_by_id, 'beatplans.mp_zone' => $key->zone, 'beatplans.client_id' => $key->client]);
+						}
+						$i++;
+					}
+				})->select('beatplans.*','vendors.name as clientname')->paginate(10);
+			}
+		}
+		$columnsDefault = [
+			'client' => true,     
+			'plan_date' => true,      
+			'zone' => true,      
+			'action' => true,     
+		];
+		$alldata = array();
+		if(isset($returndata) && !empty($returndata)){
+			$i = 0;
+			foreach($returndata as $key){
+				$alldata[$i]['client'] = $key->clientname;
+				$alldata[$i]['plan_date'] = $key->effective_date;
+				$alldata[$i]['zone'] = $key->mp_zone;
+				$alldata[$i]['action'] = '<a class="btn btn-sm btn-clean btn-icon" title="View Beat"><i class="la la-eye text-success"></i></a>';
+				$i++;
+			}
+		}
+		$data = [];
+		foreach ( $alldata as $d ) {
+			$data[] = Helper::filterArray( $d, $columnsDefault );
+		}
+		$totalRecords = $totalDisplay = count( $data );
+		if ( isset( $_REQUEST['search'] ) ) {
+			$data         = Helper::filterKeyword( $data, $_REQUEST['search'] );
+			$totalDisplay = count( $data );
+		}
+		if ( isset( $_REQUEST['columns'] ) && is_array( $_REQUEST['columns'] ) ) {
+			foreach ( $_REQUEST['columns'] as $column ) {
+				if ( isset( $column['search'] ) ) {
+					$data         = Helper::filterKeyword( $data, $column['search'], $column['data'] );
+					$totalDisplay = count( $data );
+				}
+			}
+		}
+		if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
+			$column = $_REQUEST['order'][0]['column'];
+			$dir    = $_REQUEST['order'][0]['dir'];
+			usort( $data, function ( $a, $b ) use ( $column, $dir ) {
+				$a = array_slice( $a, $column, 1 );
+				$b = array_slice( $b, $column, 1 );
+				$a = array_pop( $a );
+				$b = array_pop( $b );
+
+				if ( $dir === 'desc' ) {
+					return $a > $b ? true : false;
+				}
+				return $a < $b ? true : false;
+			} );
+		}
+		if ( isset( $_REQUEST['length'] ) ) {
+			$data = array_splice( $data, $_REQUEST['start'], $_REQUEST['length'] );
+		}
+		if ( isset( $_REQUEST['array_values'] ) && $_REQUEST['array_values'] ) {
+			$tmp  = $data;
+			$data = [];
+			foreach ( $tmp as $d ) {
+				$data[] = array_values( $d );
+			}
+		}
+		$secho = 0;
+		if ( isset( $_REQUEST['sEcho'] ) ) {
+			$secho = intval( $_REQUEST['sEcho'] );
+		}
+		$result = [
+			'iTotalRecords'        => $totalRecords,
+			'iTotalDisplayRecords' => $totalDisplay,
+			'sEcho'                => $secho,
+			'aaData'               => $data,
+		];
+		header('Content-Type: application/json');
+		header('Access-Control-Allow-Origin: *');
+		header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
+		header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
+		return json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 	}
 
 }

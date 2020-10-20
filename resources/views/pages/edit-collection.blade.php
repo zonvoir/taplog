@@ -123,7 +123,6 @@
 						</div>
 					</div>
 					<div class="row">
-
 						<div class="col">
 							<label for="fuel_guage_bef_fill_img">Fuel Gauge Before Filling Photo</label>
 							<div class="file-drop-area">
@@ -172,7 +171,6 @@
 						</div>
 					</div>
 					<div class="row">
-
 						<div class="col">
 							<label for="eb_meter_reading">EB Meter Reading</label>
 							<div class="file-drop-area">
