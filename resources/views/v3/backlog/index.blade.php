@@ -136,28 +136,28 @@
                 </div>
               </form>
               <!--begin: Datatable-->
-              <table class="table table-bordered table-hover table-checkable" id="unloaded_datatable" style="margin-top: 13px !important">
-                <thead>
-                  <tr>
-					<th>
-					  Effective Date
-					</th>
-					<th>
-					 Mp/Zone
-					</th>
-					 <th>
-					  Client Name
-					</th>
-					<th>
-					  Mode
-					</th>
-					<th>
-					  Status
-					</th>
-					<th></th>
-				  </tr>
-                </thead>
-              </table>
+              	<table class="table table-bordered table-hover table-checkable" id="unloaded_datatable" style="margin-top: 13px !important">
+	                <thead>
+	                  <tr>
+						<th>
+						  Effective Date
+						</th>
+						<th>
+						 Mp/Zone
+						</th>
+						 <th>
+						  Client Name
+						</th>
+						<th>
+						  Mode
+						</th>
+						<th>
+						  Status
+						</th>
+						<th></th>
+					  </tr>
+	                </thead>
+              	</table>
               <!--end: Datatable-->
             </div>
           </div>
@@ -204,10 +204,16 @@
 				
 				ajax: {
 					url: '{{ route('backlog.unloaded_datatable') }}',
-					type: 'POST',
+					type: 'GET',
 					data: function(data){
 						//var trip_id =  "{{ request('trip_id') }}";
 						//data.trip_id = trip_id;
+						var start_date = $('#start_date').val();
+						var end_date = $('#end_date').val();
+
+						// Append to data
+						data.start_date = start_date;
+						data.end_date = end_date;
 						data._token = csrf_token;
 					},
 				},
@@ -215,9 +221,9 @@
 				columns: [
 					{data: 'effective_date'},
 					{data: 'mp_zone'},
-					{data: 'client_id'},
+					{data: 'client_id', name: 'client.name'},
 					{data: 'mode'},
-					{data: 'status'},
+					{data: 'status', orderable: false, searchable: false},
 					{data: 'action', orderable: false, searchable: false},
 				],
 			});

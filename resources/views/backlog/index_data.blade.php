@@ -103,13 +103,13 @@
 							      <div class="modal-body">
 							        <form>
 							        	<div class="form-group">
-							        		<input type="number" id="newLoad{{$backlog->id}}" value="{{$backlog->beat_plan_data()->quantity}}">
+							        		<input type="number" id="newLoad{{$backlog->id}}" value="{{$backlog->beat_plan_data()->quantity??0}}">
 							        	</div>
 							        </form>
 							      </div>
 							      <div class="modal-footer">
 							        <button type="button" class="btn btn-secondary dis_btn" data-dismiss="modal">Close</button>
-							        <button type="button" class="btn btn-primary update_load dis_btn" backlog_id="{{$backlog->id}}" beatplan_data_id="{{$backlog->beat_plan_data()->id}}">Update</button>
+							        <button type="button" class="btn btn-primary update_load dis_btn" backlog_id="{{$backlog->id}}" beatplan_data_id="{{$backlog->beat_plan_data()->id??''}}">Update</button>
 							      </div>
 							    </div>
 							  </div>

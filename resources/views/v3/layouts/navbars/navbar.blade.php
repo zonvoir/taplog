@@ -29,7 +29,7 @@
 					<!--end::Item-->
 					<!--begin::Item-->
 					<li class="nav-item mr-3">
-						<a href="#" class="nav-link py-4 px-6" data-toggle="tab" data-target="#kt_header_tab_2" role="tab">Backlog</a>
+						<a href="#" class="nav-link py-4 px-6 {{ $pageSlug =='unallocated' || $pageSlug =='unloaded' || $pageSlug =='not-filled' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_backlog" role="tab">Backlog</a>
 					</li>
 					<!--end::Item-->
 					<!--begin::Item-->
@@ -283,6 +283,9 @@
 						<a href="#" class="nav-link btn btn-clean {{$pageSlug == 'users' || $pageSlug == 'users-create' || $pageSlug == 'users-profile' || $pageSlug =='users-contact' || $pageSlug =='users-kyc' || $pageSlug =='users-password' || $pageSlug =='users-marital' || $pageSlug == 'vendors' || $pageSlug == 'vendors-create' || $pageSlug == 'vendors-vehicle' || $pageSlug == 'vendors-personal' || $pageSlug == 'vendors-kyc' ? 'active' : ''}}" data-toggle="tab" data-target="#kt_header_tab_2" role="tab">User's</a>
 					</li>
 					<!--end::Item-->
+					<li class="nav-item mr-2">
+						<a href="#" class="nav-link btn btn-clean {{ $pageSlug =='unallocated' || $pageSlug =='unloaded' || $pageSlug =='not-filled' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_backlog" role="tab">Backlog</a>
+					</li>
 					<!--begin::Item-->
 					<li class="nav-item mr-2">
 						<a href="#" class="nav-link btn btn-clean {{ $pageSlug =='load-verification' || $pageSlug =='trip-allotment' || $pageSlug =='trips' || $pageSlug =='all-load' || $pageSlug =='load-sites' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_trip" role="tab">Trip/Load</a>
@@ -341,6 +344,33 @@
 							</div>
 							<!--end::Menu-->
 							
+						</div>
+						<div class="tab-pane py-5 p-lg-0 {{ $pageSlug =='unallocated' || $pageSlug =='unloaded' || $pageSlug =='not-filled' ? 'active' :'' }}" id="kt_header_tab_backlog">
+							<!--begin::Menu-->
+							<div id="kt_header_menu" class="header-menu header-menu-mobile header-menu-layout-default">
+								<!--begin::Nav-->
+								<ul class="menu-nav">
+									@if(auth()->user()->type == 'subadmin' || auth()->user()->type == 'mis')
+									<li class="menu-item {{ $pageSlug == 'unallocated' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+										<a href="{{ route('backlog.index') }}?type=unallocated" class="menu-link">
+											<span class="menu-text">{{ __('Unallocated') }}</span>
+										</a>
+									</li>
+									<li class="menu-item {{ $pageSlug == 'unloaded' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+										<a href="{{ route('backlog.index') }}?type=unloaded" class="menu-link">
+											<span class="menu-text">{{ __('Unloaded') }}</span>
+										</a>
+									</li>
+									<li class="menu-item {{ $pageSlug == 'not-filled' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+										<a href="{{ route('backlog.index') }}?type=not_filled" class="menu-link">
+											<span class="menu-text">{{ __('Not Filled') }}</span>
+										</a>
+									</li>
+									@endif
+								</ul>
+								<!--end::Nav-->
+							</div>
+							<!--end::Menu-->
 						</div>
 						<div class="tab-pane py-5 p-lg-0 {{ $pageSlug =='collections' || $pageSlug == 'collection-create' || $pageSlug == 'collection-edit' || $pageSlug == 'handbook-beats'  ? 'active' :'' }}" id="kt_header_tab_collections">
 							<!--begin::Menu-->

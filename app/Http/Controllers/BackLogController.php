@@ -21,91 +21,316 @@ class BackLogController extends Controller
 	public function index(Request $request){
 
 		if($request->type == "unallocated"){
-			$plans 	= Beatplan::select('beatplans.*','beatplans.id as plan_id')->join('beatplan_data', function($join) {
-				$join->on('beatplan_data.beatplan_id', '=', 'beatplans.id');
-			})->where('beatplans.effective_date', '<', date('d-m-Y'))->where('beatplan_data.status', 'pending')->groupBy('beatplans.id')->paginate(10);
-			return view('v3.backlog.unallocated',['plans' => $plans, 'type' => $request->type]);
+			return view('v3.backlog.unallocated',[]);
 		}
 		if($request->type == "unallocated_data" && $request->beat_id){
-			$plan_id = $request->beat_id;
-			
-			$backlogs 	= BeatPlanData::whereIn('beatplan_id', [$plan_id])->whereIn('status',['pending'])->paginate(10);
-			
-			// return dd($backlogs);
+			$beatplan = Beatplan::find($request->beat_id);
 
-			return view('backlog.unallocated_data',['backlogs' => $backlogs, 'type' => $request->type]);
+			return view('v3.backlog.unallocated_data', compact('beatplan'));
 		}
 		if($request->type == "unloaded"){
-			
-			$plans 	= Beatplan::select('beatplans.*','beatplans.id as plan_id')->join('trip_data', function($join) {
-				$join->on('trip_data.beatplan_id', '=', 'beatplans.id');
-			})->where('beatplans.effective_date', '<', date('d-m-Y'))->where('trip_data.status', 'unloaded')->groupBy('beatplans.id')->paginate(10);
 
-			return view('v3.backlog.index',['plans' => $plans, 'type' => $request->type]);
+			return view('v3.backlog.index',[]);
 		}
 		if($request->type == "unloaded_data" && $request->beat_id){
-			$backlogs	= Trips::where('beatplan_id', $request->beat_id)
-			->pluck('id')->toArray();
-			$backlogs 	= TripData::whereIn('trip_id', $backlogs)->whereIn('status',['unloaded'])->paginate(10);
-			//return dd($backlogs);
-			
-			$trips	    = Trips::where('effective_date', '>=', date('d-m-Y'))->get();
-			return view('backlog.index_data',['backlogs' => $backlogs, 'type' => $request->type, 'trips' => $trips]);
+			$beatplan = Beatplan::find($request->beat_id);
+			return view('v3.backlog.index_data', compact('beatplan'));
 		}
 		if($request->type == "not_filled"){
-			$plans 	= Beatplan::select('beatplans.*','beatplans.id as plan_id')->join('trip_data', function($join) {
-				$join->on('trip_data.beatplan_id', '=', 'beatplans.id');
-			})->where('beatplans.effective_date', '<', date('d-m-Y'))->where('trip_data.status', 'loaded')->groupBy('beatplans.id')->paginate(10);
-			return view('v3.backlog.not_filled',['plans' => $plans]);
+			
+			return view('v3.backlog.not_filled',[]);
 		}
 		
 		if($request->type == "not_filled_data" && $request->beat_id){
-			$backlogs	= Trips::where('beatplan_id', $request->beat_id)
-			->pluck('id')->toArray();
-			$backlogs 	= TripData::whereIn('trip_id', $backlogs)->whereIn('status',['loaded'])->paginate(10);
-			//return dd($backlogs);
-			
-			$trips	    = Trips::where('effective_date', '>=', date('d-m-Y'))->get();
-			return view('backlog.not_filled_data',['backlogs' => $backlogs, 'type' => $request->type, 'trips' => $trips]);
+			$beatplan = Beatplan::find($request->beat_id);
+			return view('v3.backlog.not_filled_data', compact('beatplan'));
 		}
 
 		// return dd($trips);
 	}
 
-	public function unloaded_datatable(Request $request){
-		$query 	= Beatplan::with(['client'])
-					->select('beatplans.*')
-					->join('trip_data', function($join) {
-						$join->on('trip_data.beatplan_id', '=', 'beatplans.id');
-					});
-/*
+	public function unallocated_datatable(Request $request){
+		$query 	= Beatplan::with(['client'])->select('beatplans.*','beatplans.id as plan_id')
+							->join('beatplan_data', function($join) {
+								$join->on('beatplan_data.beatplan_id', '=', 'beatplans.id');
+							})
+							->where('beatplans.effective_date', '<', date('d-m-Y'))
+							->where('beatplan_data.status', 'pending')
+							->groupBy('beatplans.id');
+
 		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
 			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
-		}*/
+		}
 
 		return \DataTables::of($query)
-		->addColumn('effective_date', function(Beatplan $data) {
-			return '<a href="'.route('backlog.index').'?type=load_data&beat_id='. $data->id .'">'.$data->effective_date??''.'</a>';
-		})
-		->addColumn('mp_zone', function(Beatplan $data) {
-			return $data->mp_zone;
-		})
-		->addColumn('client_id', function(Beatplan $data) {
-			return $data->client->name ?? '';
-		})
-		->addColumn('mode', function(Beatplan $data) {
-			return $data->mode ?? '';
-		})
-		->addColumn('status', function(Beatplan $data) {
-			return $data->status ?? '';
-		})
-		->addColumn('action', function(Beatplan $data) {
-			return '<a href="' . route('backlog.trip_data',$data->id) . '" class="btn btn-sm btn-clean btn-icon"><i class="la la-eye"></i></a>';
-		})
-		->orderColumn('effective_date', function ($query, $order) {
-			$query->orderBy('effective_date', $order);
-		})
-		->rawColumns(['effective_date', 'action'])->make(true);
+				->addColumn('client_id', function(Beatplan $data) {
+					return $data->client->name ?? '';
+				})
+				->addColumn('action', function(Beatplan $data) {
+					return '<a href="' . route('backlog.trip_data') ."?beat_id=".$data->id . '" class="btn btn-sm btn-clean btn-icon"><i class="la la-eye"></i></a>';
+				})
+				->addColumn('effective_date', function(Beatplan $data) {
+					return '<a href="'.route('backlog.index').'?type=unallocated_data&beat_id='. $data->id .'">'.$data->effective_date??''.'</a>';
+				})
+				->addColumn('status', function(Beatplan $data) {
+					$html ='';
+					$html .= $data->beatplan_data->count('site_id') ?? 0 ;
+					$html .= " Sites";
+					if($data->loaded_count()) 
+					$html .= "/Loading Done(".$data->loaded_count().")";
+				
+					if($data->filled_count()) 
+					$html .= "/Filling Done(".$data->filled_count().")";
+					
+					return $html;
+				})
+				->rawColumns(['effective_date', 'action', 'status'])
+				->make('true');
+	}
+
+	public function unallocated_data_datatable(Request $request){
+		$plan_id = $request->beat_id;
+		$query 	= BeatPlanData::with(['beatplan','site'])
+								->select('beatplan_data.*')
+								->whereIn('beatplan_data.beatplan_id', [$plan_id])
+								->whereIn('beatplan_data.status',['pending']);
+
+		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
+			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
+		}
+
+		return \DataTables::of($query)
+				->addColumn('effective_date', function(BeatPlanData $data) {
+					return $data->beatplan->effective_date ?? '';
+				})
+				->addColumn('site_id', function(BeatPlanData $data) {
+					return $data->site->site_id ?? '';
+				})
+				->addColumn('site_name', function(BeatPlanData $data) {
+					return $data->site->site_name ?? '';
+				})
+				->addColumn('site_category', function(BeatPlanData $data) {
+					return $data->site->site_category ?? '';
+				})
+				->addColumn('technician_name', function(BeatPlanData $data) {
+					return $data->site->technician_name ?? '';
+				})
+				->addColumn('technician_number', function(BeatPlanData $data) {
+					return $data->site->technician_contact1 ?? ''.' ,'.$data->site->technician_contact2 ?? '';
+				})
+				->addColumn('qty', function(BeatPlanData $data) {
+					return $data->quantity ?? '';
+				})
+				->addColumn('action', function(BeatPlanData $data) {
+					return '<a href="' . route('load-verification') .'" class="btn btn-sm btn-clean btn-icon"><i class="la la-eye"></i></a>';
+				})
+				->addColumn('status', function(BeatPlanData $data) {
+					$class =  'info';
+					if($data->status == 'loaded'){
+						$class =  'warning';
+					}
+					if($data->status == 'filled'){
+						$class =  'success';
+					}
+					return '<span class="label label-lg font-weight-bold label-light-'.$class.' label-inline">'.ucfirst($data->status).'</span>';
+					return $data->status;
+					
+				})
+				->rawColumns(['effective_date', 'action', 'status'])
+				->make('true');
+	}
+
+	public function unloaded_datatable(Request $request){
+		$query 	= Beatplan::with(['client'])->
+							select('beatplans.*','beatplans.id as plan_id')
+							->join('trip_data', function($join) {
+								$join->on('trip_data.beatplan_id', '=', 'beatplans.id');
+							})
+							->where('beatplans.effective_date', '<', date('d-m-Y'))
+							->where('trip_data.status', 'unloaded')
+							->groupBy('beatplans.id');
+
+		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
+			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
+		}
+
+		return \DataTables::of($query)
+				->addColumn('client_id', function(Beatplan $data) {
+					return $data->client->name ?? '';
+				})
+				->addColumn('action', function(Beatplan $data) {
+					return '<a href="' . route('backlog.trip_data') ."?beat_id=".$data->id . '" class="btn btn-sm btn-clean btn-icon"><i class="la la-eye"></i></a>';
+				})
+				->addColumn('effective_date', function(Beatplan $data) {
+					return '<a href="'.route('backlog.index').'?type=unloaded_data&beat_id='. $data->id .'">'.$data->effective_date??''.'</a>';
+				})
+				->addColumn('status', function(Beatplan $data) {
+					$html ='';
+					$html .= $data->beatplan_data->count('site_id') ?? 0 ;
+					$html .= " Sites";
+					if($data->loaded_count()) 
+					$html .= "/Loading Done(".$data->loaded_count().")";
+				
+					if($data->filled_count()) 
+					$html .= "/Filling Done(".$data->filled_count().")";
+					
+					return $html;
+				})
+				->rawColumns(['effective_date', 'action', 'status'])
+				->make('true');
+	}
+
+	public function unloaded_data_datatable(Request $request){
+		$backlogs	= Trips::where('beatplan_id', $request->beat_id)
+		->pluck('id')->toArray();
+		$query 	= TripData::with(['site','trip','trip.driver','trip.filler'])
+							->select('trip_data.*')
+							->whereIn('trip_data.trip_id', $backlogs)
+							->whereIn('trip_data.status',['unloaded']);
+		
+
+		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
+			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
+		}
+
+		return \DataTables::of($query)
+				->addColumn('trip_id', function(TripData $data) {
+					return $data->trip->trip_id ?? '';
+				})
+				->addColumn('site_id', function(TripData $data) {
+					return $data->site->site_id ?? '';
+				})
+				->addColumn('site_name', function(TripData $data) {
+					return $data->site->site_name ?? '';
+				})
+				->addColumn('site_category', function(TripData $data) {
+					return $data->site->site_category ?? '';
+				})
+				->addColumn('technician_name', function(TripData $data) {
+					return $data->site->technician_name ?? '';
+				})
+				->addColumn('technician_number', function(TripData $data) {
+					return $data->site->technician_contact1 ?? ''.' ,'.$data->site->technician_contact2 ?? '';
+				})
+				->addColumn('driver_name', function(TripData $data) {
+					return $data->trip->driver->name ?? '';
+				})
+				->addColumn('filler_name', function(TripData $data) {
+					return $data->trip->filler->name ?? '';
+				})
+				->addColumn('action', function(TripData $data) {
+					return '<a href="' . route('load-verification') .'" class="btn btn-sm btn-clean btn-icon"><i class="la la-eye"></i></a>';
+				})
+				->addColumn('status', function(TripData $data) {
+					$class =  'info';
+					if($data->status == 'loaded'){
+						$class =  'warning';
+					}
+					if($data->status == 'filled'){
+						$class =  'success';
+					}
+					return '<span class="label label-lg font-weight-bold label-light-'.$class.' label-inline">'.ucfirst($data->status).'</span>';
+					return $data->status;
+					
+				})
+				->rawColumns(['effective_date', 'action', 'status'])
+				->make('true');
+	}
+
+	public function not_filled_datatable(Request $request){
+		$query 	= Beatplan::with(['client'])
+							->select('beatplans.*','beatplans.id as plan_id')
+							->join('trip_data', function($join) {
+								$join->on('trip_data.beatplan_id', '=', 'beatplans.id');
+							})->where('beatplans.effective_date', '<', date('d-m-Y'))
+							->where('trip_data.status', 'loaded')
+							->groupBy('beatplans.id');
+
+		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
+			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
+		}
+
+		return \DataTables::of($query)
+				->addColumn('client_id', function(Beatplan $data) {
+					return $data->client->name ?? '';
+				})
+				->addColumn('action', function(Beatplan $data) {
+					return '<a href="' . route('backlog.trip_data') ."?beat_id=".$data->id . '" class="btn btn-sm btn-clean btn-icon"><i class="la la-eye"></i></a>';
+				})
+				->addColumn('effective_date', function(Beatplan $data) {
+					return '<a href="'.route('backlog.index').'?type=not_filled_data&beat_id='. $data->id .'">'.$data->effective_date??''.'</a>';
+				})
+				->addColumn('status', function(Beatplan $data) {
+					$html ='';
+					$html .= $data->beatplan_data->count('site_id') ?? 0 ;
+					$html .= " Sites";
+					if($data->loaded_count()) 
+					$html .= "/Loading Done(".$data->loaded_count().")";
+				
+					if($data->filled_count()) 
+					$html .= "/Filling Done(".$data->filled_count().")";
+					
+					return $html;
+				})
+				->rawColumns(['effective_date', 'action', 'status'])
+				->make('true');
+	}
+
+	public function not_filled_data_datatable(Request $request){
+
+			$backlogs	= Trips::where('beatplan_id', $request->beat_id)
+			->pluck('id')->toArray();
+			$query 		= TripData::with(['site','trip','trip.driver','trip.filler'])
+									->select('trip_data.*')
+									->whereIn('trip_data.trip_id', $backlogs)->whereIn('trip_data.status',['loaded']);
+			//return dd($backlogs);
+
+		if($request->has('start_date') && $request->has('end_date') && !empty($request->start_date) && !empty($request->end_date)){
+			$query->whereBetween('effective_date', [$request->start_date, $request->end_date]);
+		}
+
+		return \DataTables::of($query)
+				->addColumn('trip_id', function(TripData $data) {
+					return $data->trip->trip_id ?? '';
+				})
+				->addColumn('site_id', function(TripData $data) {
+					return $data->site->site_id ?? '';
+				})
+				->addColumn('site_name', function(TripData $data) {
+					return $data->site->site_name ?? '';
+				})
+				->addColumn('site_category', function(TripData $data) {
+					return $data->site->site_category ?? '';
+				})
+				->addColumn('technician_name', function(TripData $data) {
+					return $data->site->technician_name ?? '';
+				})
+				->addColumn('technician_number', function(TripData $data) {
+					return $data->site->technician_contact1 ?? ''.' ,'.$data->site->technician_contact2 ?? '';
+				})
+				->addColumn('driver_name', function(TripData $data) {
+					return $data->trip->driver->name ?? '';
+				})
+				->addColumn('filler_name', function(TripData $data) {
+					return $data->trip->filler->name ?? '';
+				})
+				->addColumn('action', function(TripData $data) {
+					return '<a href="' . route('load-verification') .'" class="btn btn-sm btn-clean btn-icon"><i class="la la-eye"></i></a>';
+				})
+				->addColumn('status', function(TripData $data) {
+					$class =  'info';
+					if($data->status == 'loaded'){
+						$class =  'warning';
+					}
+					if($data->status == 'filled'){
+						$class =  'success';
+					}
+					return '<span class="label label-lg font-weight-bold label-light-'.$class.' label-inline">'.ucfirst($data->status).'</span>';
+					return $data->status;
+					
+				})
+				->rawColumns(['effective_date', 'action', 'status'])
+				->make('true');
 	}
 
 	public function assign_trip(Request $request){
@@ -132,30 +357,130 @@ class BackLogController extends Controller
 	}
 
 	public function load_transfer(Request $request){
-		$verified = Verifiedloads::findOrFail($request->verified_id);
-		$load_transfer = LoadTransfer::firstOrNew(['verified_id' => $request->verified_id]);
-		$load_transfer->verified_id  = $request->verified_id;
-		$load_transfer->beatplan_id  = $verified->beatplan_id;
-		$load_transfer->site_id 	 = $verified->sites;
-		$load_transfer->trip_id 	 = $verified->auto_trip_id;
-		$load_transfer->trip_data_id = $verified->trip_data_id;
-		$load_transfer->driver_id 	 = $request->driver_id;
-		$load_transfer->filler_id 	 = $request->filler_id;
-		$load_transfer->vehicle_id 	 = $request->vehicle_id;
-		//return dd($load_transfer);
-		$load_transfer->save();
-		//$verified->status = 'transferred';
-		$verified->transfer_id = $load_transfer->id;
-		$verified->save();
 
-		if($verified){
-			$trip 				 = Trips::find($verified->auto_trip_id);
-			$trip->transferred 	 = '1';
-			$trip->driver_id 	 = $request->driver_id;
-			$trip->filler_id 	 = $request->filler_id;
-			$trip->vehicle_id 	 = $request->vehicle_id;
-			$trip->save();
+		$trip_load = $request->trip_load;
+		$trip 	   = Trips::find($trip_load);
+
+		if($trip){
+			$verified = Verifiedloads::findOrFail($request->verified_id);
+			$trip_data_old = TripData::where(['id' => $verified->trip_data_id, 'data_id'=>  $verified->sites, 'trip_id'=>  $trip->id])->first();
+			if($trip_data_old){
+				// dd('matched');
+			}
+
+			$beatplan_data = BeatPlanData::where(['site_id' => $verified->sites, 'beatplan_id' => $verified->beatplan_id])->first();
+			$beatplan_data->beatplan_id = $trip->beatplan_id;
+			$beatplan_data->save();
+
+			$load_transfer = LoadTransfer::firstOrNew(['verified_id' => $request->verified_id]);
+			$load_transfer->verified_id  = $request->verified_id;
+			$load_transfer->beatplan_id  = $trip->beatplan_id;
+			$load_transfer->site_id 	 = $verified->sites;
+			$load_transfer->trip_id 	 = $trip->id;
+			$load_transfer->trip_data_id = $verified->trip_data_id;
+			$load_transfer->driver_id 	 = $trip->driver_id;
+			$load_transfer->filler_id 	 = $trip->filler_id;
+			$load_transfer->vehicle_id 	 = $trip->vehicle_id;
+			$load_transfer->type 	 	 = 'trip';
+
+			//return dd($load_transfer);
+			$load_transfer->save();
+			//$verified->status = 'transferred';
+			$verified->beatplan_id 	= $trip->beatplan_id;
+			$verified->trip_id 		= $trip->trip_id;
+			$verified->auto_trip_id = $trip->id;
+			$verified->transfer_id 	= $load_transfer->id;
+			$verified->save();
+
+
+			$trip_data 				= TripData::find($verified->trip_data_id);
+			$trip_data->trip_id 	= $trip->id;
+			$trip_data->beatplan_id = $trip->beatplan_id;
+			$trip_data->transferred = 1;
+			$trip_data->save();
+
+
+		//dd($trip_data, $load_transfer, $verified);
+			if($verified){
+				$trip 				 = Trips::find($verified->auto_trip_id);
+				$trip->transferred 	 = '1';
+				$trip->save();
+			}
+		}else{
+			$verified = Verifiedloads::findOrFail($request->verified_id);
+			$load_transfer = LoadTransfer::firstOrNew(['verified_id' => $request->verified_id]);
+			$load_transfer->verified_id  = $request->verified_id;
+			$load_transfer->beatplan_id  = $verified->beatplan_id;
+			$load_transfer->site_id 	 = $verified->sites;
+			$load_transfer->trip_id 	 = $verified->auto_trip_id;
+			$load_transfer->trip_data_id = $verified->trip_data_id;
+			$load_transfer->driver_id 	 = $request->driver_id;
+			$load_transfer->filler_id 	 = $request->filler_id;
+			$load_transfer->vehicle_id 	 = $request->vehicle_id;
+			//return dd($load_transfer);
+			$load_transfer->save();
+			//$verified->status = 'transferred';
+			$verified->transfer_id = $load_transfer->id;
+			$verified->save();
+
+			if($verified){
+				$trip 				 = Trips::find($verified->auto_trip_id);
+				$trip->transferred 	 = '1';
+				$trip->driver_id 	 = $request->driver_id;
+				$trip->filler_id 	 = $request->filler_id;
+				$trip->vehicle_id 	 = $request->vehicle_id;
+				$trip->save();
+			}
 		}
+		
+		return response()->json('transferred');
+	}
+
+	public function load_shift(Request $request){
+
+		$trip_load = $request->trip_load;
+		$trip 	   = Trips::find($trip_load);
+
+		if($trip){
+			$verified = Verifiedloads::findOrFail($request->verified_id);
+			$trip_data_old = TripData::where(['id' => $verified->trip_data_id, 'data_id'=>  $verified->sites, 'trip_id'=>  $trip->id])->first();
+			if($trip_data_old){
+				// dd('matched');
+			}
+
+			$beatplan_data = BeatPlanData::where(['site_id' => $verified->sites, 'beatplan_id' => $verified->beatplan_id])->first();
+			$beatplan_data->beatplan_id = $trip->beatplan_id;
+			$beatplan_data->save();
+
+			$load_transfer                 = LoadTransfer::firstOrNew(['verified_id' => $request->verified_id]);
+			$load_transfer->verified_id    = $request->verified_id;
+			$load_transfer->beatplan_id    = $trip->beatplan_id;
+			$load_transfer->site_id 	   = $verified->sites;
+			$load_transfer->trip_id 	   = $trip->id;
+			$load_transfer->trip_data_id   = $verified->trip_data_id;
+			$load_transfer->driver_id 	   = $trip->driver_id;
+			$load_transfer->filler_id 	   = $trip->filler_id;
+			$load_transfer->vehicle_id 	   = $trip->vehicle_id;
+			$load_transfer->type 	 	   = 'trip';
+			$load_transfer->transfer_type  = 'shift';
+
+			//return dd($load_transfer);
+			$load_transfer->save();
+			//$verified->status = 'transferred';
+			$verified->beatplan_id 	= $trip->beatplan_id;
+			$verified->trip_id 		= $trip->trip_id;
+			$verified->auto_trip_id = $trip->id;
+			$verified->transfer_id 	= $load_transfer->id;
+			$verified->save();
+
+
+			$trip_data 				= TripData::find($verified->trip_data_id);
+			$trip_data->trip_id 	= $trip->id;
+			$trip_data->beatplan_id = $trip->beatplan_id;
+			$trip_data->shift 		= 1;
+			$trip_data->save();
+		}
+		
 		return response()->json('transferred');
 	}
 

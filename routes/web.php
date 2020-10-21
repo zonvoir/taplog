@@ -156,6 +156,7 @@ Route::get('asset-name-list', 'AssetsController@assetNameForTrip')->name('asset-
 
 Route::group(['middleware'=> 'auth', 'prefix' => 'trip'], function(){
 	Route::get('/', 'TripController@index')->name('trips');
+	Route::get('/trips_load', 'TripController@trips_load')->name('trips_load');
 	Route::get('/trip-data-table', 'TripController@datatable')->name('trips_datatable');
 	Route::get('/load-data-table', 'TripController@load_datatable')->name('loads_datatable');
 	Route::get('/load-data-data-table', 'TripController@load_datatable_by_trip_id')->name('loads_data_datatable');
@@ -174,9 +175,15 @@ Route::group(['middleware'=> 'auth', 'prefix' => 'trip'], function(){
 	Route::get('all-loads', 'TripController@allLoad')->name('all-loads');
 	Route::post('update-loading-time', 'TripController@update_loading_time')->name('update-loading-time');
 	Route::get('backlog', 'BackLogController@index')->name('backlog.index');
-	Route::post('unloaded_data', 'BackLogController@unloaded_datatable')->name('backlog.unloaded_datatable');
+	Route::get('unloaded_data', 'BackLogController@unloaded_datatable')->name('backlog.unloaded_datatable');
+	Route::get('unloaded_data_datatable', 'BackLogController@unloaded_data_datatable')->name('backlog.unloaded_data_datatable');
+	Route::get('unallocated_datatable', 'BackLogController@unallocated_datatable')->name('backlog.unallocated_datatable');
+	Route::get('unallocated_data_datatable', 'BackLogController@unallocated_data_datatable')->name('backlog.unallocated_data_datatable');
+	Route::get('not_filled_datatable', 'BackLogController@not_filled_datatable')->name('backlog.not_filled_datatable');
+	Route::get('not_filled_data_datatable', 'BackLogController@not_filled_data_datatable')->name('backlog.not_filled_data_datatable');
 	Route::post('assign-trip', 'BackLogController@assign_trip')->name('backlog.assign_trip');
 	Route::post('load-transfer', 'BackLogController@load_transfer')->name('backlog.load_transfer');
+	Route::post('load-shift', 'BackLogController@load_shift')->name('backlog.load_shift');
 	Route::get('not-delivered', 'BackLogController@not_delivered')->name('backlog.not_delivered');
 	Route::get('beat-plan-data', 'BackLogController@trip_data')->name('backlog.trip_data');
 	Route::post('save-divert', 'BackLogController@save_divert')->name('backlog.save_divert');
