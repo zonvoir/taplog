@@ -114,9 +114,10 @@ var PLANDatatablesDataSourceAjaxServer = function() {
 				                "Deleted!",
 				                "Your file has been deleted.",
 				                "success"
-				            );
-			                table.draw();
-			            },
+				            ).then(function(result){
+                                table.draw();
+                            });
+		            	},
 			            error: function (xhr, ajaxOptions, thrownError) {
 			            	Swal.fire(
 				                "Error deleting!",

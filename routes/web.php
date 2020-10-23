@@ -116,16 +116,19 @@ Route::group(['middleware'=> ['auth','is_vendor'], 'prefix'=> 'vendor'], functio
 
 Route::group(['middleware'=> 'auth', 'prefix'=> 'master'], function(){
 	Route::resource('site', 'SiteMasterController');
-	Route::get('site/delete/{id}', 'SiteMasterController@destroy')->name('site.remove');
+	Route::get('site_datatable', 'SiteMasterController@datatable')->name('site.datatable');
+	Route::post('site/delete/{id}', 'SiteMasterController@destroy')->name('site.remove');
+	Route::get('site-detail', 'SiteMasterController@getSiteDetail')->name('site.detail');
 	Route::resource('vehicle', 'VehicleMasterController');
 	Route::resource('assets', 'AssetsController');
+	Route::get('asset_datatable', 'AssetsController@datatable')->name('asset.datatable');
 	Route::get('serialkeys', ['as' => 'assets.serialkeys','uses' => 'AssetsController@showSerialKeys']);
 	Route::post('serialkeys-update', ['as' => 'assets.serialkeys-update','uses' => 'AssetsController@updateSerialKeys']);
 	Route::resource('employee', 'EmployeeController');
 	Route::get('employee/delete/{id}', 'EmployeeController@destroy')->name('employee.remove');
 	Route::resource('route', 'RouteController');
 	Route::post('import-sites', 'SiteMasterController@import')->name('site.import');
-	Route::get('delete-asset/{id}', ['as' => 'delete-asset','uses' => 'AssetsController@destroy']);
+	Route::post('delete-asset/{id}', 'AssetsController@destroy')->name('asset.remove');
 	Route::get('delete-route/{id}', ['as' => 'delete-route','uses' => 'RouteController@destroy']);
 	Route::get('delete-site/{id}', ['as' => 'delete-site','uses' => 'SiteMasterController@destroy']);
 	Route::get('delete-vendor/{id}', ['as' => 'delete-vendor','uses' => 'VendorController@destroy']);

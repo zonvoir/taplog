@@ -28,7 +28,7 @@
 					<!--end::Item-->
 					<!--begin::Item-->
 					<li class="nav-item mr-3">
-						<a href="#" class="nav-link py-4 px-6" data-toggle="tab" data-target="#kt_header_tab_mas" role="tab">Master's</a>
+						<a href="#" class="nav-link py-4 px-6 {{ $pageSlug =='site_master' || $pageSlug =='assets_master' || $pageSlug =='route_master' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_master" role="tab">Master's</a>
 					</li>
 					<!--end::Item-->
 					@endif
@@ -293,6 +293,11 @@
 					</li>
 					<!--end::Item-->
 					<li class="nav-item mr-2">
+						<a href="#" class="nav-link btn btn-clean {{ $pageSlug =='site_master' || $pageSlug =='assets_master' || $pageSlug =='route_master' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_master" role="tab">Master's</a>
+					</li>
+					<!--begin::Item-->
+					<!--end::Item-->
+					<li class="nav-item mr-2">
 						<a href="#" class="nav-link btn btn-clean {{ $pageSlug =='unallocated' || $pageSlug =='unloaded' || $pageSlug =='not-filled' ? 'active' :'' }}" data-toggle="tab" data-target="#kt_header_tab_backlog" role="tab">Backlog</a>
 					</li>
 					<!--begin::Item-->
@@ -353,6 +358,33 @@
 							</div>
 							<!--end::Menu-->
 							
+						</div>
+						<div class="tab-pane py-5 p-lg-0 {{ $pageSlug =='site_master' || $pageSlug =='assets_master' || $pageSlug =='route_master' ? 'active' :'' }}" id="kt_header_tab_master">
+							<!--begin::Menu-->
+							<div id="kt_header_menu" class="header-menu header-menu-mobile header-menu-layout-default">
+								<!--begin::Nav-->
+								<ul class="menu-nav">
+									@if(auth()->user()->type == 'subadmin' || auth()->user()->type == 'mis')
+									<li class="menu-item {{ $pageSlug == 'site_master' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+										<a href="{{ route('site.index') }}" class="menu-link">
+											<span class="menu-text">{{ __('Sites Management') }}</span>
+										</a>
+									</li>
+									<li class="menu-item {{ $pageSlug == 'assets_master' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+										<a href="{{ route('assets.index')  }}" class="menu-link">
+											<span class="menu-text">{{ __('Assets Management') }}</span>
+										</a>
+									</li>
+									<li class="menu-item {{ $pageSlug == 'route_master' ? 'menu-item-active' :'' }}" aria-haspopup="true">
+										<a href="{{ route('route.index')  }}" class="menu-link">
+											<span class="menu-text">{{ __('Route Management') }}</span>
+										</a>
+									</li>
+									@endif
+								</ul>
+								<!--end::Nav-->
+							</div>
+							<!--end::Menu-->
 						</div>
 						<div class="tab-pane py-5 p-lg-0 {{ $pageSlug =='unallocated' || $pageSlug =='unloaded' || $pageSlug =='not-filled' ? 'active' :'' }}" id="kt_header_tab_backlog">
 							<!--begin::Menu-->

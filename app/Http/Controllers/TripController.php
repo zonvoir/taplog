@@ -616,6 +616,9 @@ class TripController extends Controller
 		->orderColumn('effective_date', function ($query, $order) {
 			$query->orderBy('effective_date', $order);
 		})
+		->orderColumn('trip_id', function ($query, $order) {
+			$query->orderBy('trip_id', $order);
+		})
 		->rawColumns(['trip_id'])->make(true);
 
 	}

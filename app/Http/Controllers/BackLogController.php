@@ -84,6 +84,9 @@ class BackLogController extends Controller
 					
 					return $html;
 				})
+				->orderColumn('effective_date', function ($query, $order) {
+					$query->orderBy('effective_date', $order);
+				})
 				->rawColumns(['effective_date', 'action', 'status'])
 				->make('true');
 	}
@@ -136,6 +139,9 @@ class BackLogController extends Controller
 					return $data->status;
 					
 				})
+				->orderColumn('effective_date', function ($query, $order) {
+					$query->orderBy('effective_date', $order);
+				})
 				->rawColumns(['effective_date', 'action', 'status'])
 				->make('true');
 	}
@@ -175,6 +181,9 @@ class BackLogController extends Controller
 					$html .= "/Filling Done(".$data->filled_count().")";
 					
 					return $html;
+				})
+				->orderColumn('effective_date', function ($query, $order) {
+					$query->orderBy('effective_date', $order);
 				})
 				->rawColumns(['effective_date', 'action', 'status'])
 				->make('true');
@@ -271,6 +280,9 @@ class BackLogController extends Controller
 					$html .= "/Filling Done(".$data->filled_count().")";
 					
 					return $html;
+				})
+				->orderColumn('effective_date', function ($query, $order) {
+					$query->orderBy('effective_date', $order);
 				})
 				->rawColumns(['effective_date', 'action', 'status'])
 				->make('true');

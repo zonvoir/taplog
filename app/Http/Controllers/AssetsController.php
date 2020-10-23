@@ -14,14 +14,29 @@ class AssetsController extends Controller
      */
     public function index()
     {
+        return view('v3.assets.index',[]);   
+    }
+
+    public function datatable(Request $request){
+
         if (auth()->user()->type == 'admin') {
-            $assets = Assets::paginate(10);
-            return view('assets.index',['assets'=>$assets]);
+            $query = Assets::query();
         }if (auth()->user()->type == 'subadmin') {
-            $assets = Assets::where('created_by_id','=',auth()->user()->id)->paginate(10);
-            return view('assets.index',['assets'=>$assets]);
+            $query = Assets::where('created_by_id','=',auth()->user()->id);
         }
-        
+
+        return \DataTables::of($query)
+        ->addColumn('action', function(Assets $data) {
+            $html = '';
+           
+            $html .= '<a href="'.route('assets.edit', $data->id).'" class="btn btn-sm btn-clean btn-icon" ><i class="la la-edit"></i></a>';
+
+            $html .= '<a href="javascript: void(0);" data-href="'.route('asset.remove',$data->id).'" id="'. $data->id.'" class="delete btn btn-sm btn-clean btn-icon"><i class="la la-trash text-danger"></i></a>';
+            
+
+            return $html;
+        })
+        ->rawColumns(['action'])->make(true);
     }
 
     /**
@@ -31,7 +46,7 @@ class AssetsController extends Controller
      */
     public function create()
     {
-        return view('assets.create');
+        return view('v3.assets.create');
     }
 
     /**
@@ -77,7 +92,7 @@ class AssetsController extends Controller
     public function edit($id)
     {
         $asset = Assets::find($id);
-        return view('assets.edit',['asset'=>$asset]);
+        return view('v3.assets.edit',['asset'=>$asset]);
     }
 
     /**
