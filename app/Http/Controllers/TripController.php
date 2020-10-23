@@ -470,7 +470,6 @@ class TripController extends Controller
 			$tripDetails1 = [];
 		}
 		
-		//return dd($tripDetails1);
 		
 		$mp_zone = Beatplan::where(['effective_date' => $request->effective_date_load])->groupBy('mp_zone')->get();
 		
@@ -484,15 +483,17 @@ class TripController extends Controller
 			$fillers 		= User::where(['type' => 'filler'])->get();
 			$areaOfficers 	= User::where(['type' => 'field_officer'])->get();
 			$vendors 		= Vendor::where(['type' => 'vendor', 'vendor_category' => 'PUMP'])->get();
+			$trips 			= Trips::limit(10)->get();
 		}else{
 			$sites = [];
 			$drivers = [];
 			$fillers = [];
 			$areaOfficers = [];
 			$vendors = [];
+			$trips = [];
 		}
-		
-		return view('v3.trip.load-sites',['trips'=>$tripDetails,'trips1'=>$tripDetails1,'mp_zone'=>$mp_zone,'client'=>$client,'action'=>$action, 'sites'=>$sites, 'drivers'=>$drivers, 'fillers'=> $fillers, 'areaOfficers'=> $areaOfficers, 'vendors'=>$vendors]);
+
+		return view('v3.trip.load-sites',['trips'=>$tripDetails,'trips1'=>$tripDetails1,'mp_zone'=>$mp_zone,'client'=>$client,'action'=>$action, 'sites'=>$sites, 'drivers'=>$drivers, 'fillers'=> $fillers, 'areaOfficers'=> $areaOfficers, 'vendors'=>$vendors, 'load_trips'=>$trips]);
 		if($tripDetails) {
 		}
 
@@ -1203,5 +1204,11 @@ class TripController extends Controller
 			}
 			return $response;
 		}
+	}
+
+	public function trips_load(Request $request){
+		$trips = Trips::select('id','trip_id as text')->where('id','<>',$request->trip_id)->where('trip_id', 'like', '%' . $request->search . '%')->limit(20)->orderBy('id', 'DESC')->get();
+		return response()->json(['results' => $trips ]);
+		dd($request->all());
 	}
 }

@@ -1,6 +1,11 @@
 @extends('v3.layouts.app', ['page' => __('Load Sites'), 'pageSlug' => 'load-sites'])
 @push('css')
 <link href="{{ asset('public/assets/css/datetimepicker.css') }}" rel="stylesheet" />
+<style type="text/css">
+	.select2-container{
+		display: block;
+	}
+</style>
 @endpush
 @section('content')
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -48,7 +53,7 @@
 					<div class="row">
 						<div class="col-12">
 							<div class="card card-custom card-stretch gutter-b">
-								<h2>Effective Date: {{ request('effective_date_load') }}</h2>
+								<h3>Effective Date: <small>{{ request('effective_date_load') }}</small></h3>
 							</div>
 						</div>
 						<div class="col-6">
@@ -64,11 +69,11 @@
 								<!--end::Header-->
 								<!--begin::Body-->
 								<div class="card-body pt-8">
-									@foreach($mp_zone as $zone)
+									@foreach($mp_zone as $zone) 
 									<div class="d-flex align-items-center mb-2">
 
 										<div class="d-flex flex-column font-weight-bold">
-											<a class="{{ $zone->mp_zone == request('zone') ? 'text-primary':'text-dark' }} text-hover-primary mb-1 font-size-lg" href="{{ route('load-sites',request()->except(['client','zone','trip_id','action'])) }}&zone={{$zone->mp_zone}}&action=trip">{{ $zone->mp_zone }}</a>
+											<a class="{{ $zone->mp_zone == request('zone') ? 'text-primary':'text-dark' }} card-label font-weight-bolder" href="{{ route('load-sites',request()->except(['client','zone','trip_id','action'])) }}&zone={{$zone->mp_zone}}&action=trip">{{ $zone->mp_zone }}</a>
 											<!--span class="text-muted">QA Managers</span-->
 										</div>
 										<!--end::Text-->
@@ -97,7 +102,7 @@
 									<div class="d-flex align-items-center mb-2">
 
 										<div class="d-flex flex-column font-weight-bold">
-											<a class="{{ $client->client_id == request('client') ? 'text-primary':'text-dark' }} text-hover-primary mb-1 font-size-lg" href="{{ route('load-sites',request( )->except('client')) }}&client={{$client->client_id}}">
+											<a class="{{ $client->client_id == request('client') ? 'text-primary':'text-dark' }} card-label font-weight-bolder" href="{{ route('load-sites',request( )->except('client')) }}&client={{$client->client_id}}">
 												{{ $client->client->name }}
 											</a>
 											<!--span class="text-muted">QA Managers</span-->
@@ -113,6 +118,7 @@
 						</div>
 					</div>
 					<hr>
+
 					@if($action && isset($trips) &&!empty($trips))
 					<div class="row">
 						<div class="col-12">
@@ -130,7 +136,7 @@
 									@foreach($trips as $trip)
 									<div class="d-flex align-items-center mb-2">
 										<div class="d-flex flex-column font-weight-bold">
-											<a class="{{ $trip->id == request('trip_id') ? 'text-primary':'text-dark' }} text-hover-primary mb-1 font-size-lg" href="{{ route('load-sites',request( )->except('trip_id')) }}&trip_id={{$trip->id}}">
+											<a class="{{ $trip->id == request('trip_id') ? 'text-primary':'text-dark' }} card-label font-weight-bolder" href="{{ route('load-sites',request( )->except('trip_id')) }}&trip_id={{$trip->id}}">
 												{{ $trip->trip_id }}
 											</a>
 											<!--span class="text-muted">QA Managers</span-->
@@ -152,7 +158,7 @@
 							@endphp
 							@if(isset($trips1) && !empty($trips1))
 							<div class="table-responsive" >
-							<table class="table">
+							<table class="table table-head-custom table-vertical-center">
 								<thead>
 									<td>
 										Trip ID
@@ -252,6 +258,9 @@
 											<a href="javascript: void(0);" class="btn btn-primary" data-toggle="modal" data-target="#transferLoadModel{{$site->verified_load()->id}}">Load Transfer</a>
 											<a href="javascript: void(0);" class="btn btn-primary" data-toggle="modal" data-target="#divertLoadModel{{$site->verified_load()->id}}">Divert</a>
 											@endif
+											@if($site->status == 'unloaded')
+											<a href="javascript: void(0);" class="btn btn-primary" data-toggle="modal" data-target="#shiftLoadModel{{$site->id}}">Shift</a>
+											@endif
 										</div>
 										@if($site->verified_load())
 										<div class="modal fade" id="transferLoadModel{{$site->verified_load()->id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{$site->verified_load()->id}}" aria-hidden="true">
@@ -263,8 +272,17 @@
 															<span aria-hidden="true">&times;</span>
 														</button>
 													</div>
-													<div class="modal-body">
-														<div>
+													<form>
+														<div class="modal-body">
+															<div class="form-group row">
+																<label class="col-form-label col-lg-2 col-sm-12" for="trip_load{{$site->verified_load()->id}}">Trips</label>
+																<div class="col-lg-10 col-md-10 col-sm-12">
+																<select name="trip_load" id="trip_load{{$site->verified_load()->id}}" class="form-control trip_load">
+																	<option value="0">Select Trip</option>
+																	
+																</select>
+																</div>
+															</div>
 															<div class="row">
 																<div class="col">
 																	<label for="vehicale_number{{$site->verified_load()->id}}">Vehicle Number</label>
@@ -273,8 +291,8 @@
 																</div>
 																<div class="col">
 																	<label for="driver{{$site->verified_load()->id}}">Driver</label>
-																	<select name="driver" id="driver{{$site->verified_load()->id}}" class="form-control">
-																		<option>Select Driver</option>
+																	<select name="driver" id="driver{{$site->verified_load()->id}}" class="form-control driver_load">
+																		<option value="0">Select Driver</option>
 																		@if(isset($drivers) && !empty($drivers))
 																		@foreach($drivers as $driver)
 																		<option  value="{{$driver->id}}">{{$driver->name}}({{$driver->contact ? $driver->contact : 'NA'}})</option>
@@ -286,8 +304,8 @@
 															<div class="row">
 																<div class="col">
 																	<label for="filler{{$site->verified_load()->id}}">Fillers</label>
-																	<select name="filler" id="filler{{$site->verified_load()->id}}" class="form-control">
-																		<option>Select Filler</option>
+																	<select name="filler" id="filler{{$site->verified_load()->id}}" class="form-control filler_load">
+																		<option value="0">Select Filler</option>
 																		@if(isset($fillers) && !empty($fillers))
 																		@foreach($fillers as $filler)
 																		<option value="{{$filler->id}}">{{$filler->name}}({{$filler->contact ? $filler->contact : 'NA'}})</option>
@@ -297,11 +315,11 @@
 																</div>
 															</div>
 														</div>
-													</div>
-													<div class="modal-footer">
-														<button type="button" class="btn btn-secondary dis_btn" data-dismiss="modal">Close</button>
-														<button type="button" class="btn btn-primary transfer_load dis_btn" verified_id="{{$site->verified_load()->id}}">Transfer</button>
-													</div>
+														<div class="modal-footer">
+															<button type="button" class="btn btn-secondary dis_btn" data-dismiss="modal">Close</button>
+															<button type="button" class="btn btn-primary transfer_load dis_btn" verified_id="{{$site->verified_load()->id}}">Transfer</button>
+														</div>
+													</form>
 												</div>
 											</div>
 										</div>
@@ -360,10 +378,37 @@
 												</div>
 											</div>
 										</div>
-										@endif
 
-										<input type="hidden" name="sites[]" value="{{$site->site->id}}">
-										<input type="hidden" name="auto_trip_id[]" value="{{$trip->id}}">
+										<div class="modal fade" id="shiftLoadModel{{$site->id}}" tabindex="-1" role="dialog" aria-labelledby="shiftModalLabel{{$site->verified_load()->id}}" aria-hidden="true">
+											<div class="modal-dialog" role="document">
+												<div class="modal-content">
+													<div class="modal-header">
+														<h5 class="modal-title" id="shiftModalLabel{{$site->verified_load()->id}}">Shift Load</h5>
+														<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+															<span aria-hidden="true">&times;</span>
+														</button>
+													</div>
+													<form>
+														<div class="modal-body">
+															<div class="form-group row">
+																<label class="col-form-label col-lg-2 col-sm-12" for="shift_trip_load{{$site->verified_load()->id}}">Trips</label>
+																<div class="col-lg-10 col-md-10 col-sm-12">
+																<select name="trip_load" id="shift_trip_load{{$site->verified_load()->id}}" class="form-control trip_load">
+																	<option value="0">Select Trip</option>
+																	
+																</select>
+																</div>
+															</div>
+														</div>
+														<div class="modal-footer">
+															<button type="button" class="btn btn-secondary dis_btn" data-dismiss="modal">Close</button>
+															<button type="button" class="btn btn-primary shift_load dis_btn" verified_id="{{$site->verified_load()->id}}">Shift</button>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+										@endif
 									</td>
 								</tr>
 								<!-- <hr> -->
@@ -374,12 +419,13 @@
 							</table>
 						</div>
 							@endif
-							
-							@if(isset($trips1) && !empty($trips1) && $trip_data)
-							<input type="submit" class="btn btn-primary" value="Verify">
-							@else
-							<h3 class="text-center">No Sites Found!</h3>
-							@endif
+							<div class="form-group mt-5 col-12">
+								@if(isset($trips1) && !empty($trips1) && $trip_data)
+								<input type="submit" class="btn btn-primary" value="Verify">
+								@else
+								<h3 class="text-center">No Sites Found!</h3>
+								@endif
+							</div>
 						</div>
 					</form>
 				</div>
@@ -397,6 +443,7 @@
 
 @endsection
 @push('js')
+<script src="{{ asset('public') }}/assets/js/bootstrap3-typeahead.min.js"></script>
 <script src="{{ asset('public/assets/js/moment.min.js') }}"></script>
 <script src="{{ asset('public/assets/js/datetimepicker.min.js') }}"></script>
 <script>
@@ -440,6 +487,40 @@
 	}
 
 	$(document).ready(function(){
+
+		$('.trip_load').select2({
+		  ajax: {
+		    url: "{{ route('trips_load') }}",
+		    data: function (params) {
+		      var query = {
+		        search: params.term,
+		        type: 'public',
+		        trip_id: '{{ request()->trip_id }}'
+		      }
+
+		      // Query parameters will be ?search=[term]&type=public
+		      return query;
+		    }
+		  }
+		});
+
+		$(".trip_load").change(function(){
+			var trip_id = $(this).val();
+
+			if(trip_id != '0'){
+				console.log('have');
+				$(this).parent('div').parent('div').siblings('div').find('.vehicale_number').attr('readonly','readonly')
+				$(this).parent('div').parent('div').siblings('div').find('.driver_load').attr('disabled','disabled');
+				$(this).parent('div').parent('div').siblings('div').find('.filler_load').attr('disabled','disabled');
+			}else{
+				console.log('have not');
+				$(this).parent('div').parent('div').siblings('div').find('.vehicale_number').removeAttr('readonly');
+				$(this).parent('div').parent('div').siblings('div').find('.driver_load').removeAttr('disabled');
+				$(this).parent('div').parent('div').siblings('div').find('.filler_load').removeAttr('disabled');
+			}
+			
+		})
+
 		$('.divert_load').click(function(){
 			var row_id  = $(this).attr('row_id');
 			var old_qty  = $("#old_qty"+row_id).val();
@@ -464,22 +545,81 @@
 					}
 				});
 		$('.transfer_load').click(function(){
+
 			var verified_id  = $(this).attr('verified_id');
+			var trip_load	 = $("#trip_load"+verified_id).val();
 			var vehicle_id	 = $("#vehicle_id"+verified_id).val();
 			var driver 		 = $("#driver"+verified_id).val();
 			var filler 	 	 = $("#filler"+verified_id).val();
 			var area_officer = $("#area_officer"+verified_id).val();
 
-			$('.modal-content').find('input, textarea, button, select').attr('disabled','disabled');
-			$('.modal-content').css('cursor', 'wait');
-			$.ajax({
-				url: "{{route('backlog.load_transfer')}}",
-				data: {_token: csrf_token, verified_id: verified_id, vehicle_id: vehicle_id, driver_id: driver, filler_id: filler, area_officer: area_officer},
-				type: 'POST',
-				success: function(response){
-					location.reload(true);
-				}    
-			});
+			console.log(verified_id);
+			Swal.fire({
+		        title: "Are you sure?",
+		        text: "do you want to load it in this trip or another trip",
+		        icon: "warning",
+		        showCancelButton: true,
+		        confirmButtonText: "Yes, I want !"
+		    }).then(function(result) {
+		        if (result.value) {
+		        	
+
+					$('.modal-content').find('input, textarea, button, select').attr('disabled','disabled');
+					$('.modal-content').css('cursor', 'wait');
+					$.ajax({
+						url: "{{route('backlog.load_transfer')}}",
+						data: {_token: csrf_token, verified_id: verified_id, trip_load: trip_load, vehicle_id: vehicle_id, driver_id: driver, filler_id: filler, area_officer: area_officer},
+						type: 'POST',
+						success: function(response){
+							Swal.fire(
+				                "Transfered!",
+				                "Your trip has been transfered.",
+				                "success"
+				            ).then(function(result) {
+				            	location.reload(true);
+				            });
+						}    
+					});
+		            
+		        }
+		    });
+			
+		});
+
+		$('.shift_load').click(function(){
+
+			var verified_id  = $(this).attr('verified_id');
+			var trip_load	 = $("#shift_trip_load"+verified_id).val();
+
+			console.log(verified_id);
+			Swal.fire({
+		        title: "Are you sure?",
+		        text: "do you want to load it in this trip or another trip",
+		        icon: "warning",
+		        showCancelButton: true,
+		        confirmButtonText: "Yes, I want !"
+		    }).then(function(result) {
+		        if (result.value) {
+					$('.modal-content').find('input, textarea, button, select').attr('disabled','disabled');
+					$('.modal-content').css('cursor', 'wait');
+					$.ajax({
+						url: "{{route('backlog.load_shift')}}",
+						data: {_token: csrf_token, verified_id: verified_id, trip_load: trip_load },
+						type: 'POST',
+						success: function(response){
+							Swal.fire(
+				                "Transfered!",
+				                "Site has been shift to another trip.",
+				                "success"
+				            ).then(function(result) {
+				            	location.reload(true);
+				            });
+						}    
+					});
+		            
+		        }
+		    });
+			
 		});
 
 		$('.update_status').click(function(){

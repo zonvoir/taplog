@@ -1,129 +1,286 @@
 @extends('v3.layouts.app', ['page' => __('Backlogs'), 'pageSlug' => 'unallocated'])
 @section('content')
-<div class="row">
-	<div class="col-md-12">
-		<div class="card">
-			<div class="card-header">
-				<div class="row">
-					<div class="col-md-6"><h4 class="card-title">Unallocated Backlogs</h4></div>
-				</div>
-			</div>
-			<div class="card-body">
-				<div class="table-responsive">
-					<table class="table tablesorter " id="">
-						<thead class=" text-primary">
-						  <tr>
-							<th class="text-center">
-							  Effective Date
-							</th>
-							<th class="text-center">
-							 Mp/Zone
-							</th>
-							 <th class="text-center">
-							  Client Name
-							</th>
-							<!--th class="text-center">
-							  Site Name/Id
-							</th>
-							<th class="text-center">
-							  Quantity
-							</th-->
-							<th class="text-center">
-							  Mode
-							</th>
-							<th class="text-center">
-							  Status
-							</th>
-							<th class="text-center">
-							  
-							</th>
-						  </tr>
-						</thead>
-						<tbody>
-						  @if(isset($plans) && !empty($plans))
-						  @foreach($plans as $plan)
-						  <tr>
-							<td>
-							  <a href="{{ route('backlog.index') }}?type=unallocated_data&beat_id={{$plan->plan_id}}">{{ $plan->effective_date }}</a>
-							</td>
-							<td>
-							  {{ $plan->mp_zone }}
-							</td>
-							<td>
-							  {{ $plan->client->name }}
-							</td>
-						   
-							<td class="text-center">
-							  {{ $plan->mode }}
-							</td>
-							<td class="text-center">
-								{{ $plan->beatplan_data->count('site_id')??0 }} Sites/
-								@if($plan->loaded_count()) 
-								  Loading Done({{$plan->loaded_count()}})
-								@endif
-								@if($plan->filled_count()) 
-								  /Filling Done({{$plan->filled_count()}})
-								@endif
-							</td>
-							<td class="text-center">
-							 <div class="action_btn_cust">
-                                 <a href="{{ route('backlog.trip_data') }}?beat_id={{ $plan->id }}" target="_blank">View</a>   
-                             </div>
-							</td>
-						  </tr>
-						  @endforeach
-						  @endif
-						</tbody>
-					  </table>
-				</div>
-					@if(isset($beatplans) && !empty($beatplans))
-					{{ $beatplans->appends(request()->except('page'))->links() }}
-					@endif
-			</div>
+
+<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+  <!--begin::Subheader-->
+	<div class="subheader py-2 py-lg-6 subheader-transparent" id="kt_subheader">
+		<div class="container d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+		<!--begin::Info-->
+		<div class="d-flex align-items-center flex-wrap mr-1">
+		<!--begin::Page Heading-->
+		<div class="d-flex align-items-baseline flex-wrap mr-5">
+		  <!--begin::Page Title-->
+		  <h5 class="text-dark font-weight-bold my-1 mr-5">Unallocated</h5>
+		  <!--end::Page Title-->
+		  <!--begin::Breadcrumb-->
+		  <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
+		    <li class="breadcrumb-item">
+		      <a href="{{route('home')}}" class="text-muted">Home</a>
+		    </li>
+		  </ul>
+		  <!--end::Breadcrumb-->
+		</div>
+		<!--end::Page Heading-->
+		</div>
+		<!--end::Info-->
+		<!--begin::Toolbar-->
+
+		<!--end::Toolbar-->
 		</div>
 	</div>
+  <!--end::Subheader-->
+  <!--begin::Entry-->
+
+ 	<div class="d-flex flex-column-fluid">
+    <!--begin::Container-->
+    <div class="container">
+    @include('v3.layouts.navbars.flash-message')
+      <!--begin::Card-->
+      <div class="card card-custom">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-icon">
+              <i class="flaticon2-supermarket text-primary"></i>
+            </span>
+            <h3 class="card-label">Backlog</h3>
+          </div>
+          <div class="card-toolbar">
+            <!--begin::Dropdown-->
+            <div class="dropdown dropdown-inline mr-2">
+              <button type="button" class="btn btn-light-primary font-weight-bolder dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="svg-icon svg-icon-md">
+                  <!--begin::Svg Icon | path:assets/media/svg/icons/Design/PenAndRuller.svg-->
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                      <rect x="0" y="0" width="24" height="24" />
+                      <path d="M3,16 L5,16 C5.55228475,16 6,15.5522847 6,15 C6,14.4477153 5.55228475,14 5,14 L3,14 L3,12 L5,12 C5.55228475,12 6,11.5522847 6,11 C6,10.4477153 5.55228475,10 5,10 L3,10 L3,8 L5,8 C5.55228475,8 6,7.55228475 6,7 C6,6.44771525 5.55228475,6 5,6 L3,6 L3,4 C3,3.44771525 3.44771525,3 4,3 L10,3 C10.5522847,3 11,3.44771525 11,4 L11,19 C11,19.5522847 10.5522847,20 10,20 L4,20 C3.44771525,20 3,19.5522847 3,19 L3,16 Z" fill="#000000" opacity="0.3" />
+                      <path d="M16,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,15.2485298 C21,15.7329761 20.8241635,16.200956 20.5051534,16.565539 L17.8762883,19.5699562 C17.6944473,19.7777745 17.378566,19.7988332 17.1707477,19.6169922 C17.1540423,19.602375 17.1383289,19.5866616 17.1237117,19.5699562 L14.4948466,16.565539 C14.1758365,16.200956 14,15.7329761 14,15.2485298 L14,5 C14,3.8954305 14.8954305,3 16,3 Z" fill="#000000" />
+                    </g>
+                  </svg>
+                  <!--end::Svg Icon-->
+                </span>Export</button>
+                <!--begin::Dropdown Menu-->
+                <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+                  <!--begin::Navigation-->
+                  <ul class="navi flex-column navi-hover py-2">
+                    <li class="navi-header font-weight-bolder text-uppercase font-size-sm text-primary pb-2">Choose an option:</li>
+                    <li class="navi-item">
+                      <a href="#" id="exportBeattoExcel" class="navi-link">
+                        <span class="navi-icon">
+                          <i class="la la-file-excel-o"></i>
+                        </span>
+                        <span class="navi-text">Excel</span>
+                      </a>
+                    </li>
+                    <li class="navi-item">
+                      <a href="#" id="exportBeattoPdf" class="navi-link">
+                        <span class="navi-icon">
+                          <i class="la la-file-pdf-o"></i>
+                        </span>
+                        <span class="navi-text">PDF</span>
+                      </a>
+                    </li>
+                  </ul>
+                  <!--end::Navigation-->
+                </div>
+                <!--end::Dropdown Menu-->
+              </div>
+              <!--end::Dropdown-->
+              <!--begin::Button-->
+              <a href="{{route('allotment')}}" class="btn btn-primary font-weight-bolder">
+                <span class="svg-icon svg-icon-md">
+                  <!--begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg-->
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                      <rect x="0" y="0" width="24" height="24" />
+                      <circle fill="#000000" cx="9" cy="15" r="6" />
+                      <path d="M8.8012943,7.00241953 C9.83837775,5.20768121 11.7781543,4 14,4 C17.3137085,4 20,6.6862915 20,10 C20,12.2218457 18.7923188,14.1616223 16.9975805,15.1987057 C16.9991904,15.1326658 17,15.0664274 17,15 C17,10.581722 13.418278,7 9,7 C8.93357256,7 8.86733422,7.00080962 8.8012943,7.00241953 Z" fill="#000000" opacity="0.3" />
+                    </g>
+                  </svg>
+                  <!--end::Svg Icon-->
+                </span>Allotment</a>
+                <!--end::Button-->
+              </div>
+            </div>
+            <div class="card-body table-item-wrap">
+              <form class="mb-15">
+                <div class="row mb-8">
+                  <div class="col-lg-8 mb-lg-0 mb-6">
+                    <label>Effective Date:</label>
+                    <div class="input-daterange input-group" id="kt_datepicker">
+                      <input type="text" class="form-control datatable-input" name="start_date" id="start_date" placeholder="From" data-col-index="5" />
+                      <div class="input-group-append">
+                        <span class="input-group-text">
+                          <i class="la la-ellipsis-h"></i>
+                        </span>
+                      </div>
+                      <input type="text" class="form-control datatable-input" id="end_date" name="end_date" placeholder="To" data-col-index="5" />
+                    </div>
+                  </div>
+                  <div class="col-lg-4" style="margin-top: 25px;">
+                    <button class="btn btn-primary btn-primary--icon" id="kt_search">
+                      <span>
+                        <i class="la la-search"></i>
+                        <span>Search</span>
+                      </span>
+                    </button>&#160;&#160;
+                    <button class="btn btn-secondary btn-secondary--icon" id="kt_reset">
+                      <span>
+                        <i class="la la-close"></i>
+                        <span>Reset</span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+                <div class="row mt-8">
+                </div>
+              </form>
+              <!--begin: Datatable-->
+              	<table class="table table-bordered table-hover table-checkable" id="unloaded_datatable" style="margin-top: 13px !important">
+	                <thead>
+	                  <tr>
+						<th>
+						  Effective Date
+						</th>
+						<th>
+						 Mp/Zone
+						</th>
+						 <th>
+						  Client Name
+						</th>
+						<th>
+						  Mode
+						</th>
+						<th>
+						  Status
+						</th>
+						<th></th>
+					  </tr>
+	                </thead>
+              	</table>
+              <!--end: Datatable-->
+            </div>
+          </div>
+          <!--end::Card-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::Entry-->
 </div>
 
 @endsection
 
 @push('js')
+
+<script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
+
 <script type="text/javascript">
+	'use strict';
+	var PLANDatatablesDataSourceAjaxServer = function() {
+	
+		var initTable1 = function() {
+			var table = $('#unloaded_datatable').DataTable({
+				responsive: true,
+				searchDelay: 500,
+				processing: true,
+				serverSide: true,
+				buttons: [
+				{ 
+					extend: 'csv',
+					exportOptions: {
+						columns: 'th:not(:last-child)'
+					}
+				},
+				{ 
+					extend: 'pdf',
+					exportOptions: {
+						columns: 'th:not(:last-child)'
+					},
+					orientation: 'landscape',
+	        		pageSize: 'A2'
+				}
+				],
+				order: [ [1, 'desc'] ],
+				
+				ajax: {
+					url: '{{ route('backlog.unallocated_datatable') }}',
+					type: 'GET',
+					data: function(data){
+						//var trip_id =  "{{ request('trip_id') }}";
+						//data.trip_id = trip_id;
+						var start_date = $('#start_date').val();
+						var end_date = $('#end_date').val();
+
+						// Append to data
+						data.start_date = start_date;
+						data.end_date = end_date;
+						data._token = csrf_token;
+					},
+				},
+				
+				columns: [
+					{data: 'effective_date'},
+					{data: 'mp_zone'},
+					{data: 'client_id', name: 'client.name'},
+					{data: 'mode'},
+					{data: 'status', orderable: false, searchable: false},
+					{data: 'action', orderable: false, searchable: false},
+				],
+			});
+			
+			$('#kt_search').on('click', function(e) {
+				e.preventDefault();
+				table.draw();
+			});
+
+			$('#kt_reset').on('click', function(e) {
+				e.preventDefault();
+				$('.datatable-input').each(function() {
+					$(this).val('');
+					table.column($(this).data('col-index')).search('', false, false);
+				});
+				table.table().draw();
+			});
+
+			$('#kt_datepicker').datepicker({
+				format: 'dd-mm-yyyy',
+				todayHighlight: true,
+				templates: {
+					leftArrow: '<i class="la la-angle-left"></i>',
+					rightArrow: '<i class="la la-angle-right"></i>',
+				},
+				autoclose: true
+			});
+
+			$("#exportBeattoPdf").on("click", function() {
+				table.button( '.buttons-pdf' ).trigger();
+			});
+
+			$("#exportBeattoExcel").on("click", function() {
+				table.button( '.buttons-csv' ).trigger();
+			});
+
+			
+			
+		};
+
+		return {
+
+			//main function to initiate the module
+			init: function() {
+				initTable1();
+			},
+
+		};
+
+	}();
+
+
 	$(document).ready(function(){
-		$('.assign_trip').click(function(){
-			var backlog_id 			= $(this).attr('backlog_id');
-			var verified_id 		= $("#verified_id"+backlog_id).val();
-			var assign_to_trip_id 	= $("#assign_to_trip_id"+backlog_id).val();
-			var trip_id 			= $("#trip_id"+backlog_id).val();
+		PLANDatatablesDataSourceAjaxServer.init();
+	});
 
-			$('.modal-content').find('input, textarea, button, select').attr('disabled','disabled');
-			$('.modal-content').css('cursor', 'wait');
-			$.ajax({
-		        url: "{{route('backlog.assign_trip')}}",
-		        data: {_token: csrf_token, backlog_id: backlog_id, verified_id: verified_id, assign_to_trip_id: assign_to_trip_id, trip_id: trip_id},
-		        type: 'POST',
-		        success: function(response){
-		        	location.reload(true);
-		            
-		        }    
-		    });
-		});
-
-		$('.update_load ').click(function(){
-			var backlog_id 		= $(this).attr('backlog_id');
-			var beatplan_data_id= $(this).attr('beatplan_data_id');
-			var newLoad 		= $("#newLoad"+backlog_id).val();
-
-			$('.modal-content').find('input, textarea, button, select').attr('disabled','disabled');
-			$('.modal-content').css('cursor', 'wait');
-			$.ajax({
-		        url: "{{route('backlog.update_load')}}",
-		        data: {_token: csrf_token, backlog_id: backlog_id, beatplan_data_id: beatplan_data_id, newLoad: newLoad},
-		        type: 'POST',
-		        success: function(response){
-		        	location.reload(true);
-		        }    
-		    });
-		});
-	})
+	
 </script>
+
 @endpush
