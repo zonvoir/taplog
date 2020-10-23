@@ -43,6 +43,7 @@
   <div class="d-flex flex-column-fluid">
     <!--begin::Container-->
     <div class="container">
+      @include('v3.layouts.navbars.flash-message')
       <!--begin::Card-->
       <div class="card card-custom">
         <div class="card-header">

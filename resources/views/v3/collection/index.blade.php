@@ -43,6 +43,7 @@
   <div class="d-flex flex-column-fluid">
     <!--begin::Container-->
     <div class="container">
+      @include('v3.layouts.navbars.flash-message')
       <!--begin::Card-->
       <div class="card card-custom">
         <div class="card-header">
@@ -192,4 +193,7 @@
   <script src="{{ asset('public') }}/assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js"></script>
   <script src="{{ asset('public') }}/assets/plugins/custom/datatables/datatables.bundle.js"></script>
   <script src="{{ asset('public') }}/assets/js/pages/crud/datatables/data-sources/collection-data-ajax.js"></script>
+  <!-- fancy box -->
+  <link rel="stylesheet" href="{{ asset('public') }}/assets/js/fancybox/jquery.fancybox.min.css" />
+  <script src="{{ asset('public') }}/assets/js/fancybox/jquery.fancybox.min.js"></script>
   @endpush

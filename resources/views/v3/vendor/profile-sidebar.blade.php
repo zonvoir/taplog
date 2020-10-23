@@ -177,7 +177,7 @@
                                                         </a>
                                                     </div>
                                                     <div class="navi-item mb-2">
-                                                        <a href="{{route('user.password',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'users-password' ? 'active' :''}}">
+                                                        <a href="{{route('vendors.password',$user->id)}}" class="navi-link py-4 {{ $pageSlug == 'users-password' ? 'active' :''}}">
                                                             <span class="navi-icon mr-2">
                                                                 <span class="svg-icon">
                                                                     <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Shield-user.svg-->

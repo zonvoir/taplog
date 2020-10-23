@@ -1,5 +1,5 @@
 'use strict';
-var CollectTatablesDataSourceAjaxServer = function() {
+var HandbookTatablesDataSourceAjaxServer = function() {
 	$.fn.dataTable.Api.register('column().title()', function() {
 		return $(this.header()).text().trim();
 	});
@@ -124,5 +124,5 @@ var CollectTatablesDataSourceAjaxServer = function() {
 }();
 
 jQuery(document).ready(function() {
-	CollectTatablesDataSourceAjaxServer.init();
+	HandbookTatablesDataSourceAjaxServer.init();
 });

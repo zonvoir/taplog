@@ -25,7 +25,6 @@ class VendorController extends Controller
       }else{
         abort('403');
       }
-
     }
 
     /**
@@ -252,10 +251,10 @@ class VendorController extends Controller
         $kyc->bank_acc_no = $request->bank_acc_no;
         $kyc->ifsc_code = $request->ifsc_code;
         if ($request->hasFile('adhar_doc')) {
-            $kyc->adhar_doc = $request->file('adhar_doc')->store('adhar');
+          $kyc->adhar_doc = $request->file('adhar_doc')->store('adhar');
         }
         if ($request->hasFile('pan_doc')) {
-            $kyc->pan_doc = $request->file('pan_doc')->store('pan');
+          $kyc->pan_doc = $request->file('pan_doc')->store('pan');
         }
         $kyc->save();
         return redirect('vendor/vendors')->with('success', 'KYC updated successfully!');
@@ -269,10 +268,10 @@ class VendorController extends Controller
         $kyc->bank_acc_no = $request->bank_acc_no;
         $kyc->ifsc_code = $request->ifsc_code;
         if ($request->hasFile('adhar_doc')) {
-            $kyc->adhar_doc = $request->file('adhar_doc')->store('adhar');
+          $kyc->adhar_doc = $request->file('adhar_doc')->store('adhar');
         }
         if ($request->hasFile('pan_doc')) {
-            $kyc->pan_doc = $request->file('pan_doc')->store('pan');
+          $kyc->pan_doc = $request->file('pan_doc')->store('pan');
         }
         $kyc->save();
         return redirect('vendor/vendors')->with('success', 'KYC updated successfully!');
@@ -307,7 +306,6 @@ class VendorController extends Controller
         'created_at'  => true,
         'action'  => true,
       ];
-
       if ( isset( $_REQUEST['columnsDef'] ) && is_array( $_REQUEST['columnsDef'] ) ) {
         $columnsDefault = [];
         foreach ( $_REQUEST['columnsDef'] as $field ) {
@@ -399,11 +397,21 @@ class VendorController extends Controller
       return json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
     public function kyc($id){
-      if(auth()->user()->type == 'subadmin'){
-        $user = Vendor::find($id);
-        return view('v3.vendor.kyc-info',compact('user'));
-      }else{
-        abort('403');
-      }
+      $user = Vendor::find($id);
+      return view('v3.vendor.kyc-info',compact('user'));
+    }
+    public function password($id)
+    {
+     $user = Vendor::find($id);
+     return view('v3.vendor.password-info',compact('user'));
+   }
+   public function updatePassword(Request $request)
+   {
+    $user_id  = Vendor::find($request->id)->user_id;
+    $user = User::find($user_id);
+    $user->password = Hash::make($request->password);
+    if($user->save()){
+      return redirect('vendor/vendors')->with('success', 'Password updated successfully!');
     }
   }
+}

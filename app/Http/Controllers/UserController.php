@@ -57,8 +57,8 @@ class UserController extends Controller
     }   
     public function edit($id='')
     {
-       $user = User::find($id);
-       if($user->type == 'vendor' || $user->type == 'client'){
+     $user = User::find($id);
+     if($user->type == 'vendor' || $user->type == 'client'){
         abort('403');
     }else{
         return view('v3.users.personal-info',compact('user'));   
@@ -89,6 +89,8 @@ public function update(Request $request)
             }
         }
     }elseif ($request->form == 'personal') {
+        //dd($request->all());
+
         $details = Userdetails::firstOrNew(['user_id'=>$request->user_id]);
         $details->first_name = $request->first_name;
         $details->last_name = $request->last_name;
@@ -98,11 +100,16 @@ public function update(Request $request)
         $details->father_name = $request->father_name;
         $details->mother_name = $request->mother_name;
         $details->marital_status = $request->married;
-        if ($request->hasFile('profile_avatar')) {
-            if (isset($details->profile_img) && !empty($details->profile_img)) {
-                Helper::removePreviousAvatar($details->profile_img);
+        if($request->profile_avatar_remove == null){
+            if ($request->hasFile('profile_avatar')) {
+                if (isset($details->profile_img) && !empty($details->profile_img)) {
+                    Helper::removePreviousAvatar($details->profile_img);
+                }
+                $path = $request->file('profile_avatar')->storeAs('public/user',$request->user_id.'_avatar.'.$request->file('profile_avatar')->extension());
+                $details->profile_img = $request->user_id.'_avatar.'.$request->file('profile_avatar')->extension();
             }
-            $details->profile_img = $request->file('profile_avatar')->store('user');
+        }else{
+            $details->profile_img = null;
         }
         if($details->save()){
             $user = User::find($request->user_id);
@@ -185,12 +192,12 @@ public function apiToken(Request $request)
 }
 public function indexDataTable(Request $request)
 {
- $returndata = [];
- $alldata = array();
- if (auth()->user()->type == 'admin') {
-     $returndata = User::where('type','=','subadmin')->get();
- }
- elseif(auth()->user()->type == 'subadmin'){
+   $returndata = [];
+   $alldata = array();
+   if (auth()->user()->type == 'admin') {
+       $returndata = User::where('type','=','subadmin')->get();
+   }
+   elseif(auth()->user()->type == 'subadmin'){
     $returndata = User::whereNotIn('type',['vendor','client','admin','subadmin','other'])->where('created_by_id','=',auth()->user()->id)->get();
 }
 $columnsDefault = [
@@ -385,11 +392,11 @@ public function removeUser(Request $request)
 }
 public function marital($id='')
 {
-   $user = User::find($id);
-   if($user->type == 'vendor' || $user->type == 'client'){
+ $user = User::find($id);
+ if($user->type == 'vendor' || $user->type == 'client'){
     abort('403');
 }else{
-   if($user->details->marital_status == 'yes'){
+ if($user->details->marital_status == 'yes'){
     return view('v3.users.marital-info',compact('user'));   
 }else{
     abort('404');
@@ -398,35 +405,35 @@ public function marital($id='')
 }
 public function removeChild(Request $request)
 {
- if(Children::find($request->id)->delete()){
+   if(Children::find($request->id)->delete()){
     return true;
 }
 }
 public function contact($id='')
 {
-   $user = User::find($id);
-   if($user->type == 'vendor' || $user->type == 'client'){
+ $user = User::find($id);
+ if($user->type == 'vendor' || $user->type == 'client'){
     abort('403');
 }else{
-   return view('v3.users.contact-info',compact('user')); 
+ return view('v3.users.contact-info',compact('user')); 
 }
 }
 public function password($id='')
 {
-   $user = User::find($id);
-   if($user->type == 'vendor' || $user->type == 'client'){
+ $user = User::find($id);
+ if($user->type == 'vendor' || $user->type == 'client'){
     abort('403');
 }else{
-   return view('v3.users.password-info',compact('user')); 
+ return view('v3.users.password-info',compact('user')); 
 }
 }
 public function kyc($id='')
 {
-   $user = User::find($id);
-   if($user->type == 'vendor' || $user->type == 'client'){
+ $user = User::find($id);
+ if($user->type == 'vendor' || $user->type == 'client'){
     abort('403');
 }else{
-   return view('v3.users.kyc-info',compact('user')); 
+ return view('v3.users.kyc-info',compact('user')); 
 }
 }
 public function getAllStates(Request $request)

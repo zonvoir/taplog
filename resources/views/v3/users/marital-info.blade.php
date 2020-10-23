@@ -279,6 +279,56 @@
 @endsection
 @push('js')
 <script type="text/javascript">
+    const fv = FormValidation.formValidation(
+        document.getElementById('marital-form'),
+        {
+          fields: {
+
+            spouse_name: {
+                validators: {
+                    notEmpty: {
+                        message: 'Spouse name is required'
+                    },
+                    stringLength: {
+                        min: 4,
+                        message: 'The name must have 4 charecters minimum!' 
+                    }
+                }
+            },
+            age: {
+                validators: {
+                    notEmpty: {
+                        message: 'Child age is required'
+                    },
+                }
+            },
+            name: {
+                validators: {
+                    notEmpty: {
+                        message: 'Child name is required'
+                    },
+                }
+            },
+            gender: {
+                validators: {
+                    notEmpty: {
+                        message: 'Child gender is required'
+                    },
+                }
+            },
+        },
+
+        plugins: {
+            trigger: new FormValidation.plugins.Trigger(),
+            // Bootstrap Framework Integration
+            bootstrap: new FormValidation.plugins.Bootstrap(),
+           // Validate fields when clicking the Submit button
+           submitButton: new FormValidation.plugins.SubmitButton(),
+            // Submit the form when all fields are valid
+            defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+        }
+    }
+    );
     var KTFormRepeater = function() {
                     // Private functions
                     var demo1 = function() {
@@ -294,6 +344,9 @@
                                 $(this).children('div').find('.child_id').remove();
                                 $(this).children('div').find('.child_name').val('');
                                 $(this).children('div').find('.child_age').val('');
+                                fv.enableValidator('name','notEmpty');
+                                fv.enableValidator('age','notEmpty');
+                                fv.enableValidator('gender','notEmpty');
                             },
 
                             hide: function (deleteElement) {
@@ -341,10 +394,16 @@
                 $('.child_status').change(function() { 
                     if($(this).val() == 'no'){
                         $(".children").css("display","none");
+                        fv.disableValidator('spouse_name','notEmpty');
+                        fv.disableValidator('name','notEmpty');
+                        fv.disableValidator('age','notEmpty');
+                        fv.disableValidator('gender','notEmpty');
                     }else{
                         if($("input[name=spouse_name]").val() !== ''){
                             $(".children").css("display","block");
+                            fv.enableValidator('spouse_name','notEmpty');
                         }else{
+                            fv.enableValidator('spouse_name','notEmpty');
                             $("input[name=spouse_name]").focus();
                             $(".child_status option[value='no']").attr('selected', 'selected'); 
                             Swal.fire({
@@ -357,6 +416,7 @@
                                 },
                                 icon: "error",
                             });
+                            $(".children").css("display","block");
                         }
                     }
                 });

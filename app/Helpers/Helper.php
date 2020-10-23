@@ -179,5 +179,12 @@ class Helper
 		$ids = User::where(['created_by_id' => $id, 'type' => 'mis'])->select('id')->get();
 		return $ids;
 	}
+	public static function removePreviousHandbook($path){
+		if(file_exists(public_path().'/public/images/'.$path)){
+			if(unlink(public_path().'/public/images/'.$path)) {
+				return true;
+			}
+		}
+	}
 	
 }
