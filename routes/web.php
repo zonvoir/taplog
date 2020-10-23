@@ -22,7 +22,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'BeatPlanController@index')->name('home');
+Route::get('/home', 'BeatPlanController@index')->name('home')->middleware('auth');
 
 //Route::get('/home', 'HomeController@index')->name('home')->middleware('auth');
 Route::post('import', 'BeatPlanController@import')->name('import')->middleware('auth');
@@ -39,7 +39,6 @@ Route::post('edit-collection-action', 'CollectionController@editCollectionAction
 Route::get('handbook-beat', 'BeatPlanController@Handbook')->name('handbook-beat')->middleware('auth');
 Route::get('handbook-trips/{beatId}', 'BeatPlanController@handbookTrips')->name('handbook-trips')->middleware('auth');
 Route::get('handbook-page/{tripId}', 'BeatPlanController@uploadHandbookPage')->name('handbook-page')->middleware('auth');
-Route::post('upload-handbook', 'BeatPlanController@uploadHandbook')->name('upload-handbook')->middleware('auth');
 Route::post('get-previous-reading', 'CollectionController@validatePreviousReading')->name('get-previous-reading')->middleware('auth');
 Route::post('delete-plan-row', 'BeatPlanController@deleteRow')->name('delete-plan-row')->middleware('auth');
 Route::get('client-name-list', 'VendorController@show')->name('client-name-list')->middleware('auth');
@@ -49,6 +48,11 @@ Route::post('beat-plan-data-table', 'BeatPlanController@dataTablePlan')->middlew
 Route::post('beat-view-table', 'BackLogController@trip_data_datatable')->middleware('auth');
 Route::get('handbook-beats', 'CollectionController@handbookBeats')->name('handbook-beats')->middleware('auth');
 Route::post('handbook-beats-table', 'CollectionController@handbookBeatsTable')->middleware('auth');
+Route::get('handbook-trip/{beatId}', 'CollectionController@handbookTrips')->name('handbook-trip')->middleware('auth');
+Route::post('handbook-trips-table', 'CollectionController@handbookTripsTable')->middleware('auth');
+Route::get('handbook-sites/{tripId}', 'CollectionController@handbookSites')->name('handbook-sites')->middleware('auth');
+Route::post('handbook-sites-table', 'CollectionController@handbookSitesTable')->middleware('auth');
+Route::post('upload-handbook', 'CollectionController@uploadHandbook')->middleware('auth');
 
 Route::group(['middleware' => 'auth'], function () {
 	Route::resource('user', 'UserController', ['except' => ['show']]);
@@ -95,7 +99,7 @@ Route::group(['middleware'=> ['auth','is_vendor'], 'prefix'=> 'vendor'], functio
 	Route::resource('vendors', 'VendorController');
 	Route::get('editVehicle/{id}', ['as' => 'vendors.editVehicle','uses' => 'VendorController@redirectToEditVehicle']);
 	Route::put('update-kyc', ['as' => 'vendors.updateKyc', 'uses' => 'VendorController@updateKyc']);
-	Route::get('vehicle-status/{vehicle_id}', 'VehicleMasterController@vehicle_status')->name('vehicle-status');
+	Route::get('vehicle-status/{vehicle_id}', 'VehicleMasterController@vehicle_status')->name('vehicle-status-vendor');
 	Route::get('vehicle-run-data/{vehicle_id}', 'VehicleMasterController@vehicle_run_data')->name('vehicle-run-data');
 	Route::get('vehicle-trip-data', 'VehicleMasterController@vehicle_trip_data')->name('vehicle-trip-data');
 	Route::get('vehicle-agreement', 'VehicleMasterController@get_agreement')->name('vehicle-agreement');
@@ -103,6 +107,11 @@ Route::group(['middleware'=> ['auth','is_vendor'], 'prefix'=> 'vendor'], functio
 	// new code v3
 	Route::post('vendor-table', 'VendorController@indexDataTable');
 	Route::get('kyc/{id}', ['as' => 'vendors.kyc', 'uses' => 'VendorController@kyc']);
+	Route::get('password/{id}', ['as' => 'vendors.password', 'uses' => 'VendorController@password']);
+	Route::post('update-password-vendor', 'VendorController@updatePassword')->name('update-password-vendor');
+	Route::post('vehicle-run-status-table', 'VehicleMasterController@vehicleRunStatus')->middleware('auth');
+	Route::post('vehicle-run-data-table', 'VehicleMasterController@VehicleRunData')->middleware('auth');
+
 });
 
 Route::group(['middleware'=> 'auth', 'prefix'=> 'master'], function(){
@@ -129,6 +138,10 @@ Route::group(['middleware'=> 'auth', 'prefix'=> 'master'], function(){
 	Route::get('trips-details/{vehicleId}', 'VehicleMasterController@vehicleTripsDetails')->name('trips-details')->middleware('auth');
 	Route::get('trips-data/{tripId}', 'VehicleMasterController@vehicleTripsData')->name('trips-data')->middleware('auth');
 	// new changes 12
+	Route::post('all-vehicles-table', 'VehicleMasterController@allVehiclesTable')->middleware('auth');
+	Route::post('vehicle-trips-table', 'VehicleMasterController@vehicleTrips')->middleware('auth');
+	Route::post('vehicle-trip-data-table', 'VehicleMasterController@vehicleTripDetails')->middleware('auth');
+
 
 });
 Route::group(['middleware'=> 'auth', 'prefix'=> 'mis'], function(){

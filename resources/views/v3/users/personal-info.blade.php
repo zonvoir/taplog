@@ -163,7 +163,7 @@
                                         <div class="col-lg-9 col-xl-6">
                                             <div class="image-input image-input-outline" id="kt_profile_avatar" style="background-image: url({{asset('public/assets/media/users/')}}/blank.png)">
                                                 @if(isset($user->details->profile_img))
-                                                <div class="image-input-wrapper" style="background-image: url({{storage_path('app/')}}/{{$user->details->profile_img}})"></div>
+                                                <div class="image-input-wrapper" style="background-image: url({{asset('public/storage/')}}/user/{{$user->details->profile_img}})"></div>
                                                 @else
                                                 <div class="image-input-wrapper" style="background-image: url({{asset('public/assets/media/users/')}}/blank.png)">
                                                 </div>

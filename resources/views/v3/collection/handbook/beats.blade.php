@@ -50,7 +50,7 @@
             <span class="card-icon">
               <i class="flaticon2-supermarket text-primary"></i>
             </span>
-            <h3 class="card-label">All Beat Plans</h3>
+            <h3 class="card-label">All Beat's</h3>
           </div>
           <div class="card-toolbar">
             <!--begin::Dropdown-->

@@ -124,7 +124,7 @@
           <!--begin::Aside-->
           <div class="flex-row-auto offcanvas-mobile w-250px w-xxl-350px" id="kt_profile_aside">
             <!--begin::Profile Card-->
-            @include('v3.users.profile-sidebar',['pageSlug' => 'users-password'])
+            @include('v3.vendor.profile-sidebar',['pageSlug' => 'users-password'])
             <!--end::Profile Card-->
           </div>
           <!--end::Aside-->
@@ -141,11 +141,11 @@
               </div>
               <!--end::Header-->
               <!--begin::Form-->
-              <form class="form" id="password-form" action="{{route('user.update')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
+              <form class="form" id="password-form" action="{{route('update-password-vendor')}}" method="POST" autocomplete="off">
                 <div class="card-body">
                   @csrf
-                  @method('put')
                   <!--begin::Alert-->
+                  <input type="hidden" name="id" value="{{$user->id}}">
                   <div class="alert alert-custom alert-light-danger fade show mb-10" role="alert">
                     <div class="alert-icon">
                       <span class="svg-icon svg-icon-3x svg-icon-danger">
@@ -179,8 +179,6 @@
                         <a href="#" class="text-sm font-weight-bold">Forgot password ?</a>
                       </div>
                     </div> -->
-                    <input type="hidden" name="user_id" value="{{$user->id}}">
-                    <input type="hidden" name="form" value="password">
                     <div class="form-group row">
                       <label class="col-xl-3 col-lg-3 col-form-label text-alert">New Password</label>
                       <div class="col-lg-9 col-xl-6">

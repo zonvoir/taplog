@@ -135,7 +135,6 @@ class ClientController extends Controller
         }
       }
       $vendor->save();
-
       $msg = 'Client updated successfully!';
       if($vendor->user_id){
         $user = User::where('id','!=',$vendor->user_id)->where(['email'=>$request->email])->first();

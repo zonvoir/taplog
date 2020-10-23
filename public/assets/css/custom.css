@@ -1,0 +1,12 @@
+.bg-white-o-5 {
+    background-color: rgb(69 69 69 / 20%) !important;
+}
+.login-logo{
+	width: 150px;
+}
+
+.login_cust_cl button {
+    color: #FFFFFF;
+    background-color: #000000 !important;
+    border-color: #031413 !important;
+}

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Collection;
 use App\Beatplan;
 use App\User;
+use App\Trips;
 use App\TripData;
 use App\Verifiedloads;
 use App\Misallottedzones;
@@ -212,7 +213,7 @@ class CollectionController extends Controller
 			$attrname => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
 		]);
 
-		$imageName = time().$attrname.'.'.$request->$attrname->extension();  
+		$imageName = time().'handbook.'.$request->$attrname->extension();  
 		$request->$attrname->move(public_path('images'), $imageName);
 
 		return $imageName;
@@ -434,7 +435,7 @@ class CollectionController extends Controller
 			$query->where(function($q) use($user){
 				$q->whereIn('trips.filler_id',$user['fillers'])->orWhereIn('trips.driver_id',$user['drivers']);
 			});
-		}elseif (auth()->user()->type == 'subadmin') {
+		}elseif (auth()->user()->type == 'mis' && auth()->user()->client_id == null) {
 			$allotedData = Helper::allotedZonesAndClientId(auth()->user()->id);
 			if (isset($allotedData) && !empty($allotedData)) {
 				$query->where(function($q) use($allotedData){
@@ -472,22 +473,22 @@ class CollectionController extends Controller
 				$alldata[$i]['site_in'] = \Carbon\Carbon::parse($key->site_in)->format('H:i:s');
 				$alldata[$i]['site_out'] = \Carbon\Carbon::parse($key->site_out)->format('H:i:s');
 				$alldata[$i]['kwh_reading'] = isset($key->kwh_reading) ? $key->kwh_reading : '';
-				$alldata[$i]['kwh_reading_img'] = isset($key->kwh_reading_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->kwh_reading_img.'">' : '';
+				$alldata[$i]['kwh_reading_img'] = isset($key->kwh_reading_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->kwh_reading_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->kwh_reading_img.')"></div></div></a>' : '';
 				$alldata[$i]['hmr_reading'] = isset($key->hmr_reading) ? $key->hmr_reading : '';
-				$alldata[$i]['hmr_reading_img'] = isset($key->hmr_reading_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->hmr_reading_img.'">' : '';
-				$alldata[$i]['gcu_bef_fill_img'] = isset($key->gcu_bef_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->gcu_bef_fill_img.'">' : '';
+				$alldata[$i]['hmr_reading_img'] = isset($key->hmr_reading_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->hmr_reading_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->hmr_reading_img.')"></div></div></a>' : '';
+				$alldata[$i]['gcu_bef_fill_img'] = isset($key->gcu_bef_fill_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->gcu_bef_fill_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->gcu_bef_fill_img.')"></div></div></a>' : '';
 				$alldata[$i]['fuel_stock_bef_fill'] = isset($key->fuel_stock_bef_fill) ? $key->fuel_stock_bef_fill : '';
-				$alldata[$i]['gcu_aft_fill_img'] = isset($key->gcu_aft_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->gcu_aft_fill_img.'">' : '';
+				$alldata[$i]['gcu_aft_fill_img'] = isset($key->gcu_aft_fill_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->gcu_aft_fill_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->gcu_aft_fill_img.')"></div></div></a>' : '';
 				$alldata[$i]['fuel_stock_aft_fill'] = isset($key->fuel_stock_aft_fill) ? $key->fuel_stock_aft_fill : '';
-				$alldata[$i]['fuel_guage_bef_fill_img'] = isset($key->fuel_guage_bef_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->fuel_guage_bef_fill_img.'">' : '';
-				$alldata[$i]['dip_stick_bef_fill_img'] = isset($key->dip_stick_bef_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->dip_stick_bef_fill_img.'">' : '';
-				$alldata[$i]['dip_stick_aft_fill_img'] = isset($key->dip_stick_aft_fill_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->dip_stick_aft_fill_img.'">' : '';
+				$alldata[$i]['fuel_guage_bef_fill_img'] = isset($key->fuel_guage_bef_fill_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->fuel_guage_bef_fill_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->fuel_guage_bef_fill_img.')"></div></div></a>' : '';
+				$alldata[$i]['dip_stick_bef_fill_img'] = isset($key->dip_stick_bef_fill_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->dip_stick_bef_fill_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->dip_stick_bef_fill_img.')"></div></div></a>' : '';
+				$alldata[$i]['dip_stick_aft_fill_img'] = isset($key->dip_stick_aft_fill_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->dip_stick_aft_fill_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->dip_stick_aft_fill_img.')"></div></div></a>' : '';
 				$alldata[$i]['eb_meter_reading'] = isset($key->eb_meter_reading) ? $key->eb_meter_reading : '';
-				$alldata[$i]['eb_meter_reading_img'] = isset($key->eb_meter_reading_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->eb_meter_reading_img.'">' : '';
+				$alldata[$i]['eb_meter_reading_img'] = isset($key->eb_meter_reading_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->eb_meter_reading_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->eb_meter_reading_img.')"></div></div></a>' : '';
 				$alldata[$i]['filling_qty'] = isset($key->filling_qty) ? $key->filling_qty : '';
 				$alldata[$i]['filling_date'] = isset($key->filling_date) ? $key->filling_date : '';
 				$alldata[$i]['remark'] = isset($key->remark) ? $key->remark : '';
-				$alldata[$i]['handbook_img'] = isset($key->handbook_img) ? '<img style="height: 30px; width: 20px; cursor: pointer;" onclick="zoomImage(this);" class="myImg" src="'.asset("/public/images/").'/'.$key->handbook_img.'">' : '';
+				$alldata[$i]['handbook_img'] = isset($key->handbook_img) ? '<a data-fancybox="gallery" href="'.asset("/public/images/").'/'.$key->handbook_img.'"><div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4"><div class="symbol-label" style="background-image: url('.asset("/public/images/").'/'.$key->handbook_img.')"></div></div></a>' : '';
 				$alldata[$i]['status'] = isset($key->diverFromSiteid) ? 'Diverted From: '.$key->diverFromSiteid.' Quantity: '.$key->divert_qty : (isset($key->divertTositeid) ? ' Diverted To: '.$key->divertTositeid.' Qantity: '.$key->divert_qty : ' Not Diverted' );
 				$i++;
 			}
@@ -554,6 +555,47 @@ class CollectionController extends Controller
 	{
 		return view('v3.collection.handbook.beats');
 	}
+
+	public function handbookTrips($id)
+	{
+		if(auth()->user()->type == 'subadmin'){
+			$addedBy = array();
+			$Ids = Helper::getAllMisIdsBySubAdminId(auth()->user()->id);
+			foreach ($Ids as $key) {
+				array_push($addedBy, $key->id);
+			}
+			array_push($addedBy, auth()->user()->id);
+			if(Beatplan::whereIn('beatplans.added_by',$addedBy)->where('id','=',$id)->exists()){
+				return view('v3.collection.handbook.trips');
+			}else{
+				abort('403');
+			}
+		}elseif (auth()->user()->type == 'mis' && auth()->user()->client_id == null) {
+			$allotedData = Helper::allotedZonesAndClientId(auth()->user()->id);
+			if (isset($allotedData) && !empty($allotedData)) {
+				if(Beatplan::leftjoin('vendors', function($join){
+					$join->on('vendors.id','=','beatplans.client_id');    
+				})->where(function($q) use ($allotedData){
+					$i = 1;
+					foreach ($allotedData as $key) {
+						if ($i == 1 ) {
+							$q->where(['beatplans.added_by' => auth()->user()->created_by_id, 'beatplans.mp_zone' => $key->zone, 'beatplans.client_id' => $key->client]);
+						}else{
+							$q->orWhere(['beatplans.added_by' => auth()->user()->created_by_id, 'beatplans.added_by' => auth()->user()->id, 'beatplans.mp_zone' => $key->zone, 'beatplans.client_id' => $key->client]);
+						}
+						$i++;
+					}
+				})->where('beatplans.id','=',$id)->exists()){
+					return view('v3.collection.handbook.trips');
+				}
+				abort('403');
+			}else{
+				abort('403');
+			}
+		}else{
+			abort('403');
+		}
+	}
 	public function handbookBeatsTable()
 	{
 		$returndata = [];
@@ -598,7 +640,7 @@ class CollectionController extends Controller
 				$alldata[$i]['client'] = $key->clientname;
 				$alldata[$i]['plan_date'] = $key->effective_date;
 				$alldata[$i]['zone'] = $key->mp_zone;
-				$alldata[$i]['action'] = '<a class="btn btn-sm btn-clean btn-icon" title="View Beat"><i class="la la-eye text-success"></i></a>';
+				$alldata[$i]['action'] = '<a href="'.route('handbook-trip',$key->id).'" class="btn btn-sm btn-clean btn-icon" title="View Trips"><i class="la la-eye text-success"></i></a>';
 				$i++;
 			}
 		}
@@ -660,5 +702,230 @@ class CollectionController extends Controller
 		header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
 		return json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 	}
+	public function handbookTripsTable(Request $request)
+	{
+		$returndata = Trips::where('beatplan_id','=',$request->beatId)->get();
+		$columnsDefault = [    
+			'plan_date' => true,      
+			'trip_id' => true,      
+			'action' => true,     
+		];
+		$alldata = array();
+		if(isset($returndata) && !empty($returndata)){
+			$i = 0;
+			foreach($returndata as $key){
+				$alldata[$i]['plan_date'] = $key->effective_date;
+				$alldata[$i]['trip_id'] = $key->trip_id;
+				$alldata[$i]['action'] = '<a href="'.route('handbook-sites',$key->id).'" class="btn btn-sm btn-clean btn-icon" title="View Sites"><i class="la la-eye text-success"></i></a>';
+				$i++;
+			}
+		}
+		$data = [];
+		foreach ( $alldata as $d ) {
+			$data[] = Helper::filterArray( $d, $columnsDefault );
+		}
+		$totalRecords = $totalDisplay = count( $data );
+		if ( isset( $_REQUEST['search'] ) ) {
+			$data         = Helper::filterKeyword( $data, $_REQUEST['search'] );
+			$totalDisplay = count( $data );
+		}
+		if ( isset( $_REQUEST['columns'] ) && is_array( $_REQUEST['columns'] ) ) {
+			foreach ( $_REQUEST['columns'] as $column ) {
+				if ( isset( $column['search'] ) ) {
+					$data         = Helper::filterKeyword( $data, $column['search'], $column['data'] );
+					$totalDisplay = count( $data );
+				}
+			}
+		}
+		if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
+			$column = $_REQUEST['order'][0]['column'];
+			$dir    = $_REQUEST['order'][0]['dir'];
+			usort( $data, function ( $a, $b ) use ( $column, $dir ) {
+				$a = array_slice( $a, $column, 1 );
+				$b = array_slice( $b, $column, 1 );
+				$a = array_pop( $a );
+				$b = array_pop( $b );
 
+				if ( $dir === 'desc' ) {
+					return $a > $b ? true : false;
+				}
+				return $a < $b ? true : false;
+			} );
+		}
+		if ( isset( $_REQUEST['length'] ) ) {
+			$data = array_splice( $data, $_REQUEST['start'], $_REQUEST['length'] );
+		}
+		if ( isset( $_REQUEST['array_values'] ) && $_REQUEST['array_values'] ) {
+			$tmp  = $data;
+			$data = [];
+			foreach ( $tmp as $d ) {
+				$data[] = array_values( $d );
+			}
+		}
+		$secho = 0;
+		if ( isset( $_REQUEST['sEcho'] ) ) {
+			$secho = intval( $_REQUEST['sEcho'] );
+		}
+		$result = [
+			'iTotalRecords'        => $totalRecords,
+			'iTotalDisplayRecords' => $totalDisplay,
+			'sEcho'                => $secho,
+			'aaData'               => $data,
+		];
+		header('Content-Type: application/json');
+		header('Access-Control-Allow-Origin: *');
+		header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
+		header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
+		return json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+	}
+	public function handbookSites($id)
+	{
+		if(auth()->user()->type == 'subadmin'){
+			$addedBy = array();
+			$Ids = Helper::getAllMisIdsBySubAdminId(auth()->user()->id);
+			foreach ($Ids as $key) {
+				array_push($addedBy, $key->id);
+			}
+			array_push($addedBy, auth()->user()->id);
+			if(Trips::whereIn('added_by',$addedBy)->where('id','=',$id)->exists()){
+				return view('v3.collection.handbook.sites');
+			}else{
+				abort('403');
+			}
+		}elseif (auth()->user()->type == 'mis' && auth()->user()->client_id == null) {
+			$allotedData = Helper::allotedZonesAndClientId(auth()->user()->id);
+			if (isset($allotedData) && !empty($allotedData)) {
+				$beat = Beatplan::leftjoin('vendors', function($join){
+					$join->on('vendors.id','=','beatplans.client_id');    
+				})->where(function($q) use ($allotedData){
+					$i = 1;
+					foreach ($allotedData as $key) {
+						if ($i == 1 ) {
+							$q->where(['beatplans.added_by' => auth()->user()->created_by_id, 'beatplans.mp_zone' => $key->zone, 'beatplans.client_id' => $key->client]);
+						}else{
+							$q->orWhere(['beatplans.added_by' => auth()->user()->created_by_id, 'beatplans.added_by' => auth()->user()->id, 'beatplans.mp_zone' => $key->zone, 'beatplans.client_id' => $key->client]);
+						}
+						$i++;
+					}
+				})->select('beatplans.id')->pluck('id');
+				if(isset($beat) && Trips::whereIn('beatplan_id',$beat)->where('id','=',$id)->exists()){
+					return view('v3.collection.handbook.sites');
+				}
+				abort('403');
+			}else{
+				abort('403');
+			}
+		}else{
+			abort('403');
+		}
+	}
+	public function handbookSitesTable(Request $request){
+		$returndata = TripData::where('trip_id','=',$request->tripId)->get();
+		$columnsDefault = [    
+			'ID' => true,      
+			'site_id' => true,      
+			'site_name' => true,      
+			'technician_name' => true,     
+			'technician_contact' => true,     
+			'status' => true,     
+			'handbook' => true,     
+		];
+		$alldata = array();
+		if(isset($returndata) && !empty($returndata)){
+			$i = 0;
+			foreach($returndata as $key){
+				$alldata[$i]['ID'] = $key->id;
+				$alldata[$i]['site_id'] = $key->site->site_id;
+				$alldata[$i]['site_name'] = $key->site->site_name;
+				$alldata[$i]['technician_name'] = $key->site->technician_name;
+				$alldata[$i]['technician_contact'] = $key->site->technician_contact1 ? $key->site->technician_contact1 : $key->site->technician_contact2;
+				$alldata[$i]['status'] = $key->status;
+				$alldata[$i]['handbook'] = $key->handbook_img;
+
+				$i++;
+			}
+		}
+		$data = [];
+		foreach ( $alldata as $d ) {
+			$data[] = Helper::filterArray( $d, $columnsDefault );
+		}
+		$totalRecords = $totalDisplay = count( $data );
+		if ( isset( $_REQUEST['search'] ) ) {
+			$data         = Helper::filterKeyword( $data, $_REQUEST['search'] );
+			$totalDisplay = count( $data );
+		}
+		if ( isset( $_REQUEST['columns'] ) && is_array( $_REQUEST['columns'] ) ) {
+			foreach ( $_REQUEST['columns'] as $column ) {
+				if ( isset( $column['search'] ) ) {
+					$data         = Helper::filterKeyword( $data, $column['search'], $column['data'] );
+					$totalDisplay = count( $data );
+				}
+			}
+		}
+		if ( isset( $_REQUEST['order'][0]['column'] ) && $_REQUEST['order'][0]['dir'] ) {
+			$column = $_REQUEST['order'][0]['column'];
+			$dir    = $_REQUEST['order'][0]['dir'];
+			usort( $data, function ( $a, $b ) use ( $column, $dir ) {
+				$a = array_slice( $a, $column, 1 );
+				$b = array_slice( $b, $column, 1 );
+				$a = array_pop( $a );
+				$b = array_pop( $b );
+
+				if ( $dir === 'desc' ) {
+					return $a > $b ? true : false;
+				}
+				return $a < $b ? true : false;
+			} );
+		}
+		if ( isset( $_REQUEST['length'] ) ) {
+			$data = array_splice( $data, $_REQUEST['start'], $_REQUEST['length'] );
+		}
+		if ( isset( $_REQUEST['array_values'] ) && $_REQUEST['array_values'] ) {
+			$tmp  = $data;
+			$data = [];
+			foreach ( $tmp as $d ) {
+				$data[] = array_values( $d );
+			}
+		}
+		$secho = 0;
+		if ( isset( $_REQUEST['sEcho'] ) ) {
+			$secho = intval( $_REQUEST['sEcho'] );
+		}
+		$result = [
+			'iTotalRecords'        => $totalRecords,
+			'iTotalDisplayRecords' => $totalDisplay,
+			'sEcho'                => $secho,
+			'aaData'               => $data,
+		];
+		header('Content-Type: application/json');
+		header('Access-Control-Allow-Origin: *');
+		header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
+		header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
+		return json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+	}
+	public function uploadHandbook(Request $request)
+	{
+		if($request->has('ids')){
+			$ids = explode(',', $request->ids);
+			$tripDataId = $ids;
+			$imageName = NULL;
+			if(isset($ids) && !empty($ids)){
+				foreach ($ids as $value) {
+					$handbookPath = TripData::find($value)->handbook_img;
+					if(isset($handbookPath) && !empty($handbookPath)){
+						Helper::removePreviousHandbook($handbookPath);
+					}
+				}
+			}
+			if($request->hasFile('file')){
+				$imageName = $this->imageUpload($request,'file');
+			}
+			if(TripData::whereIn('id', $ids)->update(['handbook_img' => $imageName])){
+				return response()->json(['status' => '1', 'message' => 'File uploaded!']);
+			}else{
+				return response()->json(['status' => '0', 'message' => 'Something went wrong!']);
+			}
+		}
+
+	}
 }

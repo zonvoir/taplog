@@ -52,11 +52,16 @@ class BeatPlanData extends Model
 	{
 		if($type == 'from'){
 			$trip = TripData::find($this->trip_data()->divert_from_tripdata_id);
-			return Sitemaster::where(['id'=>$trip->data_id])->first();			
+			if($trip){
+				return Sitemaster::where(['id'=>$trip->data_id])->first();			
+			}
 		}else{
 			$trip = TripData::find($this->trip_data()->divert_to_tripdata_id);
-			return Sitemaster::where(['id'=>$trip->data_id])->first();	
+			if($trip){
+				return Sitemaster::where(['id'=>$trip->data_id])->first();	
+			}
 		}
+		return false;
 	}
 
 	public function check_divert($id){

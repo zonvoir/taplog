@@ -82,7 +82,11 @@
         <!--begin::User-->
         <div class="d-flex align-items-center">
             <div class="symbol symbol-60 symbol-xxl-100 mr-5 align-self-start align-self-xxl-center">
-                <div class="symbol-label" style="background-image:url(http://localhost/taplog/public/assets/media/users/blank.png)"></div>
+                @if(isset($user->details->profile_img))
+                <div class="symbol-label" style="background-image:url({{asset('public/storage/')}}/user/{{$user->details->profile_img}})"></div> 
+                @else
+                <div class="symbol-label" style="background-image:url({{asset('public')}}/assets/media/users/blank.png)"></div>
+                @endif
             </div>
             <div>
                 <a href="#" class="font-weight-bolder font-size-h5 text-dark-75 text-hover-primary">{{$user->name}}</a>
